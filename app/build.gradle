@@ -1,0 +1,55 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion Integer.parseInt(project.ANDROID_BUILD_SDK_VERSION)
+    buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        applicationId "com.ov3rk1ll.kinocast"
+        minSdkVersion Integer.parseInt(project.ANDROID_BUILD_MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(project.ANDROID_BUILD_TARGET_SDK_VERSION)
+        versionName project.VERSION_NAME
+        versionCode Integer.parseInt(project.VERSION_CODE)
+
+        applicationVariants.all { variant ->
+            //def fileName = variant.productFlavors.get(0).applicationId
+            def fileName = applicationId
+            if (variant.buildType.isDebuggable()) {
+                fileName += '-debug'
+            }
+            fileName += '_v' + versionName;
+            def file = variant.outputFile
+            variant.outputFile = new File(file.parent, fileName + '.apk')
+        }
+
+        buildConfigField "boolean", "GMS_CHECK", "true"
+        buildConfigField "boolean", "ENABLE_HELP", "false"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    /*productFlavors {
+        kinoxto {
+            applicationId 'com.ov3rk1ll.kinocast'
+        }
+        solarmovie {
+            applicationId 'com.ov3rk1ll.solarcast'
+        }
+    }*/
+}
+
+dependencies {
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':libs:ShowcaseView')
+    compile project(':libs:CastCompanionLibrary-android')
+    compile project(':libs:paralloid')
+    compile project(':libs:RateThisApp')
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.google.android.gms:play-services:6.1.11'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'com.android.support:palette-v7:21.0.0'
+    compile 'org.jsoup:jsoup:1.7.3'
+}

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-2382574370348580/1626448157</string>
+    <string name="ga_trackingId" translatable="false">UA-45877229-4</string>
+
+    <string name="app_name">KinoCast</string>
+    <string name="title_activity_settings">Einstellungen</string>
+    <string name="title_section1">Neue Kinofilme</string>
+    <string name="title_section2">Beliebte Filme</string>
+    <string name="title_section3">Neuste Filme</string>
+    <string name="title_section4">Beliebte Serien</string>
+    <string name="title_section5">Neuste Serien</string>
+    <string name="title_section6">Favoriten</string>
+    <string name="title_section7">Einstellungen</string>
+
+    <string name="navigation_drawer_open">Navigation öffnen</string>
+    <string name="navigation_drawer_close">Navigation schließen</string>
+
+    <string name="title_activity_detail">Details</string>
+    <string name="chromecast_subtitle">powered by KinoCast</string>
+    <string name="chromecast_not_connected">Chromecast nicht verbunden. Öffne Videoplayer…</string>
+    <string name="host_resolve_error">Fehler beim Auflösen des Hosts!
+Die Datei wurde möglicherweiße gelöscht.</string>
+    <string name="loading">Lade…</string>
+    <string name="detail_season">Staffel</string>
+    <string name="detail_episode">Episode</string>
+    <string name="detail_mirror">Mirror</string>
+    <string name="detail_open_in_browser">im Browser öffnen</string>
+    <string name="detail_open_imdb">auf IMDb anzeigen</string>
+    <string name="detail_bookmark_on">Aus Favoriten entfernen</string>
+    <string name="detail_bookmark_on_confirm">Aus Favoriten entfernt</string>
+    <string name="detail_bookmark_off">Zu Favoriten hinzufügen</string>
+    <string name="detail_bookmark_off_confirm">Zu Favoriten hinzugefügt</string>
+    <string name="no_host_found">Kein Hoster verfügbar</string>
+    <string name="pref_ringtone_silent">Lautlos</string>
+    <string name="menu_search">Suchen</string>
+    <string name="title_activity_player">Player</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="player_internal_list_entry">Abspielen</string>
+    <string name="player_select_dialog_title">Player wählen:</string>
+    <string name="player_loading_video">Lade video</string>
+    <string name="player_buffering">Buffering</string>
+    <string name="player_chromecast_list_entry">Chromecast</string>
+    <string name="player_unsupported_format">Video kann nicht abgespielt werden! Bitte versuche einen anderen Player.</string>
+    <string name="player_error_dialog_title">Fehler beim Abspielen</string>
+    <string name="player_warn_no_wifi">Das Ansehen von Filmen verursacht hohe Datendownloads. Über eine Mobilfunkverbindung können so hohe Kosten entstehen!
+Trozdem fortfahren?</string>
+
+    <string name="connection_error_title">Verbindungsfehler</string>
+    <string name="connection_error_message">Kinox.to antwortet nicht!</string>
+    <string name="connection_error_button">Wiederholen</string>
+
+    <string name="showcast_series_title">Staffel und Episode</string>
+    <string name="showcast_series_text">Wähle die Staffel und Episode aus die du ansehen willst hier aus</string>
+    <string name="showcast_mirror_title">Mirror</string>
+    <string name="showcast_mirror_text">Wähle den Hoster und Mirror hier aus</string>
+    <string name="showcast_chromecast_title">Chromecast</string>
+    <string name="showcast_chromecast_text">Verbinde dich um Filme an den Chromecast zu streamen</string>
+    <string name="showcast_bookmarks_title">Favoriten</string>
+    <string name="showcast_bookmarks_text">Füge deine Lieblingsfilme und Serien zu den Favoriten hinzu.
+Deine Favoriten findest du im Menü auf der linken Seite.</string>
+
+</resources>

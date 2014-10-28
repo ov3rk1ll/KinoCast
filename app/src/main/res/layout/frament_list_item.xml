@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/list_item_width"
+    android:layout_height="@dimen/list_item_height"
+    android:layout_margin="@dimen/spacing_xsmall"
+    android:foreground="?attr/selectableItemBackground"
+    tools:layout_gravity="center">
+    <com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/ic_launcher" />
+
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_gravity="center" />
+
+    <ImageView
+        android:id="@+id/language"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        tools:src="@drawable/lang_de"
+        android:layout_margin="1dp"
+        android:layout_gravity="top|right" />
+
+    <RatingBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rating"
+        android:isIndicator="true"
+        android:layout_margin="1dp"
+        android:layout_gravity="left|top"
+        style="?android:attr/ratingBarStyleSmall"
+        android:numStars="5" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:id="@+id/layoutInfo"
+        android:background="#B000"
+        android:padding="@dimen/spacing_xsmall">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:layout_marginRight="2dp"
+            tools:text="title"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/detail"
+            android:layout_below="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            tools:text="Details"
+            android:textSize="12sp"/>
+    </RelativeLayout>
+
+
+</FrameLayout>
