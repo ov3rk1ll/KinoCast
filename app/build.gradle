@@ -12,7 +12,6 @@ android {
         versionCode Integer.parseInt(project.VERSION_CODE)
 
         applicationVariants.all { variant ->
-            //def fileName = variant.productFlavors.get(0).applicationId
             def fileName = applicationId
             if (variant.buildType.isDebuggable()) {
                 fileName += '-debug'
@@ -23,7 +22,7 @@ android {
         }
 
         buildConfigField "boolean", "GMS_CHECK", "true"
-        buildConfigField "boolean", "ENABLE_HELP", "false"
+        buildConfigField "boolean", "ENABLE_HELP", "true"
     }
     buildTypes {
         release {
@@ -31,14 +30,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    /*productFlavors {
-        kinoxto {
-            applicationId 'com.ov3rk1ll.kinocast'
-        }
-        solarmovie {
-            applicationId 'com.ov3rk1ll.solarcast'
-        }
-    }*/
 }
 
 dependencies {
