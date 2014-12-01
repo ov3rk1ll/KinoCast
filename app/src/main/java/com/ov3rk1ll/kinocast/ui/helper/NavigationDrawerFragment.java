@@ -85,14 +85,6 @@ public class NavigationDrawerFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-
-        View view = inflater.inflate(
-                R.layout.fragment_navigation_drawer, container, false);
 
         /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_1,
@@ -112,7 +104,6 @@ public class NavigationDrawerFragment extends Fragment {
 
         ((Spinner)view.findViewById(R.id.spinner)).setAdapter(adapter);*/
 
-        mDrawerListView = (ListView) view.findViewById(android.R.id.list);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -133,6 +124,18 @@ public class NavigationDrawerFragment extends Fragment {
                         //getString(R.string.title_section7),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+
+        View view = inflater.inflate(
+                R.layout.fragment_navigation_drawer, container, false);
+
+        mDrawerListView = (ListView) view.findViewById(android.R.id.list);
+
         return view;
     }
 

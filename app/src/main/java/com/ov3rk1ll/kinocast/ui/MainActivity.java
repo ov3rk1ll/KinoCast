@@ -81,6 +81,7 @@ public class MainActivity extends ActionBarActivity
         ProgressBar progressBar = new ProgressBar(this);
         progressBar.setVisibility(View.GONE);
         progressBar.setIndeterminate(true);
+
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(progressBar);
 
@@ -233,8 +234,8 @@ public class MainActivity extends ActionBarActivity
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        //actionBar.setDisplayShowTitleEnabled(true);
+        //actionBar.setTitle(mTitle);
     }
 
 

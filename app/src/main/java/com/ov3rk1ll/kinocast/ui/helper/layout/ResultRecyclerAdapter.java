@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,7 +52,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
         holder.detail.setText(item.getGenre());
         holder.language.setImageResource(item.getLanguageResId());
 
-        int px = holder.image.getContext().getResources().getDimensionPixelSize(R.dimen.list_item_width);
+        int px = holder.image.getContext().getResources().getDisplayMetrics().widthPixels; //holder.image.getContext().getResources().getDimensionPixelSize(R.dimen.list_item_width);
 
         holder.image.setImageItem(item.getImageRequest(px, "poster"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
@@ -113,6 +112,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
         public RatingBar rating;
         public TextView detail;
         public ProgressBar progressBar;
+        public Palette palette;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -133,7 +133,6 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
                 @Override
                 public void onPaletteReady(Palette palette) {
                     Palette.Swatch swatch = palette.getDarkVibrantSwatch();
-                    Log.i("updatePalette", "swatch: " + swatch);
                     if(swatch != null) {
                         background.setBackgroundColor(setColorAlpha(swatch.getRgb(), 192));
                         title.setTextColor(swatch.getTitleTextColor());

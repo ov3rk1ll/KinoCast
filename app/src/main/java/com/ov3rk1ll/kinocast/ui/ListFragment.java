@@ -8,8 +8,6 @@ import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -24,7 +22,6 @@ import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.layout.GridLayoutManager;
 import com.ov3rk1ll.kinocast.ui.helper.layout.ResultRecyclerAdapter;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
 
 import java.util.ArrayList;
@@ -95,10 +92,10 @@ public class ListFragment extends Fragment {
         adapter.setOnItemClickListener(new ResultRecyclerAdapter.OnRecyclerViewItemClickListener<ViewModel>() {
             @Override public void onItemClick(View view, ViewModel viewModel) {
                 Intent intent = new Intent(getActivity(), DetailActivity.class);
-                SmartImageView hero = (SmartImageView) view.findViewById(R.id.image);
                 intent.putExtra(DetailActivity.ARG_ITEM, viewModel);
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), hero, "photo_hero");
-                ActivityCompat.startActivity(getActivity(), intent, options.toBundle());
+                intent.putExtra(DetailActivity.ARG_ITEM, viewModel);
+                //ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), view.findViewById(R.id.image), "photo_hero");
+                getActivity().startActivity(intent);
             }
         });
 

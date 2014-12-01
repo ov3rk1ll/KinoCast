@@ -20,7 +20,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.graphics.Palette;
@@ -77,6 +76,7 @@ import java.util.List;
 
 public class DetailActivity extends ActionBarActivity {
     public static final String ARG_ITEM = "param_item";
+    public static final String ARG_PALLETE = "param_item";
     private ViewModel item;
     private ColorDrawable mActionBarBackgroundDrawable;
 
@@ -111,6 +111,12 @@ public class DetailActivity extends ActionBarActivity {
     private SpannableString mSpannableString;
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        supportFinishAfterTransition();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
@@ -135,6 +141,37 @@ public class DetailActivity extends ActionBarActivity {
         mActionBarBackgroundDrawable = new ColorDrawable(Color.BLACK);
         mActionBarBackgroundDrawable.setAlpha(0);
 
+        mSpannableString = new SpannableString(item.getTitle());
+        mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(Color.WHITE);
+        setTitleAlpha(0);
+
+        PaletteManager.getInstance().getPalette(item.getSlug(), null, new PaletteManager.Callback() {
+            @Override
+            public void onPaletteReady(Palette palette) {
+                Palette.Swatch swatch = palette.getDarkVibrantSwatch();
+                if(swatch != null) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                        mActionBarBackgroundDrawable.setColor(swatch.getRgb());
+                    } else {
+                        mActionBarBackgroundDrawable = new ColorDrawable(swatch.getRgb());
+                    }
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        mActionBarBackgroundDrawable.setCallback(mDrawableCallback);
+                        mActionBarBackgroundDrawable.invalidateSelf();
+                    }
+
+                    mActionBarBackgroundDrawable.setAlpha(0);
+
+                    findViewById(R.id.hr1).setBackgroundColor(swatch.getRgb());
+                    findViewById(R.id.hr2).setBackgroundColor(swatch.getRgb());
+
+                    int alpha = mAlphaForegroundColorSpan.getAlpha();
+                    mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(swatch.getTitleTextColor());
+                    setTitleAlpha(alpha);
+                }
+            }
+        });
 
         ActionBar actionBar = getSupportActionBar();
 
@@ -142,9 +179,6 @@ public class DetailActivity extends ActionBarActivity {
         actionBar.setDisplayShowHomeEnabled(false);
 
         actionBar.setDisplayHomeAsUpEnabled(true);
-        mSpannableString = new SpannableString(item.getTitle());
-        mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(Color.WHITE);
-        setTitleAlpha(0);
 
         AdView mAdView = (AdView)findViewById(R.id.adView);
         if(SHOW_ADS){
@@ -196,7 +230,7 @@ public class DetailActivity extends ActionBarActivity {
         ((TextView)findViewById(R.id.detail)).setText(item.getSummary());
 
         final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
-        headerImage.setVisibility(View.GONE);
+        //headerImage.setVisibility(View.GONE);
         headerImage.setImageItem(item.getImageRequest(screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
             public void onComplete() { }
@@ -206,34 +240,6 @@ public class DetailActivity extends ActionBarActivity {
             public void onComplete(Bitmap bitmap) {
                 headerImage.setVisibility(View.VISIBLE);
                 findViewById(R.id.progressBar).setVisibility(View.GONE);
-                final String key = item.getSlug();
-                PaletteManager.getInstance().getPalette(key, bitmap, new PaletteManager.Callback() {
-                    @Override
-                    public void onPaletteReady(Palette palette) {
-                        Palette.Swatch swatch = palette.getDarkVibrantSwatch();
-                        if(swatch != null) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                mActionBarBackgroundDrawable.setColor(swatch.getRgb());
-                            } else {
-                                mActionBarBackgroundDrawable = new ColorDrawable(swatch.getRgb());
-                            }
-
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                                mActionBarBackgroundDrawable.setCallback(mDrawableCallback);
-                                mActionBarBackgroundDrawable.invalidateSelf();
-                            }
-
-                            mActionBarBackgroundDrawable.setAlpha(0);
-
-                            findViewById(R.id.hr1).setBackgroundColor(swatch.getRgb());
-                            findViewById(R.id.hr2).setBackgroundColor(swatch.getRgb());
-
-                            int alpha = mAlphaForegroundColorSpan.getAlpha();
-                            mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(swatch.getTitleTextColor());
-                            setTitleAlpha(alpha);
-                        }
-                    }
-                });
             }
         });
 
@@ -399,7 +405,8 @@ public class DetailActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home){
-            NavUtils.navigateUpFromSameTask(this);
+            supportFinishAfterTransition();
+            //NavUtils.navigateUpFromSameTask(this);
             return true;
         }else if (id == R.id.action_share){
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Parser.getInstance().getPageLink(this.item)));

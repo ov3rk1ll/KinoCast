@@ -7,7 +7,6 @@
         android:id="@+id/iconContainer"
         android:layout_width="68dp"
         android:layout_height="68dp"
-        android:background="@color/black"
         android:layout_alignParentLeft="true">
 
         <ImageView

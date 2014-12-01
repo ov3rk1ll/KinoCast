@@ -29,6 +29,13 @@ See LICENSE
 Google Cast Developers Community on Google+ [http://goo.gl/TPLDxj](http://goo.gl/TPLDxj)
 
 ## Change List
+1.11
+ * Added support for Notifications and Lock Screen controls (via Notifications) on Android Lollipop.
+ * Updated dependencies to use Google Play Services 6.1 and Support Libraries v21.
+ * Added Toolbar as a replacement for ActionBar.
+ * Added support for Android Studio 0.9.1 and updated gradle support to the latest versions.
+ * Fixed issues 74, 110, 115, 119.
+
 1.10
  * Added support for Tracks and Closed Captions. See the documentation for details.
  * Refactored image loading across the library.

@@ -22,7 +22,7 @@ android {
         }
 
         buildConfigField "boolean", "GMS_CHECK", "true"
-        buildConfigField "boolean", "ENABLE_HELP", "true"
+        buildConfigField "boolean", "ENABLE_HELP", "false"
     }
     buildTypes {
         release {

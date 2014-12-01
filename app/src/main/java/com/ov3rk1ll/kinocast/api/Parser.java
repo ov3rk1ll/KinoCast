@@ -5,7 +5,7 @@ import com.ov3rk1ll.kinocast.data.ViewModel;
 
 import java.util.List;
 
-public class Parser {
+public abstract class Parser {
     public static final int PARSER_ID = -1;
 
     private static Parser instance;
@@ -20,75 +20,40 @@ public class Parser {
         switch (id){
             case KinoxParser.PARSER_ID: return new KinoxParser();
         }
-        return new Parser();
+        return null;
     }
 
     public int getParserId(){
         return PARSER_ID;
     }
 
-    /**
-     * Reads ViewModel list from given page
-     * @param url
-     * @return
-     */
-    public List<ViewModel> parseList(String url){
-        return null;
-    }
+    public abstract List<ViewModel> parseList(String url);
 
-    public ViewModel loadDetail(ViewModel item){
-        return item;
-    }
+    public abstract ViewModel loadDetail(ViewModel item);
 
-    public ViewModel loadDetail(String url){
-        return null;
-    }
+    public abstract ViewModel loadDetail(String url);
 
-    public List<Host> getHosterList(ViewModel item, int season, String episode){
-        return null;
-    }
+    public abstract List<Host> getHosterList(ViewModel item, int season, String episode);
 
-    private String getMirrorLink(String url){
-        return null;
-    }
+    public abstract String getMirrorLink(String url);
 
-    public String getMirrorLink(ViewModel item, int hoster, int mirror){
-        return null;
-    }
+    public abstract String getMirrorLink(ViewModel item, int hoster, int mirror);
 
-    public String getMirrorLink(ViewModel item, int hoster, int mirror, int season, String episode){
-        return null;
-    }
+    public abstract String getMirrorLink(ViewModel item, int hoster, int mirror, int season, String episode);
 
-    public String[] getSearchSuggestions(String query){
-        return null;
-    }
+    public abstract String[] getSearchSuggestions(String query);
 
-    public String getPageLink(ViewModel item){
-        return null;
-    }
+    public abstract String getPageLink(ViewModel item);
 
-    public String getSearchPage(String query){
-        return null;
-    }
+    public abstract String getSearchPage(String query);
 
-    public String getCineMovies(){
-        return null;
-    }
+    public abstract String getCineMovies();
 
-    public String getPopularMovies(){
-        return null;
-    }
+    public abstract String getPopularMovies();
 
-    public String getLatestMovies(){
-        return null;
-    }
+    public abstract String getLatestMovies();
 
-    public String getPopularSeries(){
-        return null;
-    }
+    public abstract String getPopularSeries();
 
-    public String getLatestSeries(){
-        return null;
-    }
+    public abstract String getLatestSeries();
 }

@@ -252,7 +252,8 @@ public class KinoxParser extends Parser{
         return null;
     }
 
-    private String getMirrorLink(String url){
+    @Override
+    public String getMirrorLink(String url){
         try {
             JSONObject json = Utils.readJson(URL_BASE + url);
             Document doc = Jsoup.parse(json.getString("Stream"));

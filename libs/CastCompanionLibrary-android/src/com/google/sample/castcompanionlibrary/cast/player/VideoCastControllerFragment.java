@@ -485,7 +485,7 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
             // activity
             try {
                 mSelectedMedia = mCastManager.getRemoteMediaInformation();
-               updateClosedCaptionState();
+                updateClosedCaptionState();
                 updateMetadata();
             } catch (TransientNetworkDisconnectionException e) {
                 LOGE(TAG, "Failed to update the metadata due to network issues", e);

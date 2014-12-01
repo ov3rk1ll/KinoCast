@@ -18,6 +18,7 @@ package com.google.sample.castcompanionlibrary.cast.callbacks;
 
 import android.support.v7.media.MediaRouter.RouteInfo;
 
+import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.common.ConnectionResult;
 
 /**
@@ -56,6 +57,14 @@ public class BaseCastConsumerImpl implements IBaseCastConsumer {
 
     @Override
     public void onUiVisibilityChanged(boolean visible) {
+    }
+
+    @Override
+    public void onReconnectionStatusChanged(int status) {
+    }
+
+    @Override
+    public void onDeviceSelected(CastDevice device) {
     }
 
     @Override
