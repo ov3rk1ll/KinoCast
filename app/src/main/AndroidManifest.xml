@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <uses-sdk tools:node="replace" />
+    <!--<uses-sdk tools:node="replace" />-->
 
     <application
         android:name=".TrackingApplication"
@@ -52,7 +52,7 @@
             android:launchMode="singleTask"
             android:parentActivityName=".ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+            android:theme="@style/AppTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ov3rk1ll.kinocast.ui.DetailActivity" />

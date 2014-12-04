@@ -1,19 +1,3 @@
-/*
- * Copyright 2014 Alex Curran
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.github.amlcurran.showcaseview;
 
 import android.app.Activity;
@@ -43,7 +27,7 @@ import static com.github.amlcurran.showcaseview.AnimationFactory.AnimationStartL
  * A view which allows you to showcase areas of your app with an explanation.
  */
 public class ShowcaseView extends RelativeLayout
-        implements View.OnTouchListener, ShowcaseViewApi {
+        implements View.OnClickListener, View.OnTouchListener, ViewTreeObserver.OnPreDrawListener, ViewTreeObserver.OnGlobalLayoutListener {
 
     private static final int HOLO_BLUE = Color.parseColor("#33B5E5");
 
@@ -73,7 +57,6 @@ public class ShowcaseView extends RelativeLayout
     // Animation items
     private long fadeInMillis;
     private long fadeOutMillis;
-    private boolean isShowing;
 
     protected ShowcaseView(Context context, boolean newStyle) {
         this(context, null, R.styleable.CustomTheme_showcaseViewStyle, newStyle);
@@ -88,8 +71,8 @@ public class ShowcaseView extends RelativeLayout
         shotStateStore = new ShotStateStore(context);
 
         apiUtils.setFitsSystemWindowsCompat(this);
-        getViewTreeObserver().addOnPreDrawListener(new CalculateTextOnPreDraw());
-        getViewTreeObserver().addOnGlobalLayoutListener(new UpdateOnGlobalLayout());
+        getViewTreeObserver().addOnPreDrawListener(this);
+        getViewTreeObserver().addOnGlobalLayoutListener(this);
 
         // Get the attributes for the ShowcaseView
         final TypedArray styled = context.getTheme()
@@ -124,9 +107,9 @@ public class ShowcaseView extends RelativeLayout
             lps.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             lps.setMargins(margin, margin, margin, margin);
             mEndButton.setLayoutParams(lps);
-            mEndButton.setText(android.R.string.ok);
+            mEndButton.setText(R.string.ok);
             if (!hasCustomClickListener) {
-                mEndButton.setOnClickListener(hideOnClickListener);
+                mEndButton.setOnClickListener(this);
             }
             addView(mEndButton);
         }
@@ -183,10 +166,7 @@ public class ShowcaseView extends RelativeLayout
 
     private void updateBitmap() {
         if (bitmapBuffer == null || haveBoundsChanged()) {
-            if(bitmapBuffer != null)
-        		bitmapBuffer.recycle();
             bitmapBuffer = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-
         }
     }
 
@@ -196,7 +176,7 @@ public class ShowcaseView extends RelativeLayout
     }
 
     public boolean hasShowcaseView() {
-        return (showcaseX != 1000000 && showcaseY != 1000000) && !hasNoTarget;
+        return (showcaseX != 1000000 && showcaseY != 1000000) || !hasNoTarget;
     }
 
     public void setShowcaseX(int x) {
@@ -225,11 +205,7 @@ public class ShowcaseView extends RelativeLayout
             return;
         }
         if (mEndButton != null) {
-            if (listener != null) {
-                mEndButton.setOnClickListener(listener);
-            } else {
-                mEndButton.setOnClickListener(hideOnClickListener);
-            }
+            mEndButton.setOnClickListener(listener != null ? listener : this);
         }
         hasCustomClickListener = true;
     }
@@ -248,19 +224,20 @@ public class ShowcaseView extends RelativeLayout
         }
     }
 
-    private void recalculateText() {
+    @Override
+    public boolean onPreDraw() {
         boolean recalculatedCling = showcaseAreaCalculator.calculateShowcaseRect(showcaseX, showcaseY, showcaseDrawer);
         boolean recalculateText = recalculatedCling || hasAlteredText;
         if (recalculateText) {
             textDrawer.calculateTextPosition(getMeasuredWidth(), getMeasuredHeight(), this, shouldCentreText);
         }
         hasAlteredText = false;
+        return true;
     }
 
-    @SuppressWarnings("NullableProblems")
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        if (showcaseX < 0 || showcaseY < 0 || shotStateStore.hasShot() || bitmapBuffer == null) {
+        if (showcaseX < 0 || showcaseY < 0 || shotStateStore.hasShot()) {
             super.dispatchDraw(canvas);
             return;
         }
@@ -282,6 +259,10 @@ public class ShowcaseView extends RelativeLayout
     }
 
     @Override
+    public void onClick(View view) {
+        hide();
+    }
+
     public void hide() {
         clearBitmap();
         // If the type is set to one-shot, store that it has shot
@@ -302,15 +283,12 @@ public class ShowcaseView extends RelativeLayout
             @Override
             public void onAnimationEnd() {
                 setVisibility(View.GONE);
-                isShowing = false;
                 mEventListener.onShowcaseViewDidHide(ShowcaseView.this);
             }
         });
     }
 
-    @Override
     public void show() {
-        isShowing = true;
         mEventListener.onShowcaseViewShow(this);
         fadeInShowcase();
     }
@@ -352,22 +330,26 @@ public class ShowcaseView extends RelativeLayout
     }
 
     private void hideImmediate() {
-        isShowing = false;
         setVisibility(GONE);
     }
 
-    @Override
     public void setContentTitle(CharSequence title) {
         textDrawer.setContentTitle(title);
     }
 
-    @Override
     public void setContentText(CharSequence text) {
         textDrawer.setContentText(text);
     }
 
     private void setScaleMultiplier(float scaleMultiplier) {
         this.scaleMultiplier = scaleMultiplier;
+    }
+
+    @Override
+    public void onGlobalLayout() {
+        if (!shotStateStore.hasShot()) {
+            updateBitmap();
+        }
     }
 
     public void hideButton() {
@@ -528,7 +510,6 @@ public class ShowcaseView extends RelativeLayout
      * @param layoutParams a {@link android.widget.RelativeLayout.LayoutParams} representing
      *                     the new position of the button
      */
-    @Override
     public void setButtonPosition(RelativeLayout.LayoutParams layoutParams) {
         mEndButton.setLayoutParams(layoutParams);
     }
@@ -544,7 +525,6 @@ public class ShowcaseView extends RelativeLayout
     /**
      * @see com.github.amlcurran.showcaseview.ShowcaseView.Builder#hideOnTouchOutside()
      */
-    @Override
     public void setHideOnTouchOutside(boolean hideOnTouch) {
         this.hideOnTouch = hideOnTouch;
     }
@@ -552,7 +532,6 @@ public class ShowcaseView extends RelativeLayout
     /**
      * @see com.github.amlcurran.showcaseview.ShowcaseView.Builder#doNotBlockTouches()
      */
-    @Override
     public void setBlocksTouches(boolean blockTouches) {
         this.blockTouches = blockTouches;
     }
@@ -560,15 +539,9 @@ public class ShowcaseView extends RelativeLayout
     /**
      * @see com.github.amlcurran.showcaseview.ShowcaseView.Builder#setStyle(int)
      */
-    @Override
     public void setStyle(int theme) {
         TypedArray array = getContext().obtainStyledAttributes(theme, R.styleable.ShowcaseView);
         updateStyle(array, true);
-    }
-
-    @Override
-    public boolean isShowing() {
-        return isShowing;
     }
 
     private void updateStyle(TypedArray styled, boolean invalidate) {
@@ -576,7 +549,7 @@ public class ShowcaseView extends RelativeLayout
         int showcaseColor = styled.getColor(R.styleable.ShowcaseView_sv_showcaseColor, HOLO_BLUE);
         String buttonText = styled.getString(R.styleable.ShowcaseView_sv_buttonText);
         if (TextUtils.isEmpty(buttonText)) {
-            buttonText = getResources().getString(android.R.string.ok);
+            buttonText = getResources().getString(R.string.ok);
         }
         boolean tintButton = styled.getBoolean(R.styleable.ShowcaseView_sv_tintButtonColor, true);
 
@@ -607,31 +580,5 @@ public class ShowcaseView extends RelativeLayout
             mEndButton.getBackground().setColorFilter(HOLO_BLUE, PorterDuff.Mode.MULTIPLY);
         }
     }
-
-    private class UpdateOnGlobalLayout implements ViewTreeObserver.OnGlobalLayoutListener {
-
-        @Override
-        public void onGlobalLayout() {
-            if (!shotStateStore.hasShot()) {
-                updateBitmap();
-            }
-        }
-    }
-
-    private class CalculateTextOnPreDraw implements ViewTreeObserver.OnPreDrawListener {
-
-        @Override
-        public boolean onPreDraw() {
-            recalculateText();
-            return true;
-        }
-    }
-
-    private OnClickListener hideOnClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            hide();
-        }
-    };
 
 }
