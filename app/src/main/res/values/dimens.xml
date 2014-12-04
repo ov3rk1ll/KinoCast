@@ -13,5 +13,6 @@
     <dimen name="list_item_width">140dp</dimen>
     <dimen name="list_item_height">200dp</dimen>
 
-    <dimen name="detail_image_height">250dp</dimen>
+    <dimen name="detail_image_height">306dp</dimen>
+    <dimen name="detail_image_height_padding">194dp</dimen> <!-- 250dp - 50dp -->
 </resources>

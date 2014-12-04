@@ -19,20 +19,18 @@
             tools:src="@drawable/ic_launcher" />
 
         <ProgressBar
+            android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
             android:layout_gravity="center" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/gradient"/>
+            android:background="@drawable/gradient" />
 
     </FrameLayout>
-
-
 
     <com.ov3rk1ll.kinocast.ui.helper.widget.ObservableScrollView
         android:id="@+id/scroll_view"
@@ -41,27 +39,29 @@
         android:layout_above="@+id/miniController">
 
         <LinearLayout
+            android:id="@+id/scroll_view_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:id="@+id/scroll_view_content"
             android:paddingTop="@dimen/detail_image_height">
 
             <!-- Dummy view for background color -->
             <LinearLayout
-                android:background="?android:attr/windowBackground"
-                android:orientation="vertical"
+                android:id="@+id/layoutBody"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:ignore="UselessParent"
-                android:id="@+id/layoutBody"
-                android:paddingBottom="@dimen/activity_vertical_margin">
+                android:background="?android:attr/windowBackground"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingTop="4dp"
+                tools:ignore="UselessParent">
 
                 <!-- Title and Flag -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
                     <TextView
                         android:id="@+id/title"
@@ -94,7 +94,8 @@
                     android:layout_marginBottom="4dp"
                     android:layout_marginLeft="2dp"
                     android:layout_marginRight="2dp"
-                    android:background="@android:color/black" />
+                    android:background="@android:color/black"
+                    android:visibility="gone" />
 
                 <com.google.android.gms.ads.AdView
                     android:id="@+id/adView"
@@ -108,10 +109,10 @@
                     android:id="@+id/hr2"
                     android:layout_width="fill_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
                     android:layout_marginLeft="2dp"
                     android:layout_marginRight="2dp"
+                    android:layout_marginTop="4dp"
                     android:background="@android:color/black" />
 
                 <!-- Content with margin -->
@@ -226,5 +227,27 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/toolbar_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/detail_image_height_padding"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/toolbar_actionbar"
+            layout="@layout/toolbar_default"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.ActionMenuView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/bar_split"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary" />
+
+    </LinearLayout>
+
 
 </RelativeLayout>

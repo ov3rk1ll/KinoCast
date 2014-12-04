@@ -24,7 +24,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -44,7 +43,7 @@ import static com.github.amlcurran.showcaseview.AnimationFactory.AnimationStartL
  * A view which allows you to showcase areas of your app with an explanation.
  */
 public class ShowcaseView extends RelativeLayout
-        implements View.OnClickListener, View.OnTouchListener, ViewTreeObserver.OnPreDrawListener, ViewTreeObserver.OnGlobalLayoutListener {
+        implements View.OnTouchListener, ShowcaseViewApi {
 
     private static final int HOLO_BLUE = Color.parseColor("#33B5E5");
 
@@ -74,6 +73,7 @@ public class ShowcaseView extends RelativeLayout
     // Animation items
     private long fadeInMillis;
     private long fadeOutMillis;
+    private boolean isShowing;
 
     protected ShowcaseView(Context context, boolean newStyle) {
         this(context, null, R.styleable.CustomTheme_showcaseViewStyle, newStyle);
@@ -88,8 +88,8 @@ public class ShowcaseView extends RelativeLayout
         shotStateStore = new ShotStateStore(context);
 
         apiUtils.setFitsSystemWindowsCompat(this);
-        getViewTreeObserver().addOnPreDrawListener(this);
-        getViewTreeObserver().addOnGlobalLayoutListener(this);
+        getViewTreeObserver().addOnPreDrawListener(new CalculateTextOnPreDraw());
+        getViewTreeObserver().addOnGlobalLayoutListener(new UpdateOnGlobalLayout());
 
         // Get the attributes for the ShowcaseView
         final TypedArray styled = context.getTheme()
@@ -126,7 +126,7 @@ public class ShowcaseView extends RelativeLayout
             mEndButton.setLayoutParams(lps);
             mEndButton.setText(android.R.string.ok);
             if (!hasCustomClickListener) {
-                mEndButton.setOnClickListener(this);
+                mEndButton.setOnClickListener(hideOnClickListener);
             }
             addView(mEndButton);
         }
@@ -225,7 +225,11 @@ public class ShowcaseView extends RelativeLayout
             return;
         }
         if (mEndButton != null) {
-            mEndButton.setOnClickListener(listener != null ? listener : this);
+            if (listener != null) {
+                mEndButton.setOnClickListener(listener);
+            } else {
+                mEndButton.setOnClickListener(hideOnClickListener);
+            }
         }
         hasCustomClickListener = true;
     }
@@ -244,20 +248,19 @@ public class ShowcaseView extends RelativeLayout
         }
     }
 
-    @Override
-    public boolean onPreDraw() {
+    private void recalculateText() {
         boolean recalculatedCling = showcaseAreaCalculator.calculateShowcaseRect(showcaseX, showcaseY, showcaseDrawer);
         boolean recalculateText = recalculatedCling || hasAlteredText;
         if (recalculateText) {
             textDrawer.calculateTextPosition(getMeasuredWidth(), getMeasuredHeight(), this, shouldCentreText);
         }
         hasAlteredText = false;
-        return true;
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        if (showcaseX < 0 || showcaseY < 0 || shotStateStore.hasShot()) {
+        if (showcaseX < 0 || showcaseY < 0 || shotStateStore.hasShot() || bitmapBuffer == null) {
             super.dispatchDraw(canvas);
             return;
         }
@@ -279,10 +282,6 @@ public class ShowcaseView extends RelativeLayout
     }
 
     @Override
-    public void onClick(View view) {
-        hide();
-    }
-
     public void hide() {
         clearBitmap();
         // If the type is set to one-shot, store that it has shot
@@ -299,38 +298,32 @@ public class ShowcaseView extends RelativeLayout
     }
 
     private void fadeOutShowcase() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            animationFactory.fadeOutView(this, fadeOutMillis, new AnimationEndListener() {
-                @Override
-                public void onAnimationEnd() {
-                    setVisibility(View.GONE);
-                    mEventListener.onShowcaseViewDidHide(ShowcaseView.this);
-                }
-            });
-        }else{
-            setVisibility(View.GONE);
-            mEventListener.onShowcaseViewDidHide(ShowcaseView.this);
-        }
+        animationFactory.fadeOutView(this, fadeOutMillis, new AnimationEndListener() {
+            @Override
+            public void onAnimationEnd() {
+                setVisibility(View.GONE);
+                isShowing = false;
+                mEventListener.onShowcaseViewDidHide(ShowcaseView.this);
+            }
+        });
     }
 
+    @Override
     public void show() {
+        isShowing = true;
         mEventListener.onShowcaseViewShow(this);
         fadeInShowcase();
     }
 
     private void fadeInShowcase() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            animationFactory.fadeInView(this, fadeInMillis,
-                    new AnimationStartListener() {
-                        @Override
-                        public void onAnimationStart() {
-                            setVisibility(View.VISIBLE);
-                        }
+        animationFactory.fadeInView(this, fadeInMillis,
+                new AnimationStartListener() {
+                    @Override
+                    public void onAnimationStart() {
+                        setVisibility(View.VISIBLE);
                     }
-            );
-        }else{
-            setVisibility(View.VISIBLE);
-        }
+                }
+        );
     }
 
     @Override
@@ -359,26 +352,22 @@ public class ShowcaseView extends RelativeLayout
     }
 
     private void hideImmediate() {
+        isShowing = false;
         setVisibility(GONE);
     }
 
+    @Override
     public void setContentTitle(CharSequence title) {
         textDrawer.setContentTitle(title);
     }
 
+    @Override
     public void setContentText(CharSequence text) {
         textDrawer.setContentText(text);
     }
 
     private void setScaleMultiplier(float scaleMultiplier) {
         this.scaleMultiplier = scaleMultiplier;
-    }
-
-    @Override
-    public void onGlobalLayout() {
-        if (!shotStateStore.hasShot()) {
-            updateBitmap();
-        }
     }
 
     public void hideButton() {
@@ -539,6 +528,7 @@ public class ShowcaseView extends RelativeLayout
      * @param layoutParams a {@link android.widget.RelativeLayout.LayoutParams} representing
      *                     the new position of the button
      */
+    @Override
     public void setButtonPosition(RelativeLayout.LayoutParams layoutParams) {
         mEndButton.setLayoutParams(layoutParams);
     }
@@ -554,6 +544,7 @@ public class ShowcaseView extends RelativeLayout
     /**
      * @see com.github.amlcurran.showcaseview.ShowcaseView.Builder#hideOnTouchOutside()
      */
+    @Override
     public void setHideOnTouchOutside(boolean hideOnTouch) {
         this.hideOnTouch = hideOnTouch;
     }
@@ -561,6 +552,7 @@ public class ShowcaseView extends RelativeLayout
     /**
      * @see com.github.amlcurran.showcaseview.ShowcaseView.Builder#doNotBlockTouches()
      */
+    @Override
     public void setBlocksTouches(boolean blockTouches) {
         this.blockTouches = blockTouches;
     }
@@ -568,9 +560,15 @@ public class ShowcaseView extends RelativeLayout
     /**
      * @see com.github.amlcurran.showcaseview.ShowcaseView.Builder#setStyle(int)
      */
+    @Override
     public void setStyle(int theme) {
         TypedArray array = getContext().obtainStyledAttributes(theme, R.styleable.ShowcaseView);
         updateStyle(array, true);
+    }
+
+    @Override
+    public boolean isShowing() {
+        return isShowing;
     }
 
     private void updateStyle(TypedArray styled, boolean invalidate) {
@@ -609,5 +607,31 @@ public class ShowcaseView extends RelativeLayout
             mEndButton.getBackground().setColorFilter(HOLO_BLUE, PorterDuff.Mode.MULTIPLY);
         }
     }
+
+    private class UpdateOnGlobalLayout implements ViewTreeObserver.OnGlobalLayoutListener {
+
+        @Override
+        public void onGlobalLayout() {
+            if (!shotStateStore.hasShot()) {
+                updateBitmap();
+            }
+        }
+    }
+
+    private class CalculateTextOnPreDraw implements ViewTreeObserver.OnPreDrawListener {
+
+        @Override
+        public boolean onPreDraw() {
+            recalculateText();
+            return true;
+        }
+    }
+
+    private OnClickListener hideOnClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            hide();
+        }
+    };
 
 }

@@ -2,6 +2,7 @@ package com.ov3rk1ll.kinocast.api;
 
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.ov3rk1ll.kinocast.R;
@@ -60,31 +61,35 @@ public class KinoxParser extends Parser{
 
         for(Element element : files){
             element = element.parent();
-            ViewModel model = new ViewModel();
-            String url = element.select("h1").parents().attr("href");
-            model.setSlug(url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".")));
-            model.setTitle(element.select("h1").text());
-            model.setSummary(element.select("div.Descriptor").text());
+            try {
+                ViewModel model = new ViewModel();
+                String url = element.select("h1").parents().attr("href");
+                model.setSlug(url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".")));
+                model.setTitle(element.select("h1").text());
+                model.setSummary(element.select("div.Descriptor").text());
 
-            String ln = element.select("div.Genre > div.floatleft").eq(0).select("img").attr("src");
-            ln = ln.substring(ln.lastIndexOf("/") + 1);
-            ln = ln.substring(0, ln.indexOf("."));
-            int lnId = Integer.valueOf(ln);
-            model.setLanguageResId(languageResMap.get(lnId));
-            String language = languageKeyMap.get(lnId);
+                String ln = element.select("div.Genre > div.floatleft").eq(0).select("img").attr("src");
+                ln = ln.substring(ln.lastIndexOf("/") + 1);
+                ln = ln.substring(0, ln.indexOf("."));
+                int lnId = Integer.valueOf(ln);
+                model.setLanguageResId(languageResMap.get(lnId));
+                String language = languageKeyMap.get(lnId);
 
-            String genre = element.select("div.Genre > div.floatleft").eq(1).text();
-            genre = genre.substring(genre.indexOf(":") + 1).trim();
-            if(genre.contains(",")) genre = genre.substring(0, genre.indexOf(","));
-            model.setGenre(genre);
+                String genre = element.select("div.Genre > div.floatleft").eq(1).text();
+                genre = genre.substring(genre.indexOf(":") + 1).trim();
+                if (genre.contains(",")) genre = genre.substring(0, genre.indexOf(","));
+                model.setGenre(genre);
 
-            String rating = element.select("div.Genre > div.floatright").text();
-            rating = rating.substring(rating.indexOf(":") + 1, rating.indexOf("/") - 1);
-            model.setRating(Float.valueOf(rating.trim()));
+                String rating = element.select("div.Genre > div.floatright").text();
+                rating = rating.substring(rating.indexOf(":") + 1, rating.indexOf("/") - 1);
+                model.setRating(Float.valueOf(rating.trim()));
 
-            model.setImage(getPageLink(model) + "#language=" + language);
+                model.setImage(getPageLink(model) + "#language=" + language);
 
-            list.add(model);
+                list.add(model);
+            }catch (Exception e){
+                Log.e("Kinox", "Error parsing " + element.html(), e);
+            }
         }
         return list;
     }

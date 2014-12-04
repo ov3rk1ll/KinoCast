@@ -12,21 +12,21 @@
         android:title="@string/detail_bookmark_on"
         android:icon="@drawable/ic_action_bookmark_on"
         android:visible="false"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_bookmark_off"
         android:title="@string/detail_bookmark_off"
         android:icon="@drawable/ic_action_bookmark_off"
         android:visible="false"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_share"
         android:title="@string/detail_open_in_browser"
         android:icon="@drawable/ic_action_browser"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_imdb"
         android:title="@string/detail_open_imdb"
         android:icon="@drawable/ic_action_imdb"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>

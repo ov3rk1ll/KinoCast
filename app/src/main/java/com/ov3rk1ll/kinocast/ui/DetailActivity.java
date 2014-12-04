@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,10 +21,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.media.MediaRouter;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
@@ -36,6 +40,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -74,7 +79,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DetailActivity extends ActionBarActivity {
+public class DetailActivity extends ActionBarActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     public static final String ARG_PALLETE = "param_item";
     private ViewModel item;
@@ -121,10 +126,15 @@ public class DetailActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+
+        ((ActionMenuView) findViewById(R.id.bar_split)).setOnMenuItemClickListener(this);
+
         bookmarkManager = new BookmarkManager(getApplication());
         bookmarkManager.restore();
 
-        if(BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
+        if (BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
         mVideoCastManager = CastHelper.getVideoCastManager(this);
         mMini = (MiniController) findViewById(R.id.miniController);
         mVideoCastManager.addMiniController(mMini);
@@ -132,56 +142,34 @@ public class DetailActivity extends ActionBarActivity {
 
         item = (ViewModel) getIntent().getSerializableExtra(ARG_ITEM);
 
-        if(item == null){
+        if (item == null) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
             return;
         }
 
-        mActionBarBackgroundDrawable = new ColorDrawable(Color.BLACK);
-        mActionBarBackgroundDrawable.setAlpha(0);
+        mActionBarBackgroundDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
+        mActionBarBackgroundDrawable.setAlpha(192);
 
         mSpannableString = new SpannableString(item.getTitle());
         mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(Color.WHITE);
-        setTitleAlpha(0);
+        setTitleAlpha(192);
 
-        PaletteManager.getInstance().getPalette(item.getSlug(), null, new PaletteManager.Callback() {
-            @Override
-            public void onPaletteReady(Palette palette) {
-                Palette.Swatch swatch = palette.getDarkVibrantSwatch();
-                if(swatch != null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                        mActionBarBackgroundDrawable.setColor(swatch.getRgb());
-                    } else {
-                        mActionBarBackgroundDrawable = new ColorDrawable(swatch.getRgb());
-                    }
+        ColorDrawable colorDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
+        colorDrawable.setAlpha(192);
+        findViewById(R.id.bar_split).setBackgroundDrawable(colorDrawable);
 
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        mActionBarBackgroundDrawable.setCallback(mDrawableCallback);
-                        mActionBarBackgroundDrawable.invalidateSelf();
-                    }
-
-                    mActionBarBackgroundDrawable.setAlpha(0);
-
-                    findViewById(R.id.hr1).setBackgroundColor(swatch.getRgb());
-                    findViewById(R.id.hr2).setBackgroundColor(swatch.getRgb());
-
-                    int alpha = mAlphaForegroundColorSpan.getAlpha();
-                    mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(swatch.getTitleTextColor());
-                    setTitleAlpha(alpha);
-                }
-            }
-        });
+        attemptColor(null);
 
         ActionBar actionBar = getSupportActionBar();
 
         actionBar.setBackgroundDrawable(mActionBarBackgroundDrawable);
         actionBar.setDisplayShowHomeEnabled(false);
 
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        // actionBar.setDisplayHomeAsUpEnabled(true);
 
-        AdView mAdView = (AdView)findViewById(R.id.adView);
-        if(SHOW_ADS){
+        AdView mAdView = (AdView) findViewById(R.id.adView);
+        if (SHOW_ADS) {
             mAdView.setVisibility(View.VISIBLE);
             findViewById(R.id.hr2).setVisibility(View.VISIBLE);
             AdRequest adRequest = new AdRequest.Builder()
@@ -189,7 +177,7 @@ public class DetailActivity extends ActionBarActivity {
                     .addTestDevice("9E6DD569F43AF307B296CE50D7766370")
                     .build();
             mAdView.loadAd(adRequest);
-        }else{
+        } else {
             mAdView.setVisibility(View.GONE);
             findViewById(R.id.hr2).setVisibility(View.GONE);
         }
@@ -222,36 +210,48 @@ public class DetailActivity extends ActionBarActivity {
 
         int screenWidthPx = getResources().getDisplayMetrics().widthPixels;
 
-        FrameLayout topContent = (FrameLayout)findViewById(R.id.top_content);
+        FrameLayout topContent = (FrameLayout) findViewById(R.id.top_content);
         ObservableScrollView scrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
         scrollView.parallaxViewBy(topContent, 0.5f);
 
-        ((TextView)findViewById(R.id.title)).setText(item.getTitle());
-        ((TextView)findViewById(R.id.detail)).setText(item.getSummary());
+        ((TextView) findViewById(R.id.title)).setText(item.getTitle());
+        ((TextView) findViewById(R.id.detail)).setText(item.getSummary());
 
         final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
         //headerImage.setVisibility(View.GONE);
         headerImage.setImageItem(item.getImageRequest(screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
-            public void onComplete() { }
+            public void onComplete() {
+            }
 
             @TargetApi(11)
             @Override
             public void onComplete(Bitmap bitmap) {
                 headerImage.setVisibility(View.VISIBLE);
                 findViewById(R.id.progressBar).setVisibility(View.GONE);
+                attemptColor(bitmap);
             }
         });
 
-        ((ImageView)findViewById(R.id.language)).setImageResource(item.getLanguageResId());
+        ((ImageView) findViewById(R.id.language)).setImageResource(item.getLanguageResId());
 
         ((ObservableScrollView) findViewById(R.id.scroll_view)).setOnScrollChangedListener(new ObservableScrollView.OnScrollChangedListener() {
             public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
-                final int headerHeight = findViewById(R.id.image_header).getHeight() - getSupportActionBar().getHeight();
-                final float ratio = (float) Math.min(Math.max(t, 0), headerHeight) / headerHeight;
-                final int newAlpha = (int) (ratio * 255);
-                mActionBarBackgroundDrawable.setAlpha(newAlpha);
-                setTitleAlpha(newAlpha);
+                int headerHeight = findViewById(R.id.image_header).getHeight() - getSupportActionBar().getHeight() * 2;
+                if (t - headerHeight >= 0) {
+                    mActionBarBackgroundDrawable.setAlpha(255);
+                    setTitleAlpha(255);
+                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), -headerHeight);
+                    ViewCompat.setElevation(findViewById(R.id.toolbar_actionbar), 10);
+                    ViewCompat.setTranslationY(findViewById(R.id.bar_split), -t + headerHeight);
+                } else { // on screen
+                    mActionBarBackgroundDrawable.setAlpha(192);
+                    setTitleAlpha(192);
+                    ViewCompat.setElevation(findViewById(R.id.toolbar_actionbar), 0);
+                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), -t);
+                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_actionbar), 0);
+                    ViewCompat.setTranslationY(findViewById(R.id.bar_split), 0);
+                }
             }
         });
 
@@ -263,7 +263,7 @@ public class DetailActivity extends ActionBarActivity {
                 spinnerEpisode.setAdapter(
                         new ArrayAdapter<String>(DetailActivity.this, android.R.layout.simple_list_item_1, item.getSeasons()[position].episodes));
 
-                if(mRestoreEpisodeIndex != -1){
+                if (mRestoreEpisodeIndex != -1) {
                     spinnerEpisode.setSelection(mRestoreEpisodeIndex);
                     mRestoreEpisodeIndex = -1;
                 }
@@ -290,7 +290,7 @@ public class DetailActivity extends ActionBarActivity {
         findViewById(R.id.buttonPlay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!com.ov3rk1ll.kinocast.utils.Utils.isWifiConnected(DetailActivity.this)){
+                if (!com.ov3rk1ll.kinocast.utils.Utils.isWifiConnected(DetailActivity.this)) {
                     new AlertDialog.Builder(DetailActivity.this)
                             .setMessage(getString(R.string.player_warn_no_wifi))
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -316,6 +316,54 @@ public class DetailActivity extends ActionBarActivity {
         getSupportActionBar().setTitle(mSpannableString);
     }
 
+    boolean hasColors = false;
+
+    private void attemptColor(Bitmap bitmap) {
+        if (hasColors) return;
+        PaletteManager.getInstance().getPalette(item.getSlug(), bitmap, new PaletteManager.Callback() {
+            @Override
+            public void onPaletteReady(Palette palette) {
+                if (palette == null) return;
+                Palette.Swatch swatch = palette.getDarkVibrantSwatch();
+                if (swatch != null) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                        mActionBarBackgroundDrawable.setColor(swatch.getRgb());
+                    } else {
+                        mActionBarBackgroundDrawable = new ColorDrawable(swatch.getRgb());
+                    }
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        mActionBarBackgroundDrawable.setCallback(mDrawableCallback);
+                        mActionBarBackgroundDrawable.invalidateSelf();
+                    }
+
+                    ColorDrawable colorDrawable = new ColorDrawable(swatch.getRgb());
+                    colorDrawable.setAlpha(192);
+                    findViewById(R.id.bar_split).setBackgroundDrawable(colorDrawable);
+
+                    mActionBarBackgroundDrawable.setAlpha(192);
+
+                    findViewById(R.id.hr1).setBackgroundColor(swatch.getRgb());
+                    findViewById(R.id.hr2).setBackgroundColor(swatch.getRgb());
+
+                    int alpha = mAlphaForegroundColorSpan.getAlpha();
+                    mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(swatch.getTitleTextColor());
+                    setTitleAlpha(alpha);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ((ProgressBar) findViewById(R.id.progressBar)).setIndeterminateTintList(ColorStateList.valueOf(swatch.getRgb()));
+                        float hsv[] = new float[3];
+                        Color.colorToHSV(swatch.getRgb(), hsv);
+                        hsv[2] = 0.2f;
+                        getWindow().setStatusBarColor(Color.HSVToColor(hsv));
+                    }
+
+                    hasColors = true;
+                }
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         mVideoCastManager.removeMiniController(mMini);
@@ -339,12 +387,12 @@ public class DetailActivity extends ActionBarActivity {
         mVideoCastManager.decrementUiCounter();
 
         //Update Bookmark to keep series info
-        if(item.getType() == ViewModel.Type.SERIES) {
+        if (item.getType() == ViewModel.Type.SERIES) {
             BookmarkManager.Bookmark b = new BookmarkManager.Bookmark(Parser.getInstance().getParserId(), Parser.getInstance().getPageLink(item));
             b.setSeason(((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition());
             b.setEpisode(((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition());
             int idx = bookmarkManager.indexOf(b);
-            if(idx == -1){
+            if (idx == -1) {
                 bookmarkManager.add(b);
             } else {
                 b.setInternal(bookmarkManager.get(idx).isInternal());
@@ -356,16 +404,19 @@ public class DetailActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        //getMenuInflater().inflate(R.menu.detail, menu);
+        menu = ((ActionMenuView) findViewById(R.id.bar_split)).getMenu();
+        menu.clear();
         getMenuInflater().inflate(R.menu.detail, menu);
         mediaRouteMenuItem = mVideoCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         // Set visibility depending on detail data
         menu.findItem(R.id.action_imdb).setVisible(item.getImdbId() != null);
 
         BookmarkManager.Bookmark b = bookmarkManager.findItem(this.item);
-        if(b != null && !b.isInternal()){
+        if (b != null && !b.isInternal()) {
             menu.findItem(R.id.action_bookmark_on).setVisible(true);
             menu.findItem(R.id.action_bookmark_off).setVisible(false);
-        }else{
+        } else {
             menu.findItem(R.id.action_bookmark_on).setVisible(false);
             menu.findItem(R.id.action_bookmark_off).setVisible(true);
             Handler handler = new Handler();
@@ -384,7 +435,7 @@ public class DetailActivity extends ActionBarActivity {
                                 if (findViewById(R.id.layoutSeries).getVisibility() == View.VISIBLE) {
                                     doShowSeriesHelp();
                                 }
-                            }else{
+                            } else {
                                 ShowcaseHelper.showMirrorHelp(DetailActivity.this);
                             }
                         }
@@ -397,36 +448,35 @@ public class DetailActivity extends ActionBarActivity {
                 }
             }, 200);
         }
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home){
+        if (id == android.R.id.home) {
             supportFinishAfterTransition();
             //NavUtils.navigateUpFromSameTask(this);
             return true;
-        }else if (id == R.id.action_share){
+        } else if (id == R.id.action_share) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Parser.getInstance().getPageLink(this.item)));
             startActivity(intent);
             return true;
-        }else if (id == R.id.action_imdb){
+        } else if (id == R.id.action_imdb) {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.imdb.com/title/" + this.item.getImdbId()));
             startActivity(intent);
             return true;
-        }else if (id == R.id.action_bookmark_on) {
+        } else if (id == R.id.action_bookmark_on) {
             //Remove bookmark
             bookmarkManager.remove(new BookmarkManager.Bookmark(
-                    Parser.getInstance().getParserId(),
-                    Parser.getInstance().getPageLink(this.item))
+                            Parser.getInstance().getParserId(),
+                            Parser.getInstance().getPageLink(this.item))
             );
             //Show confirmation
             Toast.makeText(getApplication(), getString(R.string.detail_bookmark_on_confirm), Toast.LENGTH_SHORT).show();
             supportInvalidateOptionsMenu();
             return true;
-        }else if (id == R.id.action_bookmark_off) {
+        } else if (id == R.id.action_bookmark_off) {
             //Add bookmark
             bookmarkManager.addAsPublic(new BookmarkManager.Bookmark(
                             Parser.getInstance().getParserId(),
@@ -448,8 +498,8 @@ public class DetailActivity extends ActionBarActivity {
         return super.dispatchKeyEvent(event);
     }
 
-    private void setMirrorSpinner(Host mirrors[]){
-        if(mirrors != null && mirrors.length > 0) {
+    private void setMirrorSpinner(Host mirrors[]) {
+        if (mirrors != null && mirrors.length > 0) {
             ((Spinner) findViewById(R.id.spinnerMirror)).setAdapter(
                     new ArrayAdapter<Host>(DetailActivity.this, android.R.layout.simple_list_item_1,
                             mirrors));
@@ -458,11 +508,16 @@ public class DetailActivity extends ActionBarActivity {
         } else {
             ((Spinner) findViewById(R.id.spinnerMirror)).setAdapter(
                     new ArrayAdapter<String>(DetailActivity.this, android.R.layout.simple_list_item_1,
-                            new String[]{ getString(R.string.no_host_found) }));
+                            new String[]{getString(R.string.no_host_found)}));
             findViewById(R.id.spinnerMirror).setEnabled(false);
             findViewById(R.id.buttonPlay).setEnabled(false);
         }
         findViewById(R.id.layoutMirror).setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        return this.onOptionsItemSelected(menuItem);
     }
 
     public class QueryDetailTask extends AsyncTask<Void, Void, Boolean> {
@@ -485,8 +540,8 @@ public class DetailActivity extends ActionBarActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
 
-            if(item.getType() == ViewModel.Type.SERIES) {
-                if(item.getType() == ViewModel.Type.SERIES) {
+            if (item.getType() == ViewModel.Type.SERIES) {
+                if (item.getType() == ViewModel.Type.SERIES) {
                     BookmarkManager.Bookmark b = bookmarkManager.findItem(item);
                     if (b != null) {
                         mRestoreSeasonIndex = b.getSeason();
@@ -501,13 +556,13 @@ public class DetailActivity extends ActionBarActivity {
                 ((Spinner) findViewById(R.id.spinnerSeason)).setAdapter(
                         new ArrayAdapter<String>(DetailActivity.this, android.R.layout.simple_list_item_1, seasons));
 
-                if(mRestoreSeasonIndex != -1){
+                if (mRestoreSeasonIndex != -1) {
                     ((Spinner) findViewById(R.id.spinnerSeason)).setSelection(mRestoreSeasonIndex);
                     mRestoreSeasonIndex = -1;
                 }
                 doShowSeriesHelp();
                 findViewById(R.id.layoutSeries).setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 findViewById(R.id.layoutSeries).setVisibility(View.GONE);
                 setMirrorSpinner(item.getMirrors());
             }
@@ -515,7 +570,7 @@ public class DetailActivity extends ActionBarActivity {
         }
     }
 
-    public void doShowSeriesHelp(){
+    public void doShowSeriesHelp() {
         ShowcaseHelper.showSeriesHelp(DetailActivity.this, new OnShowcaseEventListener() {
             @Override
             public void onShowcaseViewHide(ShowcaseView showcaseView) {
@@ -524,7 +579,7 @@ public class DetailActivity extends ActionBarActivity {
 
             @Override
             public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                if(findViewById(R.id.layoutMirror).getVisibility() == View.VISIBLE){
+                if (findViewById(R.id.layoutMirror).getVisibility() == View.VISIBLE) {
                     ShowcaseHelper.showMirrorHelp(DetailActivity.this);
                 }
             }
@@ -546,7 +601,7 @@ public class DetailActivity extends ActionBarActivity {
 
         @Override
         protected List<Host> doInBackground(Void... params) {
-            if(item.getType() == ViewModel.Type.SERIES) {
+            if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
                 int position = ((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition();
                 return Parser.getInstance().getHosterList(item, s.id, s.episodes[position]);
@@ -564,7 +619,7 @@ public class DetailActivity extends ActionBarActivity {
     public class QueryPlayTask extends AsyncTask<Void, Void, String> {
         private ProgressDialog progressDialog;
 
-        public QueryPlayTask(Context context){
+        public QueryPlayTask(Context context) {
             progressDialog = new ProgressDialog(context);
             progressDialog.setIndeterminate(true);
             progressDialog.setMessage(getString(R.string.loading));
@@ -677,15 +732,15 @@ public class DetailActivity extends ActionBarActivity {
         }
     }
 
-    public void startPlaybackOnChromecast(String link){
+    public void startPlaybackOnChromecast(String link) {
         MediaMetadata mediaMetadata;
-        if(item.getType() == ViewModel.Type.SERIES){
+        if (item.getType() == ViewModel.Type.SERIES) {
             Season s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
             String e = s.episodes[((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition()];
-            mediaMetadata= new MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW);
+            mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW);
             mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle() + " - " + s + "x" + e);
-        }else{
-            mediaMetadata= new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+        } else {
+            mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
             mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle());
         }
         mediaMetadata.putString(MediaMetadata.KEY_SUBTITLE, getString(R.string.chromecast_subtitle));

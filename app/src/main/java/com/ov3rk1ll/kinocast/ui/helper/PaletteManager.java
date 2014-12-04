@@ -22,12 +22,16 @@ public class PaletteManager {
         if (palette != null)
             callback.onPaletteReady(palette);
         else
-            Palette.generateAsync(bitmap, 24, new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(Palette palette) {
-                    cache.put(key, palette);
-                    callback.onPaletteReady(palette);
-                }
-            });
+            if(bitmap == null){
+                callback.onPaletteReady(null);
+            } else {
+                Palette.generateAsync(bitmap, 24, new Palette.PaletteAsyncListener() {
+                    @Override
+                    public void onGenerated(Palette palette) {
+                        cache.put(key, palette);
+                        callback.onPaletteReady(palette);
+                    }
+                });
+            }
     }
 }

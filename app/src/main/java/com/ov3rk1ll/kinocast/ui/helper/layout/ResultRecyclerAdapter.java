@@ -52,7 +52,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
         holder.detail.setText(item.getGenre());
         holder.language.setImageResource(item.getLanguageResId());
 
-        int px = holder.image.getContext().getResources().getDisplayMetrics().widthPixels; //holder.image.getContext().getResources().getDimensionPixelSize(R.dimen.list_item_width);
+        int px = holder.image.getContext().getResources().getDimensionPixelSize(R.dimen.list_item_width);
 
         holder.image.setImageItem(item.getImageRequest(px, "poster"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override

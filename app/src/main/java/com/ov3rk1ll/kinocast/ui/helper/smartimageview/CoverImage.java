@@ -78,7 +78,6 @@ public class CoverImage implements SmartImage {
         if(width > 300) size = "w780";
         if(width > 780) size = "w1280";
         if(width > 1280) size = "original";
-
         return size;
     }
 
@@ -90,7 +89,6 @@ public class CoverImage implements SmartImage {
         if(width > 342) size = "w500";
         if(width > 500) size = "w780";
         if(width > 780) size = "original";
-
         return size;
     }
 
@@ -136,9 +134,14 @@ public class CoverImage implements SmartImage {
             Map<String, List<String>> para = Utils.splitHashQuery(new URL(url));
             JSONObject json = tmdbCache.get(this.request);
             if(json != null){
-                String key = para.get("type").get(0) + "_path";
+                String type = para.get("type").get(0);
+                String key = type + "_path";
                 int size = Integer.valueOf(para.get("size").get(0));
-                imageUrl = TheMovieDb.IMAGE_BASE_PATH + getPosterSize(size) + json.getString(key);
+                if(type.equals("backdrop"))
+                    imageUrl = TheMovieDb.IMAGE_BASE_PATH + getBackdropSize(size) + json.getString(key);
+                else
+                    imageUrl = TheMovieDb.IMAGE_BASE_PATH + getPosterSize(size) + json.getString(key);
+
             }
         } catch(Exception e) {
             e.printStackTrace();

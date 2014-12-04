@@ -1,7 +1,9 @@
 package com.ov3rk1ll.kinocast.ui;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
@@ -11,11 +13,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.google.sample.castcompanionlibrary.cast.BaseCastManager;
@@ -44,6 +49,7 @@ public class MainActivity extends ActionBarActivity
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private CharSequence mTitle;
     private boolean mIsSearchView = false;
+    private ProgressBar mProgressBar;
 
     private VideoCastManager mVideoCastManager;
     private MiniController mMini;
@@ -54,7 +60,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         //super.setSupportProgressBarIndeterminateVisibility(visible);
-        getSupportActionBar().getCustomView().setVisibility(visible ? View.VISIBLE : View.GONE);
+        mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -78,12 +84,19 @@ public class MainActivity extends ActionBarActivity
             mIsSearchView = savedInstanceState.getBoolean(STATE_IS_SEARCHVIEW);
         }
 
-        ProgressBar progressBar = new ProgressBar(this);
-        progressBar.setVisibility(View.GONE);
-        progressBar.setIndeterminate(true);
+        mProgressBar = new ProgressBar(this);
+        mProgressBar.setVisibility(View.GONE);
+        mProgressBar.setIndeterminate(true);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorAccentTint)));
+        }
 
-        getSupportActionBar().setDisplayShowCustomEnabled(true);
-        getSupportActionBar().setCustomView(progressBar);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_actionbar);
+        Toolbar.LayoutParams layoutParams = new Toolbar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.gravity = Gravity.RIGHT;
+        toolbar.addView(mProgressBar, layoutParams);
+        setSupportActionBar(toolbar);
+
 
         if(BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
         mVideoCastManager = CastHelper.getVideoCastManager(this);
@@ -233,9 +246,11 @@ public class MainActivity extends ActionBarActivity
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        //actionBar.setDisplayShowTitleEnabled(true);
-        //actionBar.setTitle(mTitle);
+        if(actionBar != null) {
+            //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle(mTitle);
+        }
     }
 
 
