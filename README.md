@@ -1,8 +1,10 @@
 # KinoCast
 
 ## Änderungen
-### Version 1.2.1
- - [Neu] Material Design für Android 5.0
+### Version 1.3.0
+ - [Neu] Design changes (with some Material design)
+ - [Fix] Chrash wenn Details geöffnet wurden bevor das Cover geladen war
+ - [Fix] Chromecast Update für Lollipop
 
 ### Version 1.2.0
  - [Neu] Favoriten/Bookmarks
