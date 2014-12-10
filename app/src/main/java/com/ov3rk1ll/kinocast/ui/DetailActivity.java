@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -81,7 +82,6 @@ import java.util.List;
 
 public class DetailActivity extends ActionBarActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
-    public static final String ARG_PALLETE = "param_item";
     private ViewModel item;
     private ColorDrawable mActionBarBackgroundDrawable;
 
@@ -166,6 +166,19 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         actionBar.setBackgroundDrawable(mActionBarBackgroundDrawable);
         actionBar.setDisplayShowHomeEnabled(false);
 
+        int padding = getResources().getDimensionPixelSize(R.dimen.detail_image_height);
+
+        final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
+                new int[] { R.attr.actionBarSize });
+        int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+
+        Log.i("setTranslationY", "actionBarSize: " + actionBarSize);
+        padding -= actionBarSize * 2;
+        ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), padding);
+        ViewCompat.setTranslationY(findViewById(R.id.toolbar_actionbar), 0);
+        ViewCompat.setTranslationY(findViewById(R.id.bar_split), 0);
+
         // actionBar.setDisplayHomeAsUpEnabled(true);
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
@@ -237,18 +250,18 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
 
         ((ObservableScrollView) findViewById(R.id.scroll_view)).setOnScrollChangedListener(new ObservableScrollView.OnScrollChangedListener() {
             public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
-                int headerHeight = findViewById(R.id.image_header).getHeight() - getSupportActionBar().getHeight() * 2;
+                int headerHeight = findViewById(R.id.image_header).getHeight() - findViewById(R.id.toolbar_container).getHeight();
                 if (t - headerHeight >= 0) {
                     mActionBarBackgroundDrawable.setAlpha(255);
                     setTitleAlpha(255);
-                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), -headerHeight);
+                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), 0);
                     ViewCompat.setElevation(findViewById(R.id.toolbar_actionbar), 10);
                     ViewCompat.setTranslationY(findViewById(R.id.bar_split), -t + headerHeight);
                 } else { // on screen
                     mActionBarBackgroundDrawable.setAlpha(192);
                     setTitleAlpha(192);
                     ViewCompat.setElevation(findViewById(R.id.toolbar_actionbar), 0);
-                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), -t);
+                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), headerHeight - t);
                     ViewCompat.setTranslationY(findViewById(R.id.toolbar_actionbar), 0);
                     ViewCompat.setTranslationY(findViewById(R.id.bar_split), 0);
                 }
@@ -492,10 +505,7 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (mVideoCastManager.onDispatchVolumeKeyEvent(event, VideoCastControllerActivity.DEFAULT_VOLUME_INCREMENT)) {
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
+        return mVideoCastManager.onDispatchVolumeKeyEvent(event, VideoCastControllerActivity.DEFAULT_VOLUME_INCREMENT) || super.dispatchKeyEvent(event);
     }
 
     private void setMirrorSpinner(Host mirrors[]) {
@@ -541,12 +551,10 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
             super.onPostExecute(aBoolean);
 
             if (item.getType() == ViewModel.Type.SERIES) {
-                if (item.getType() == ViewModel.Type.SERIES) {
-                    BookmarkManager.Bookmark b = bookmarkManager.findItem(item);
-                    if (b != null) {
-                        mRestoreSeasonIndex = b.getSeason();
-                        mRestoreEpisodeIndex = b.getEpisode();
-                    }
+                BookmarkManager.Bookmark b = bookmarkManager.findItem(item);
+                if (b != null) {
+                    mRestoreSeasonIndex = b.getSeason();
+                    mRestoreEpisodeIndex = b.getEpisode();
                 }
 
                 String seasons[] = new String[item.getSeasons().length];

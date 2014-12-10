@@ -1,6 +1,9 @@
 # KinoCast
 
 ## Änderungen
+### Version 1.3.1
+ - [Fix] Titel und Menu Position
+
 ### Version 1.3.0
  - [Neu] Design changes (with some Material design)
  - [Fix] Chrash wenn Details geöffnet wurden bevor das Cover geladen war

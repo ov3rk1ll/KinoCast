@@ -12,13 +12,17 @@ android {
         versionCode Integer.parseInt(project.VERSION_CODE)
 
         applicationVariants.all { variant ->
-            def fileName = applicationId
-            if (variant.buildType.isDebuggable()) {
-                fileName += '-debug'
+            variant.outputs.each { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                    def fileName = applicationId
+                    if (variant.buildType.isDebuggable()) {
+                        fileName += '-debug'
+                    }
+                    fileName += '_v' + versionName;
+                    output.outputFile = new File(outputFile.parent, fileName + '.apk')
+                }
             }
-            fileName += '_v' + versionName;
-            def file = variant.outputFile
-            variant.outputFile = new File(file.parent, fileName + '.apk')
         }
 
         buildConfigField "boolean", "GMS_CHECK", "true"
@@ -26,7 +30,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,7 +43,7 @@ dependencies {
     compile project(':libs:paralloid')
     compile project(':libs:RateThisApp')
     compile 'com.android.support:appcompat-v7:21.0.2'
-    compile 'com.google.android.gms:play-services:6.1.71'
+    compile 'com.google.android.gms:play-services:6.5.87'
     compile 'com.android.support:recyclerview-v7:21.0.0'
     compile 'com.android.support:palette-v7:21.0.0'
     compile 'org.jsoup:jsoup:1.7.3'
