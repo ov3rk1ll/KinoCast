@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -28,7 +28,19 @@
         android:id="@android:id/list"
         android:divider="@android:color/transparent"
         tools:listitem="@android:layout/simple_list_item_1"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"
+        android:layout_above="@+id/textVersion" />
 
-    </LinearLayout>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:paddingLeft="2dp"
+        android:textColor="@color/primary_text_default_material_dark"
+        android:id="@+id/textVersion"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+</RelativeLayout>
 

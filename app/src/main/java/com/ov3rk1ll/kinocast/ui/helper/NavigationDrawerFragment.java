@@ -21,6 +21,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 
 /**
@@ -124,7 +125,6 @@ public class NavigationDrawerFragment extends Fragment {
                         //getString(R.string.title_section7),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-
     }
 
     @Override
@@ -135,6 +135,8 @@ public class NavigationDrawerFragment extends Fragment {
                 R.layout.fragment_navigation_drawer, container, false);
 
         mDrawerListView = (ListView) view.findViewById(android.R.id.list);
+
+        ((TextView) view.findViewById(R.id.textVersion)).setText("v" + BuildConfig.VERSION_NAME);
 
         return view;
     }
