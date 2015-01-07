@@ -138,7 +138,7 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         mVideoCastManager = CastHelper.getVideoCastManager(this);
         mMini = (MiniController) findViewById(R.id.miniController);
         mVideoCastManager.addMiniController(mMini);
-        mVideoCastManager.reconnectSessionIfPossible(this, false, 5);
+        mVideoCastManager.reconnectSessionIfPossible();
 
         item = (ViewModel) getIntent().getSerializableExtra(ARG_ITEM);
 

@@ -106,4 +106,12 @@ public class CastMediaRouterCallback extends MediaRouter.Callback {
         }
     }
 
+    /**
+     * Resets the count of discovered routes. This should be called when we stop the discovery so
+     * next time that we start the discovery, the count of discovered routes reflect the reality.
+     */
+    public void resetRouteCount() {
+        mRouteCount = 0;
+    }
+
 }

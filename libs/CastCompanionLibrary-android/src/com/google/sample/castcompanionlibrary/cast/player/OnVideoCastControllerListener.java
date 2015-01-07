@@ -22,9 +22,9 @@ import android.widget.SeekBar;
 import com.google.sample.castcompanionlibrary.cast.exceptions.CastException;
 import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
 import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
-import com.google.sample.castcompanionlibrary.cast.tracks.ui.TracksChooserDialog;
+import com.google.sample.castcompanionlibrary.cast.tracks.OnTracksSelectedListener;
 
-public interface OnVideoCastControllerListener extends TracksChooserDialog.OnTracksSelectedListener{
+public interface OnVideoCastControllerListener extends OnTracksSelectedListener {
 
     /**
      * Called when seeking is stopped by user.

@@ -22,4 +22,16 @@ package com.google.sample.castcompanionlibrary.cast.exceptions;
  */
 @SuppressWarnings("serial")
 public class NoConnectionException extends Exception {
+
+    public NoConnectionException() {
+        super();
+    }
+
+    public NoConnectionException(Throwable throwable) {
+        super(throwable);
+    }
+
+    public NoConnectionException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
 }

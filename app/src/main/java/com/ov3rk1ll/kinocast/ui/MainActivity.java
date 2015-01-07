@@ -38,6 +38,7 @@ import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
 import com.ov3rk1ll.kinocast.utils.CastHelper;
 import com.ov3rk1ll.kinocast.utils.ShowcaseHelper;
 import com.ov3rk1ll.kinocast.utils.Utils;
+import com.winsontan520.wversionmanager.library.WVersionManager;
 
 
 public class MainActivity extends ActionBarActivity
@@ -68,6 +69,10 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+        WVersionManager versionManager = new WVersionManager(this);
+        versionManager.setVersionContentUrl("http://ov3rk1ll.github.io/KinoCast/update.json");
+        versionManager.checkVersion();
 
         /*BackupManager bm = new BackupManager(this);
         bm.requestRestore(new RestoreObserver() {
@@ -102,7 +107,7 @@ public class MainActivity extends ActionBarActivity
         mVideoCastManager = CastHelper.getVideoCastManager(this);
         mMini = (MiniController) findViewById(R.id.miniController);
         mVideoCastManager.addMiniController(mMini);
-        mVideoCastManager.reconnectSessionIfPossible(this, false, 5);
+        mVideoCastManager.reconnectSessionIfPossible();
 
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)

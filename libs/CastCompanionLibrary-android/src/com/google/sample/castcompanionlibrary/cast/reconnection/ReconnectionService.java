@@ -78,7 +78,7 @@ public class ReconnectionService extends Service {
         mCastManager = VideoCastManager
                 .initialize(this, mApplicationId, mTargetActivity, mDataNamespace);
         if (!mCastManager.isConnected() && !mCastManager.isConnecting()) {
-            mCastManager.reconnectSessionIfPossible(this, false);
+            mCastManager.reconnectSessionIfPossible();
         }
 
         // register a broadcast receiver to be notified when screen goes on or off
@@ -127,7 +127,7 @@ public class ReconnectionService extends Service {
             mWifiConnectivity = true;
             if (mCastManager.isFeatureEnabled(BaseCastManager.FEATURE_WIFI_RECONNECT)) {
                 mCastManager.startCastDiscovery();
-                mCastManager.reconnectSessionIfPossible(this, false, RECONNECTION_ATTEMPT_PERIOD_S,
+                mCastManager.reconnectSessionIfPossible(RECONNECTION_ATTEMPT_PERIOD_S,
                         networkSsid);
             }
 
@@ -224,7 +224,7 @@ public class ReconnectionService extends Service {
             stopSelf();
         } else {
             // since we are connected and our timer has gone off, lets update the time remaining
-            // on the media (since media may have been paused) and reset teh time left
+            // on the media (since media may have been paused) and reset the time left
             long timeLeft = 0;
             try {
                 timeLeft = mCastManager.isRemoteStreamLive() ? 0 :

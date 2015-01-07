@@ -16,8 +16,6 @@
 
 package com.google.sample.castcompanionlibrary.cast.tracks.ui;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -42,45 +40,33 @@ import java.util.List;
 import static com.google.sample.castcompanionlibrary.utils.LogUtils.LOGE;
 
 /**
- * A dialog to show the available tracks (Text, Audio and Video) to allow selection of tracks.
+ * A dialog to show the available tracks (Text and Audio) to allow selection of tracks.
  */
-@SuppressLint("ValidFragment")
 public class TracksChooserDialog extends DialogFragment {
 
     private static final String TAG = "TracksChooserDialog";
     private VideoCastManager mCastManager;
     private long[] mActiveTracks = null;
-    private OnTracksSelectedListener mListener;
     private MediaInfo mMediaInfo;
     private TracksListAdapter mTextAdapter;
     private TracksListAdapter mAudioVideoAdapter;
     private List<MediaTrack> mTextTracks = new ArrayList<MediaTrack>();
-    private List<MediaTrack> mAudioVideoTracks = new ArrayList<MediaTrack>();
+    private List<MediaTrack> mAudioTracks = new ArrayList<MediaTrack>();
     private static final long TEXT_TRACK_NONE_ID = -1;
-    private static final MediaTrack TEXT_TRACK_NONE = new MediaTrack.Builder(TEXT_TRACK_NONE_ID,
-            MediaTrack.TYPE_TEXT)
-            .setName("None")
-            .setSubtype(MediaTrack.SUBTYPE_CAPTIONS)
-            .setContentId("").build();
     private int mSelectedTextPosition = 0;
     private int mSelectedAudioPosition = -1;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.custom_tracks_dialog_layout, null);
         setupView(view);
 
         builder.setView(view)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        // sign in the user ...
-                        if (mListener == null) {
-                            return;
-                        }
                         List<MediaTrack> selectedTracks = new ArrayList<MediaTrack>();
                         MediaTrack textTrack = mTextAdapter.getSelectedTrack();
                         if (textTrack.getId() != TEXT_TRACK_NONE_ID) {
@@ -90,21 +76,18 @@ public class TracksChooserDialog extends DialogFragment {
                         if (null != audioVideoTrack) {
                             selectedTracks.add(audioVideoTrack);
                         }
-                        mListener.onTracksSelected(selectedTracks);
-                        mListener = null;
+                        mCastManager.notifyTracksSelectedListeners(selectedTracks);
                         TracksChooserDialog.this.getDialog().cancel();
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener = null;
                         TracksChooserDialog.this.getDialog().cancel();
                     }
                 })
                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
-                        mListener = null;
                         TracksChooserDialog.this.getDialog().cancel();
                     }
                 });
@@ -116,6 +99,19 @@ public class TracksChooserDialog extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        Bundle mediaWrapper = getArguments().getBundle(VideoCastManager.EXTRA_MEDIA);
+        mMediaInfo = Utils.toMediaInfo(mediaWrapper);
+        try {
+            mCastManager = VideoCastManager.getInstance();
+            mActiveTracks = mCastManager.getActiveTrackIds();
+            List<MediaTrack> allTracks = mMediaInfo.getMediaTracks();
+            if (allTracks == null || allTracks.isEmpty()) {
+                Utils.showToast(getActivity(), R.string.caption_no_tracks_available);
+                dismiss();
+            }
+        } catch (CastException e) {
+            LOGE(TAG, "Failed to get an instance of VideoCatManager", e);
+        }
     }
 
     /**
@@ -130,7 +126,7 @@ public class TracksChooserDialog extends DialogFragment {
         super.onDestroyView();
     }
 
-    public void setupView(View view) {
+    private void setupView(View view) {
         ListView listView1 = (ListView) view.findViewById(R.id.listview1);
         ListView listView2 = (ListView) view.findViewById(R.id.listview2);
         TextView textEmptyMessageView = (TextView) view.findViewById(R.id.text_empty_message);
@@ -140,7 +136,7 @@ public class TracksChooserDialog extends DialogFragment {
         mTextAdapter = new TracksListAdapter(getActivity(), R.layout.tracks_row_layout,
                 mTextTracks, mSelectedTextPosition);
         mAudioVideoAdapter = new TracksListAdapter(getActivity(), R.layout.tracks_row_layout,
-                mAudioVideoTracks, mSelectedAudioPosition);
+                mAudioTracks, mSelectedAudioPosition);
 
         listView1.setAdapter(mTextAdapter);
         listView2.setAdapter(mAudioVideoAdapter);
@@ -162,7 +158,7 @@ public class TracksChooserDialog extends DialogFragment {
 
         // create tab 2
         TabHost.TabSpec tab2 = tabs.newTabSpec("tab2");
-        if (mAudioVideoTracks == null || mAudioVideoTracks.isEmpty()) {
+        if (mAudioTracks == null || mAudioTracks.isEmpty()) {
             listView2.setVisibility(View.INVISIBLE);
             tab2.setContent(R.id.audio_empty_message);
         } else {
@@ -173,11 +169,19 @@ public class TracksChooserDialog extends DialogFragment {
         tabs.addTab(tab2);
     }
 
+    private MediaTrack buildNoneTrack() {
+        return new MediaTrack.Builder(TEXT_TRACK_NONE_ID,
+                MediaTrack.TYPE_TEXT)
+                .setName(getString(R.string.none))
+                .setSubtype(MediaTrack.SUBTYPE_CAPTIONS)
+                .setContentId("").build();
+    }
+
     private void partitionTracks() {
         List<MediaTrack> allTracks = mMediaInfo.getMediaTracks();
-        mAudioVideoTracks.clear();
+        mAudioTracks.clear();
         mTextTracks.clear();
-        mTextTracks.add(TEXT_TRACK_NONE);
+        mTextTracks.add(buildNoneTrack());
         mSelectedTextPosition = 0;
         mSelectedAudioPosition = -1;
         if (allTracks != null) {
@@ -197,8 +201,7 @@ public class TracksChooserDialog extends DialogFragment {
                         textPosition++;
                         break;
                     case MediaTrack.TYPE_AUDIO:
-                    case MediaTrack.TYPE_VIDEO:
-                        mAudioVideoTracks.add(track);
+                        mAudioTracks.add(track);
                         if (mActiveTracks != null) {
                             for(int i=0; i < mActiveTracks.length; i++) {
                                 if (mActiveTracks[i] == track.getId()) {
@@ -213,39 +216,14 @@ public class TracksChooserDialog extends DialogFragment {
         }
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        List<MediaTrack> allTracks = mMediaInfo.getMediaTracks();
-        if (allTracks == null || allTracks.isEmpty()) {
-            Utils.showToast(activity, R.string.caption_no_tracks_available);
-            dismiss();
-        }
-    }
-
-    public TracksChooserDialog(MediaInfo mediaInfo, OnTracksSelectedListener listener) {
-        mMediaInfo = mediaInfo;
-        mListener = listener;
-        try {
-            mCastManager = VideoCastManager.getInstance();
-            mActiveTracks = mCastManager.getActiveTrackIds();
-        } catch (CastException e) {
-            LOGE(TAG, "Failed to get an instance of VideoCatManager", e);
-        }
-    }
-
     /**
-     * An interface that would be used to inform
-     * {@link com.google.sample.castcompanionlibrary.cast.tracks.ui.TracksChooserDialog.OnTracksSelectedListener}
-     * listeners when user is changing the active tracks for a media.
+     * Call this static method to create a new instance of the dialog.
      */
-    public interface OnTracksSelectedListener {
-
-        /**
-         * Called to inform the listeners of the new set of active tracks, set by the user.
-         *
-         * @param tracks A Non-<code>null</code> list of MediaTracks.
-         */
-        public void onTracksSelected(List<MediaTrack> tracks);
+    public static TracksChooserDialog newInstance(MediaInfo mediaInfo) {
+        TracksChooserDialog fragment = new TracksChooserDialog();
+        Bundle bundle = new Bundle();
+        bundle.putBundle(VideoCastManager.EXTRA_MEDIA, Utils.fromMediaInfo(mediaInfo));
+        fragment.setArguments(bundle);
+        return fragment;
     }
 }

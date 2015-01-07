@@ -1,6 +1,9 @@
 # KinoCast
 
 ## Änderungen
+### Version 1.3.2
+ - [Neu] Update Funktion
+
 ### Version 1.3.1
  - [Fix] Titel und Menu Position
 

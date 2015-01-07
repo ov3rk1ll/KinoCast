@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Google Inc. All Rights Reserved.
+ * Copyright (C) 2014 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.google.android.gms.cast.MediaInfo;
@@ -94,7 +93,7 @@ public class VideoCastNotificationService extends Service {
         mCastManager = VideoCastManager
                 .initialize(this, mApplicationId, mTargetActivity, mDataNamespace);
         if (!mCastManager.isConnected() && !mCastManager.isConnecting()) {
-            mCastManager.reconnectSessionIfPossible(this, false);
+            mCastManager.reconnectSessionIfPossible();
         }
         mConsumer = new VideoCastConsumerImpl() {
             @Override
@@ -115,7 +114,6 @@ public class VideoCastNotificationService extends Service {
                 mVisible = !visible;
                 if (mVisible && null != mNotification) {
                     startForeground(NOTIFICATION_ID, mNotification);
-                    mCastManager.setContext(VideoCastNotificationService.this);
                 } else {
                     stopForeground(true);
                 }
@@ -144,9 +142,18 @@ public class VideoCastNotificationService extends Service {
             } else if (ACTION_VISIBILITY.equals(action)) {
                 mVisible = intent.getBooleanExtra(NOTIFICATION_VISIBILITY, false);
                 LOGD(TAG, "onStartCommand(): Action: ACTION_VISIBILITY " + mVisible);
-                if (mVisible && null != mNotification) {
-                    startForeground(NOTIFICATION_ID, mNotification);
-                    mCastManager.setContext(this);
+                if (mVisible) {
+                    if (mNotification != null) {
+                        startForeground(NOTIFICATION_ID, mNotification);
+                    } else {
+                        try {
+                            setupNotification(mCastManager.getRemoteMediaInformation());
+                        } catch (TransientNetworkDisconnectionException e) {
+                            LOGE(TAG, "onStartCommand() failed to get media", e);
+                        } catch (NoConnectionException e) {
+                            LOGE(TAG, "onStartCommand() failed to get media", e);
+                        }
+                    }
                 } else {
                     stopForeground(true);
                 }
@@ -285,7 +292,6 @@ public class VideoCastNotificationService extends Service {
      */
     private RemoteViews build(MediaInfo info, Bitmap bitmap, boolean isPlaying)
             throws CastException, TransientNetworkDisconnectionException, NoConnectionException {
-        Log.d(TAG, "Build version is: " + Build.VERSION.SDK_INT);
         if (mIsLollipopOrAbove) {
             buildForLollipopAndAbove(info, bitmap, isPlaying);
             return null;
@@ -340,7 +346,7 @@ public class VideoCastNotificationService extends Service {
         return rv;
     }
 
-    @TargetApi(Build.VERSION_CODES.L)
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void buildForLollipopAndAbove(MediaInfo info, Bitmap bitmap, boolean isPlaying)
             throws CastException, TransientNetworkDisconnectionException, NoConnectionException {
 
@@ -379,9 +385,11 @@ public class VideoCastNotificationService extends Service {
                 .setContentText(castingTo)
                 .setContentIntent(contentPendingIntent)
                 .setLargeIcon(bitmap)
-                .addAction(isPlaying ? R.drawable.ic_av_pause_light : R.drawable.ic_av_play_light,
-                        "Pause", playbackPendingIntent)
-                .addAction(R.drawable.ic_cast_stop, "Disconnect", stopPendingIntent)
+                .addAction(isPlaying ? R.drawable.ic_pause_white_48dp :
+                                R.drawable.ic_play_arrow_white_48dp,
+                        getString(R.string.pause), playbackPendingIntent)
+                .addAction(R.drawable.ic_clear_white_24dp, getString(R.string.disconnect),
+                        stopPendingIntent)
                 .setStyle(new Notification.MediaStyle()
                                 .setShowActionsInCompactView(new int[]{0,1}))
                 .setOngoing(true)

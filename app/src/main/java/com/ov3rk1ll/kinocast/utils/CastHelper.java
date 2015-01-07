@@ -19,8 +19,6 @@ public class CastHelper {
                     VideoCastManager.FEATURE_CAPTIONS_PREFERENCE |
                     VideoCastManager.FEATURE_DEBUGGING);
         }
-        mCastMgr.setContext(ctx);
         return mCastMgr;
     }
-
 }

@@ -20,7 +20,9 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -98,7 +100,7 @@ public class VideoCastControllerActivity extends ActionBarActivity implements IV
             mVolumeIncrement = DEFAULT_VOLUME_INCREMENT;
         }
         try {
-            mCastManager = VideoCastManager.getInstance(this);
+            mCastManager = VideoCastManager.getInstance();
         } catch (CastException e) {
             // logged already
             finish();
@@ -154,7 +156,7 @@ public class VideoCastControllerActivity extends ActionBarActivity implements IV
     protected void onResume() {
         LOGD(TAG, "onResume() was called");
         try {
-            mCastManager = VideoCastManager.getInstance(VideoCastControllerActivity.this);
+            mCastManager = VideoCastManager.getInstance();
         } catch (CastException e) {
             // logged already
         }
@@ -186,15 +188,15 @@ public class VideoCastControllerActivity extends ActionBarActivity implements IV
                     mListener.onPlayPauseClicked(v);
                 } catch (TransientNetworkDisconnectionException e) {
                     LOGE(TAG, "Failed to toggle playback due to temporary network issue", e);
-                    Utils.showErrorDialog(VideoCastControllerActivity.this,
+                    Utils.showToast(VideoCastControllerActivity.this,
                             R.string.failed_no_connection_trans);
                 } catch (NoConnectionException e) {
                     LOGE(TAG, "Failed to toggle playback due to network issues", e);
-                    Utils.showErrorDialog(VideoCastControllerActivity.this,
+                    Utils.showToast(VideoCastControllerActivity.this,
                             R.string.failed_no_connection);
                 } catch (Exception e) {
                     LOGE(TAG, "Failed to toggle playback due to other issues", e);
-                    Utils.showErrorDialog(VideoCastControllerActivity.this,
+                    Utils.showToast(VideoCastControllerActivity.this,
                             R.string.failed_perform_action);
                 }
             }
@@ -235,7 +237,7 @@ public class VideoCastControllerActivity extends ActionBarActivity implements IV
                         mListener.onProgressChanged(seekBar, progress, fromUser);
                     }
                 } catch (Exception e) {
-                    LOGE(TAG, "Failed to set teh progress result", e);
+                    LOGE(TAG, "Failed to set the progress result", e);
                 }
             }
         });
@@ -244,16 +246,29 @@ public class VideoCastControllerActivity extends ActionBarActivity implements IV
             @Override
             public void onClick(View v) {
                 try {
-                    new TracksChooserDialog(mCastManager.getRemoteMediaInformation(),
-                            mVideoCastControllerFragment)
-                            .show(getSupportFragmentManager(), "dlg");
+                    showTracksChooserDialog();
                 } catch (TransientNetworkDisconnectionException e) {
                     LOGE(TAG, "Failed to get the media", e);
                 } catch (NoConnectionException e) {
-                    e.printStackTrace();
+                    LOGE(TAG, "Failed to get the media", e);
                 }
             }
         });
+    }
+
+    private void showTracksChooserDialog()
+            throws TransientNetworkDisconnectionException, NoConnectionException {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog");
+        if (prev != null) {
+            transaction.remove(prev);
+        }
+        transaction.addToBackStack(null);
+
+        // Create and show the dialog.
+        TracksChooserDialog dialogFragment = TracksChooserDialog
+                .newInstance(mCastManager.getRemoteMediaInformation());
+        dialogFragment.show(transaction, "dialog");
     }
 
     private void setupActionBar() {

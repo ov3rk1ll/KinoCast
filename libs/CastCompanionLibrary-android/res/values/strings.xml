@@ -2,13 +2,16 @@
 <resources>
 
     <string name="app_name">Cast Companion Library</string>
-    <string name="ccl_version">1.11</string>
+    <string name="ccl_version">1.14</string>
     <string name="media_route_menu_title">Play on&#8230;</string>
     <string name="live">Live</string>
     <string name="cancel">Cancel</string>
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="info_na">Information Not Available</string>
+    <string name="pause">Pause</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="none">None</string>
 
     <!-- Used in Error Dialog -->
     <string name="ok">OK</string>
@@ -29,7 +32,7 @@
     <!-- onApplicationConnectionFailed() errors -->
     <string name="failed_to_launch_app">Failed to launch application</string>
     <string name="failed_app_launch_timeout">The request to launch the application has timed out!</string>
-    <string name="failed_to_find_app">The application you are trying to launch is not available on your Chromecast device</string>
+    <string name="failed_to_find_app">The application you are trying to launch is not available on your Cast device</string>
 
     <!-- Error messages for the play.pause in mini player -->
     <string name="failed_to_play">Failed to start the playback of media</string>
@@ -47,7 +50,7 @@
     <string name="failed_status_request">Failed to sync up with the cast device</string>
     <string name="failed_load">Failed to load media on the cast device</string>
     <string name="failed_seek">Failed to seek to the new position on the cast device</string>
-    <string name="failed_receiver_player_error">Receiver player has encountered a sever error</string>
+    <string name="failed_receiver_player_error">Receiver player has encountered a severe error</string>
     <string name="failed_authorization_timeout">Authorization timed out</string>
     <string name="failed_to_set_track_style">Failed to update the Captions style.</string>
 

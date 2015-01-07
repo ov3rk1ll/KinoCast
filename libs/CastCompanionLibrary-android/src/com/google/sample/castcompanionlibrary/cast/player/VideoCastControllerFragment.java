@@ -25,6 +25,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -100,15 +101,15 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
         mCastController = (IVideoCastController) activity;
         mHandler = new Handler();
         try {
-            mCastManager = VideoCastManager.getInstance(activity);
+            mCastManager = VideoCastManager.getInstance();
         } catch (CastException e) {
             // logged already
         }
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         mCastConsumer = new MyCastConsumer();
         Bundle bundle = getArguments();
         if (null == bundle) {
@@ -119,7 +120,14 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
 
         // Retain this fragment across configuration changes.
         setRetainInstance(true);
-
+        mCastManager.addTracksSelectedListener(this);
+        boolean explicitStartActivity = Utils.getBooleanFromPreference(getActivity(),
+                VideoCastManager.PREFS_KEY_START_ACTIVITY, false);
+        if (explicitStartActivity) {
+            mIsFresh = true;
+        }
+        Utils.saveBooleanToPreference(getActivity(), VideoCastManager.PREFS_KEY_START_ACTIVITY,
+                false);
         if (extras.getBoolean(VideoCastManager.EXTRA_HAS_AUTH)) {
             mOverallState = OverallState.AUTHORIZING;
             mMediaAuthService = mCastManager.getMediaAuthService();
@@ -140,7 +148,7 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
             }
             MediaInfo info = Utils.toMediaInfo(mediaWrapper);
             int startPoint = extras.getInt(VideoCastManager.EXTRA_START_POINT, 0);
-            onReady(info, shouldStartPlayback, startPoint, customData);
+            onReady(info, shouldStartPlayback && explicitStartActivity, startPoint, customData);
         }
     }
 
@@ -239,7 +247,7 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
             LOGD(TAG, "onFailed(): " + getString(resourceId) + ", status code: " + statusCode);
             if (statusCode == RemoteMediaPlayer.STATUS_FAILED
                     || statusCode == RemoteMediaPlayer.STATUS_TIMED_OUT) {
-                Utils.showErrorDialog(getActivity(), resourceId);
+                Utils.showToast(getActivity(), resourceId);
                 mCastController.closeActivity();
             }
         }
@@ -465,38 +473,54 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
 
     @Override
     public void onResume() {
+        super.onResume();
         LOGD(TAG, "onResume() was called");
         try {
-            mCastManager = VideoCastManager.getInstance(getActivity());
-            boolean shouldFinish = !(mCastManager.isConnected() || mCastManager.isConnecting())
-                    || (mCastManager.getPlaybackStatus() == MediaStatus.PLAYER_STATE_IDLE
-                    && mCastManager.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED
-                    && !mIsFresh);
-            if (shouldFinish) {
-                mCastController.closeActivity();
+            mCastManager = VideoCastManager.getInstance();
+            try {
+                if (mCastManager.isRemoteMoviePaused() || mCastManager.isRemoteMoviePlaying()) {
+                    if (mCastManager.getRemoteMediaInformation() != null &&
+                            mSelectedMedia.getContentId()
+                                    .equals(mCastManager.getRemoteMediaInformation()
+                                            .getContentId())) {
+                        mIsFresh = false;
+                    }
+                }
+            } catch (TransientNetworkDisconnectionException e) {
+                LOGE(TAG, "Failed getting status of media playback", e);
+            } catch (NoConnectionException e) {
+                LOGE(TAG, "Failed getting status of media playback", e);
+            }
+            boolean shouldFinish = false;
+            if (!mCastManager.isConnecting()) {
+                shouldFinish = !(mCastManager.isConnected())
+                        || (mCastManager.getPlaybackStatus() == MediaStatus.PLAYER_STATE_IDLE
+                        && mCastManager.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED);
+                if (shouldFinish && !mIsFresh) {
+                    mCastController.closeActivity();
+                    return;
+                }
             }
             mCastManager.addVideoCastConsumer(mCastConsumer);
             mCastManager.incrementUiCounter();
             if (!mIsFresh) {
                 updatePlayerStatus();
-            }
-
-            // updating metadata in case someone else has changed it and we are resuming the
-            // activity
-            try {
-                mSelectedMedia = mCastManager.getRemoteMediaInformation();
-                updateClosedCaptionState();
-                updateMetadata();
-            } catch (TransientNetworkDisconnectionException e) {
-                LOGE(TAG, "Failed to update the metadata due to network issues", e);
-            } catch (NoConnectionException e) {
-                LOGE(TAG, "Failed to update the metadata due to network issues", e);
+                // updating metadata in case someone else has changed it and we are resuming the
+                // activity
+                try {
+                    mSelectedMedia = mCastManager.getRemoteMediaInformation();
+                    updateClosedCaptionState();
+                    updateMetadata();
+                } catch (TransientNetworkDisconnectionException e) {
+                    LOGE(TAG, "Failed to update the metadata due to network issues", e);
+                } catch (NoConnectionException e) {
+                    LOGE(TAG, "Failed to update the metadata due to network issues", e);
+                }
             }
 
         } catch (CastException e) {
             // logged already
         }
-        super.onResume();
     }
 
     @Override
@@ -700,11 +724,11 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
                 mMediaAuthTimer.cancel();
             }
             mSelectedMedia = info;
-            updateClosedCaptionState();
             mHandler.post(new Runnable() {
 
                 @Override
                 public void run() {
+                    updateClosedCaptionState();
                     mOverallState = OverallState.PLAYBACK;
                     onReady(info, true, startPoint, customData);
                 }
@@ -802,6 +826,7 @@ public class VideoCastControllerFragment extends Fragment implements OnVideoCast
         }
 
         mCastManager.clearContext(getActivity());
+        mCastManager.removeTracksSelectedListener(this);
     }
 
 }
