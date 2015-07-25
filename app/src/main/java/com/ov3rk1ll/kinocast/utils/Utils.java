@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Utils {
-    public static final String USER_AGENT = "KinoCast/Android v" + BuildConfig.VERSION_NAME;
+    public static final String USER_AGENT = "KinoCast v" + BuildConfig.VERSION_NAME;
 
     public static void trackPath(Activity activity, String path){
         Tracker t = ((TrackingApplication) activity.getApplication()).getTracker(TrackingApplication.TrackerName.APP_TRACKER);

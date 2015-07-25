@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
@@ -131,13 +132,22 @@ public class KinoxParser extends Parser{
         }else{
             item.setType(ViewModel.Type.MOVIE);
             List<Host> hostlist = new ArrayList<Host>();
-            Elements hosts = doc.select("ul#HosterList").select("li");
+            Elements hosts = doc.select("ul#nonajax_list").select("li");
             for(Element host: hosts){
-                int hosterId = Integer.valueOf(host.id().replace("Hoster_", ""));
+                int hosterId = 0;
+                Set<String> classes = host.classNames();
+                for (String c : classes) {
+                    if(c.startsWith("MirStyle")){
+                        hosterId = Integer.valueOf(c.substring("MirStyle".length()));
+                    }
+                }
                 String name = host.select("div.Named").text();
                 String count = host.select("div.Data").text();
-                count = count.substring(count.indexOf("/") + 1, count.indexOf(" ", count.indexOf("/")));
-                int c = Integer.valueOf(count);
+                int c = 1;
+                if(count.contains("/")) {
+                    count = count.substring(count.indexOf("/") + 1, count.indexOf(" ", count.indexOf("/")));
+                    c = Integer.valueOf(count);
+                }
                 for(int i = 0; i < c; i++){
                     Host h = Host.selectById(hosterId);
                     h.setName(name);
@@ -162,11 +172,11 @@ public class KinoxParser extends Parser{
         try {
             Document doc = Jsoup.connect(URL_BASE + "Stream/" + item.getSlug() + ".html")
                     .userAgent(Utils.USER_AGENT)
-                    .cookie("StreamHostMirrorMode", "fixed")
+                    /*.cookie("StreamHostMirrorMode", "fixed")
                     .cookie("StreamAutoHideMirrros", "Fixed")
                     .cookie("StreamShowFacebook", "N")
                     .cookie("StreamCommentLimit", "0")
-                    .cookie("StreamMirrorMode", "fixed")
+                    .cookie("StreamMirrorMode", "fixed")*/
                     .timeout(10000)
                     .get();
 
