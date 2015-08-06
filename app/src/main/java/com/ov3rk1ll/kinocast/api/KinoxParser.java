@@ -132,7 +132,7 @@ public class KinoxParser extends Parser{
         }else{
             item.setType(ViewModel.Type.MOVIE);
             List<Host> hostlist = new ArrayList<Host>();
-            Elements hosts = doc.select("ul#nonajax_list").select("li");
+            Elements hosts = doc.select("ul#HosterList").select("li");
             for(Element host: hosts){
                 int hosterId = 0;
                 Set<String> classes = host.classNames();
