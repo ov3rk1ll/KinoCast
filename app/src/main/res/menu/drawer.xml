@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity" >
+    <item
+        android:id="@string/title_section1"
+        android:title="@string/title_section1" />
+    <item
+        android:id="@string/title_section2"
+        android:title="@string/title_section2" />
+    <item
+        android:id="@string/title_section3"
+        android:title="@string/title_section3" />
+    <item
+        android:id="@string/title_section4"
+        android:title="@string/title_section4" />
+    <item
+        android:id="@string/title_section5"
+        android:title="@string/title_section5" />
+    <item
+        android:id="@string/title_section6"
+        android:title="@string/title_section6" />
+    <!--<item
+        android:id="@string/title_section7"
+        android:title="@string/title_section7" />-->
+</menu>
