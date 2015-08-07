@@ -52,6 +52,11 @@ public class KinoxParser extends Parser{
     }
 
     @Override
+    public String getParserName() {
+        return "Kinox";
+    }
+
+    @Override
     public int getParserId(){
         return PARSER_ID;
     }
@@ -132,7 +137,7 @@ public class KinoxParser extends Parser{
         }else{
             item.setType(ViewModel.Type.MOVIE);
             List<Host> hostlist = new ArrayList<Host>();
-            Elements hosts = doc.select("ul#nonajax_list").select("li");
+            Elements hosts = doc.select("ul#HosterList").select("li");
             for(Element host: hosts){
                 int hosterId = 0;
                 Set<String> classes = host.classNames();

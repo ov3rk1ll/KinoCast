@@ -3,11 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/libs/CastCompanionLibrary-android/CastCompanionLibrary-android.iml" filepath="$PROJECT_DIR$/libs/CastCompanionLibrary-android/CastCompanionLibrary-android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/RateThisApp/RateThisApp.iml" filepath="$PROJECT_DIR$/libs/RateThisApp/RateThisApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/libs/ShowcaseView/ShowcaseView.iml" filepath="$PROJECT_DIR$/libs/ShowcaseView/ShowcaseView.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/paralloid/paralloid.iml" filepath="$PROJECT_DIR$/libs/paralloid/paralloid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kinocast.iml" filepath="$PROJECT_DIR$/kinocast.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
     </modules>
   </component>
 </project>
-

@@ -9,7 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -145,7 +145,7 @@ public class ListFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            ((ActionBarActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(true);
+            ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(true);
             super.onPreExecute();
         }
 
@@ -181,7 +181,7 @@ public class ListFragment extends Fragment {
                         .show();
             }
             if(getActivity() != null)
-                ((ActionBarActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(false);
+                ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(false);
             super.onPostExecute(viewModels);
         }
     }
@@ -190,7 +190,7 @@ public class ListFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            ((ActionBarActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(true);
+            ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(true);
             super.onPreExecute();
         }
 
@@ -233,7 +233,7 @@ public class ListFragment extends Fragment {
                         .show();
             }
             if(getActivity() != null)
-                ((ActionBarActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(false);
+                ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(false);
             super.onPostExecute(viewModels);
         }
     }

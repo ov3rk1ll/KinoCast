@@ -14,4 +14,8 @@
     <dimen name="list_item_height">200dp</dimen>
 
     <dimen name="detail_image_height">306dp</dimen>
+
+    <dimen name="app_bar_height">256dp</dimen>
+    <dimen name="nav_header_height">192dp</dimen>
+    <dimen name="expanded_toolbar_title_margin_start">64dp</dimen>
 </resources>

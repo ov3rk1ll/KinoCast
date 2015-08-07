@@ -2,7 +2,6 @@ package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.util.Log;
 
-import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.json.JSONException;

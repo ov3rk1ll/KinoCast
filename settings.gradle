@@ -1,1 +1,1 @@
-include ':app', ':libs:CastCompanionLibrary-android', ':libs:paralloid', ':libs:ShowcaseView', ':libs:RateThisApp'
+include ':app', ':libs:CastCompanionLibrary-android', ':libs:ShowcaseView'

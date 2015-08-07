@@ -11,26 +11,21 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -39,10 +34,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,12 +47,10 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
-import com.google.sample.castcompanionlibrary.cast.BaseCastManager;
-import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
-import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.sample.castcompanionlibrary.cast.player.VideoCastControllerActivity;
-import com.google.sample.castcompanionlibrary.utils.Utils;
-import com.google.sample.castcompanionlibrary.widgets.MiniController;
+import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.android.libraries.cast.companionlibrary.widgets.MiniController;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -70,8 +61,6 @@ import com.ov3rk1ll.kinocast.ui.helper.PaletteManager;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
-import com.ov3rk1ll.kinocast.ui.helper.widget.ObservableScrollView;
-import com.ov3rk1ll.kinocast.ui.util.AlphaForegroundColorSpan;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
 import com.ov3rk1ll.kinocast.utils.CastHelper;
 import com.ov3rk1ll.kinocast.utils.ShowcaseHelper;
@@ -80,10 +69,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DetailActivity extends ActionBarActivity implements ActionMenuView.OnMenuItemClickListener {
+public class DetailActivity extends AppCompatActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     private ViewModel item;
-    private ColorDrawable mActionBarBackgroundDrawable;
 
     private VideoCastManager mVideoCastManager;
     private MiniController mMini;
@@ -94,26 +82,11 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
     private boolean SHOW_ADS = true;
 
     private BookmarkManager bookmarkManager;
+    private Toolbar toolbar;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
 
-    private Drawable.Callback mDrawableCallback = new Drawable.Callback() {
-        @Override
-        public void invalidateDrawable(Drawable who) {
-            getSupportActionBar().setBackgroundDrawable(who);
-        }
-
-        @Override
-        public void scheduleDrawable(Drawable who, Runnable what, long when) {
-        }
-
-        @Override
-        public void unscheduleDrawable(Drawable who, Runnable what) {
-        }
-    };
     private int mRestoreSeasonIndex = -1;
     private int mRestoreEpisodeIndex = -1;
-
-    private AlphaForegroundColorSpan mAlphaForegroundColorSpan;
-    private SpannableString mSpannableString;
 
     @Override
     public void onBackPressed() {
@@ -126,10 +99,9 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+        // actionBar.setDisplayHomeAsUpEnabled(true);
 
-        ((ActionMenuView) findViewById(R.id.bar_split)).setOnMenuItemClickListener(this);
+        //((ActionMenuView) findViewById(R.id.bar_split)).setOnMenuItemClickListener(this);
 
         bookmarkManager = new BookmarkManager(getApplication());
         bookmarkManager.restore();
@@ -148,38 +120,9 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
             return;
         }
 
-        mActionBarBackgroundDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
-        mActionBarBackgroundDrawable.setAlpha(192);
-
-        mSpannableString = new SpannableString(item.getTitle());
-        mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(Color.WHITE);
-        setTitleAlpha(192);
-
-        ColorDrawable colorDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
-        colorDrawable.setAlpha(192);
-        findViewById(R.id.bar_split).setBackgroundDrawable(colorDrawable);
-
+        initToolbar();
+        initInstances();
         attemptColor(null);
-
-        ActionBar actionBar = getSupportActionBar();
-
-        actionBar.setBackgroundDrawable(mActionBarBackgroundDrawable);
-        actionBar.setDisplayShowHomeEnabled(false);
-
-        int padding = getResources().getDimensionPixelSize(R.dimen.detail_image_height);
-
-        final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
-                new int[] { R.attr.actionBarSize });
-        int actionBarSize = (int) styledAttributes.getDimension(0, 0);
-        styledAttributes.recycle();
-
-        Log.i("setTranslationY", "actionBarSize: " + actionBarSize);
-        padding -= actionBarSize * 2;
-        ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), padding);
-        ViewCompat.setTranslationY(findViewById(R.id.toolbar_actionbar), 0);
-        ViewCompat.setTranslationY(findViewById(R.id.bar_split), 0);
-
-        // actionBar.setDisplayHomeAsUpEnabled(true);
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         if (SHOW_ADS) {
@@ -223,11 +166,6 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
 
         int screenWidthPx = getResources().getDisplayMetrics().widthPixels;
 
-        FrameLayout topContent = (FrameLayout) findViewById(R.id.top_content);
-        ObservableScrollView scrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
-        scrollView.parallaxViewBy(topContent, 0.5f);
-
-        ((TextView) findViewById(R.id.title)).setText(item.getTitle());
         ((TextView) findViewById(R.id.detail)).setText(item.getSummary());
 
         final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
@@ -247,26 +185,6 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         });
 
         ((ImageView) findViewById(R.id.language)).setImageResource(item.getLanguageResId());
-
-        ((ObservableScrollView) findViewById(R.id.scroll_view)).setOnScrollChangedListener(new ObservableScrollView.OnScrollChangedListener() {
-            public void onScrollChanged(ScrollView who, int l, int t, int oldl, int oldt) {
-                int headerHeight = findViewById(R.id.image_header).getHeight() - findViewById(R.id.toolbar_container).getHeight();
-                if (t - headerHeight >= 0) {
-                    mActionBarBackgroundDrawable.setAlpha(255);
-                    setTitleAlpha(255);
-                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), 0);
-                    ViewCompat.setElevation(findViewById(R.id.toolbar_actionbar), 10);
-                    ViewCompat.setTranslationY(findViewById(R.id.bar_split), -t + headerHeight);
-                } else { // on screen
-                    mActionBarBackgroundDrawable.setAlpha(192);
-                    setTitleAlpha(192);
-                    ViewCompat.setElevation(findViewById(R.id.toolbar_actionbar), 0);
-                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_container), headerHeight - t);
-                    ViewCompat.setTranslationY(findViewById(R.id.toolbar_actionbar), 0);
-                    ViewCompat.setTranslationY(findViewById(R.id.bar_split), 0);
-                }
-            }
-        });
 
         ((Spinner) findViewById(R.id.spinnerSeason)).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -323,10 +241,18 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         (new QueryDetailTask()).execute((Void) null);
     }
 
-    private void setTitleAlpha(int alpha) {
-        mAlphaForegroundColorSpan.setAlpha(alpha);
-        mSpannableString.setSpan(mAlphaForegroundColorSpan, 0, mSpannableString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        getSupportActionBar().setTitle(mSpannableString);
+    private void initToolbar() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
+
+    private void initInstances() {
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setTitle(item.getTitle());
+
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingToolbarLayout);
+        collapsingToolbarLayout.setTitle(item.getTitle());
     }
 
     boolean hasColors = false;
@@ -339,29 +265,13 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
                 if (palette == null) return;
                 Palette.Swatch swatch = palette.getDarkVibrantSwatch();
                 if (swatch != null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                        mActionBarBackgroundDrawable.setColor(swatch.getRgb());
-                    } else {
-                        mActionBarBackgroundDrawable = new ColorDrawable(swatch.getRgb());
-                    }
-
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        mActionBarBackgroundDrawable.setCallback(mDrawableCallback);
-                        mActionBarBackgroundDrawable.invalidateSelf();
-                    }
-
-                    ColorDrawable colorDrawable = new ColorDrawable(swatch.getRgb());
-                    colorDrawable.setAlpha(192);
-                    findViewById(R.id.bar_split).setBackgroundDrawable(colorDrawable);
-
-                    mActionBarBackgroundDrawable.setAlpha(192);
+                    collapsingToolbarLayout.setContentScrimColor(swatch.getRgb());
 
                     findViewById(R.id.hr1).setBackgroundColor(swatch.getRgb());
                     findViewById(R.id.hr2).setBackgroundColor(swatch.getRgb());
 
-                    int alpha = mAlphaForegroundColorSpan.getAlpha();
-                    mAlphaForegroundColorSpan = new AlphaForegroundColorSpan(swatch.getTitleTextColor());
-                    setTitleAlpha(alpha);
+                    //collapsingToolbarLayout.setCollapsedTitleTextColor(swatch.getTitleTextColor());
+                    //collapsingToolbarLayout.setExpandedTitleColor(swatch.getTitleTextColor());
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         ((ProgressBar) findViewById(R.id.progressBar)).setIndeterminateTintList(ColorStateList.valueOf(swatch.getRgb()));
@@ -418,7 +328,7 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.detail, menu);
-        menu = ((ActionMenuView) findViewById(R.id.bar_split)).getMenu();
+        //menu = ((ActionMenuView) findViewById(R.id.bar_split)).getMenu();
         menu.clear();
         getMenuInflater().inflate(R.menu.detail, menu);
         mediaRouteMenuItem = mVideoCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
@@ -505,7 +415,7 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        return mVideoCastManager.onDispatchVolumeKeyEvent(event, VideoCastControllerActivity.DEFAULT_VOLUME_INCREMENT) || super.dispatchKeyEvent(event);
+        return mVideoCastManager.onDispatchVolumeKeyEvent(event, 0.05) || super.dispatchKeyEvent(event);
     }
 
     private void setMirrorSpinner(Host mirrors[]) {
@@ -600,18 +510,20 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
     }
 
     public class QueryHosterTask extends AsyncTask<Void, Void, List<Host>> {
+        Season s;
+        int position;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             findViewById(R.id.layoutMirror).setVisibility(View.GONE);
+            s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
+            position = ((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition();
         }
 
         @Override
         protected List<Host> doInBackground(Void... params) {
             if (item.getType() == ViewModel.Type.SERIES) {
-                Season s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
-                int position = ((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition();
                 return Parser.getInstance().getHosterList(item, s.id, s.episodes[position]);
             }
             return null;
@@ -626,6 +538,10 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
 
     public class QueryPlayTask extends AsyncTask<Void, Void, String> {
         private ProgressDialog progressDialog;
+
+        Host host;
+        int spinnerSeasonItemPosition;
+        int spinnerEpisodeItemPosition;
 
         public QueryPlayTask(Context context) {
             progressDialog = new ProgressDialog(context);
@@ -650,6 +566,10 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         protected void onPreExecute() {
             super.onPreExecute();
             progressDialog.show();
+            ArrayAdapter<Host> hosts = (ArrayAdapter<Host>) ((Spinner) findViewById(R.id.spinnerMirror)).getAdapter();
+            host = hosts.getItem(((Spinner) findViewById(R.id.spinnerMirror)).getSelectedItemPosition());
+            spinnerSeasonItemPosition = ((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition();
+            spinnerEpisodeItemPosition = ((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition();
         }
 
         @Override
@@ -661,13 +581,11 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
         @Override
         protected String doInBackground(Void... params) {
             String link;
-            ArrayAdapter<Host> hosts = (ArrayAdapter<Host>) ((Spinner) findViewById(R.id.spinnerMirror)).getAdapter();
-            Host host = hosts.getItem(((Spinner) findViewById(R.id.spinnerMirror)).getSelectedItemPosition());
             com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html?host=" + host.toString());
 
             if (item.getType() == ViewModel.Type.SERIES) {
-                Season s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
-                String e = s.episodes[((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition()];
+                Season s = item.getSeasons()[spinnerSeasonItemPosition];
+                String e = s.episodes[spinnerEpisodeItemPosition];
                 link = Parser.getInstance().getMirrorLink(item, host.getId(), host.getMirror(), s.id, e);
             } else {
                 link = Parser.getInstance().getMirrorLink(item, host.getId(), host.getMirror());
@@ -746,7 +664,9 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
             Season s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
             String e = s.episodes[((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition()];
             mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW);
-            mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle() + " - " + s + "x" + e);
+            mediaMetadata.putString(MediaMetadata.KEY_SERIES_TITLE, item.getTitle());
+            mediaMetadata.putString(MediaMetadata.KEY_SEASON_NUMBER, s.name);
+            mediaMetadata.putString(MediaMetadata.KEY_EPISODE_NUMBER, e);
         } else {
             mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
             mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle());
@@ -764,7 +684,7 @@ public class DetailActivity extends ActionBarActivity implements ActionMenuView.
                 .setMetadata(mediaMetadata)
                 .build();
 
-        mVideoCastManager.startCastControllerActivity(DetailActivity.this, Utils.fromMediaInfo(mediaInfo), 0, true);
+        mVideoCastManager.startVideoCastControllerActivity(DetailActivity.this, mediaInfo, 0, true);
     }
 
     /*public void startCastControllerActivity(Context context, Bundle mediaWrapper, int position, boolean shouldStart) {

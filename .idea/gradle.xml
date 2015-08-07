@@ -3,22 +3,20 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="distributionType" value="LOCAL" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleHome" value="C:\Program Files (x86)\Android\android-studio\gradle\gradle-2.2.1" />
+        <option name="gradleHome" value="$APPLICATION_HOME_DIR$/gradle/gradle-2.2.1" />
+        <option name="gradleJvm" value="1.7" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/libs" />
             <option value="$PROJECT_DIR$/libs/CastCompanionLibrary-android" />
-            <option value="$PROJECT_DIR$/libs/RateThisApp" />
             <option value="$PROJECT_DIR$/libs/ShowcaseView" />
-            <option value="$PROJECT_DIR$/libs/paralloid" />
           </set>
         </option>
       </GradleProjectSettings>
     </option>
   </component>
 </project>
-

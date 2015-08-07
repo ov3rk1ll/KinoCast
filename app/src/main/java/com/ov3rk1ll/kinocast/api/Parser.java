@@ -19,9 +19,12 @@ public abstract class Parser {
     public static Parser selectByParserId(int id){
         switch (id){
             case KinoxParser.PARSER_ID: return new KinoxParser();
+            case Movie4kParser.PARSER_ID: return new Movie4kParser();
         }
         return null;
     }
+
+    public abstract String getParserName();
 
     public int getParserId(){
         return PARSER_ID;
@@ -56,4 +59,9 @@ public abstract class Parser {
     public abstract String getPopularSeries();
 
     public abstract String getLatestSeries();
+
+    @Override
+    public String toString() {
+        return getParserName();
+    }
 }

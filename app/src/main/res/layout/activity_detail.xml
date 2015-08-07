@@ -1,253 +1,255 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.DetailActivity">
+    tools:context="com.inthecheesefactory.lab.designlibrary.activity.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/top_content"
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/detail_image_height">
+        android:layout_height="match_parent">
 
-        <com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView
-            android:id="@+id/image_header"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/detail_image_height"
-            android:scaleType="centerCrop"
-            android:transitionName="photo_hero"
-            tools:src="@drawable/ic_launcher" />
+            android:layout_height="@dimen/app_bar_height"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/gradient" />
-
-    </FrameLayout>
-
-    <com.ov3rk1ll.kinocast.ui.helper.widget.ObservableScrollView
-        android:id="@+id/scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/miniController">
-
-        <LinearLayout
-            android:id="@+id/scroll_view_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingTop="@dimen/detail_image_height">
-
-            <!-- Dummy view for background color -->
-            <LinearLayout
-                android:id="@+id/layoutBody"
+            <android.support.design.widget.CollapsingToolbarLayout
+                android:id="@+id/collapsingToolbarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?android:attr/windowBackground"
-                android:orientation="vertical"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:paddingTop="4dp"
-                tools:ignore="UselessParent">
+                app:contentScrim="?attr/colorPrimary"
+                app:expandedTitleMarginStart="@dimen/expanded_toolbar_title_margin_start"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-                <!-- Title and Flag -->
-                <LinearLayout
+                <FrameLayout
+                    android:id="@+id/top_content"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
+                    android:layout_height="match_parent"
+                    app:layout_collapseMode="parallax"
+                    app:layout_collapseParallaxMultiplier="0.7">
 
-                    <TextView
-                        android:id="@+id/title"
+                    <com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView
+                        android:id="@+id/image_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        tools:src="@drawable/ic_launcher" />
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/gradient" />
+                </FrameLayout>
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+            </android.support.design.widget.CollapsingToolbarLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <!-- content goes here -->
+            <LinearLayout
+                android:id="@+id/scroll_view_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- Dummy view for background color -->
+                <LinearLayout
+                    android:id="@+id/layoutBody"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/windowBackground"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
+                    android:paddingTop="4dp"
+                    tools:ignore="UselessParent">
+
+                    <!-- Title and Flag -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/activity_vertical_margin"
+                            android:layout_marginLeft="@dimen/activity_vertical_margin"
+                            android:layout_marginTop="@dimen/activity_vertical_margin"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            tools:text="Aaaaaaaaaaaaaaaaaaaaaaaaaaaa very long title" />
+
+                        <ImageView
+                            android:id="@+id/language"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:layout_gravity="top"
+                            android:layout_marginRight="@dimen/activity_vertical_margin"
+                            android:layout_weight="1"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/lang_de" />
+                    </LinearLayout>
+
+                    <View
+                        android:id="@+id/hr1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="4dp"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
+                        android:background="@android:color/black"
+                        android:visibility="gone" />
+
+                    <com.google.android.gms.ads.AdView
+                        android:id="@+id/adView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        ads:adSize="BANNER"
+                        ads:adUnitId="@string/banner_ad_unit_id" />
+
+                    <View
+                        android:id="@+id/hr2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="4dp"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@android:color/black" />
+
+                    <!-- Content with margin -->
+                    <LinearLayout
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/activity_vertical_margin"
                         android:layout_marginLeft="@dimen/activity_vertical_margin"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
-                        tools:text="Aaaaaaaaaaaaaaaaaaaaaaaaaaaa very long title" />
-
-                    <ImageView
-                        android:id="@+id/language"
-                        android:layout_width="34dp"
-                        android:layout_height="34dp"
-                        android:layout_gravity="top"
                         android:layout_marginRight="@dimen/activity_vertical_margin"
-                        android:layout_weight="1"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/lang_de" />
-                </LinearLayout>
+                        android:orientation="vertical">
 
-                <View
-                    android:id="@+id/hr1"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginRight="2dp"
-                    android:background="@android:color/black"
-                    android:visibility="gone" />
-
-                <com.google.android.gms.ads.AdView
-                    android:id="@+id/adView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    ads:adSize="BANNER"
-                    ads:adUnitId="@string/banner_ad_unit_id" />
-
-                <View
-                    android:id="@+id/hr2"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginRight="2dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@android:color/black" />
-
-                <!-- Content with margin -->
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginLeft="@dimen/activity_vertical_margin"
-                    android:layout_marginRight="@dimen/activity_vertical_margin"
-                    android:orientation="vertical">
-
-                    <!-- Season and Episode Spinner -->
-                    <LinearLayout
-                        android:id="@+id/layoutSeries"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
+                        <!-- Season and Episode Spinner -->
                         <LinearLayout
+                            android:id="@+id/layoutSeries"
                             android:layout_width="fill_parent"
-                            android:layout_height="fill_parent"
-                            android:orientation="horizontal">
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="gone">
 
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/detail_season"
-                                android:textAppearance="?android:attr/textAppearanceMedium" />
+                            <LinearLayout
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent"
+                                android:orientation="horizontal">
 
-                            <TextView
-                                android:layout_width="0dp"
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/detail_season"
+                                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/detail_episode"
+                                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="fill_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/detail_episode"
-                                android:textAppearance="?android:attr/textAppearanceMedium" />
+                                android:orientation="horizontal">
+
+                                <Spinner
+                                    android:id="@+id/spinnerSeason"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1" />
+
+                                <Spinner
+                                    android:id="@+id/spinnerEpisode"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1" />
+                            </LinearLayout>
 
                         </LinearLayout>
 
+                        <!-- Mirror and play button -->
                         <LinearLayout
+                            android:id="@+id/layoutMirror"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:orientation="vertical"
+                            android:visibility="gone">
 
-                            <Spinner
-                                android:id="@+id/spinnerSeason"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-
-                            <Spinner
-                                android:id="@+id/spinnerEpisode"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Mirror and play button -->
-                    <LinearLayout
-                        android:id="@+id/layoutMirror"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/detail_mirror"
-                            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                        <LinearLayout
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <Spinner
-                                android:id="@+id/spinnerMirror"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-
-                            <ImageButton
-                                android:id="@+id/buttonPlay"
+                            <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:background="?attr/selectableItemBackground"
-                                android:src="@drawable/ic_action_play" />
-                        </LinearLayout>
-                    </LinearLayout>
+                                android:text="@string/detail_mirror"
+                                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                    <TextView
-                        android:id="@+id/detail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        tools:text="Detail Summary" />
+                            <LinearLayout
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <Spinner
+                                    android:id="@+id/spinnerMirror"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1" />
+
+                                <ImageButton
+                                    android:id="@+id/buttonPlay"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:background="?attr/selectableItemBackground"
+                                    android:src="@drawable/ic_action_play" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/detail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            tools:text="Detail Summary" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-    </com.ov3rk1ll.kinocast.ui.helper.widget.ObservableScrollView>
 
-    <com.google.sample.castcompanionlibrary.widgets.MiniController
-        android:id="@+id/miniController"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:visibility="gone" />
+        </android.support.v4.widget.NestedScrollView>
 
-    <FrameLayout
-        android:id="@+id/toolbar_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    </android.support.design.widget.CoordinatorLayout>
 
-        <android.support.v7.widget.ActionMenuView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/bar_split"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_marginTop="?attr/actionBarSize"
-            android:background="?attr/colorPrimary" />
-
-        <include
-            android:id="@+id/toolbar_actionbar"
-            layout="@layout/toolbar_default"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </FrameLayout>
-
-
-</RelativeLayout>
+</FrameLayout>
