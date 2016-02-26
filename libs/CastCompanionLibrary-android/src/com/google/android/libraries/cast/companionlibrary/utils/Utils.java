@@ -16,22 +16,7 @@
 
 package com.google.android.libraries.cast.companionlibrary.utils;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.RectF;
-import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.text.TextUtils;
-import android.util.TypedValue;
-import android.widget.Toast;
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGE;
 
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
@@ -41,14 +26,35 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.images.WebImage;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Point;
+import android.graphics.RectF;
+import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Looper;
+import android.os.Parcelable;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.TypedValue;
+import android.view.Display;
+import android.view.WindowManager;
+import android.widget.Toast;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGE;
 
 /**
  * A collection of utility methods, all static.
@@ -56,6 +62,7 @@ import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.
 public final class Utils {
 
     private static final String TAG = LogUtils.makeLogTag(Utils.class);
+    private static final String KEY_MEDIA_TYPE = "media-type";
     private static final String KEY_IMAGES = "images";
     private static final String KEY_URL = "movie-urls";
     private static final String KEY_CONTENT_TYPE = "content-type";
@@ -72,10 +79,6 @@ public final class Utils {
     private static final String KEY_TRACKS_DATA = "track-data";
     public static final boolean IS_KITKAT_OR_ABOVE =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-    public static final boolean IS_LOLLIPOP_OR_ABOVE =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    public static final boolean IS_ICS_OR_ABOVE =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
     private Utils() {
     }
@@ -83,20 +86,8 @@ public final class Utils {
     /**
      * Formats time from milliseconds to hh:mm:ss string format.
      */
-    public static String formatMillis(int millisec) {
-        int seconds = (int) (millisec / 1000);
-        int hours = seconds / (60 * 60);
-        seconds %= (60 * 60);
-        int minutes = seconds / 60;
-        seconds %= 60;
-
-        String time;
-        if (hours > 0) {
-            time = String.format("%d:%02d:%02d", hours, minutes, seconds);
-        } else {
-            time = String.format("%d:%02d", minutes, seconds);
-        }
-        return time;
+    public static String formatMillis(int millis) {
+        return DateUtils.formatElapsedTime(millis/1000);
     }
 
     /**
@@ -174,6 +165,23 @@ public final class Utils {
         Bundle wrapper = new Bundle();
         wrapper.putString(MediaMetadata.KEY_TITLE, md.getString(MediaMetadata.KEY_TITLE));
         wrapper.putString(MediaMetadata.KEY_SUBTITLE, md.getString(MediaMetadata.KEY_SUBTITLE));
+        wrapper.putString(MediaMetadata.KEY_ALBUM_TITLE,
+                md.getString(MediaMetadata.KEY_ALBUM_TITLE));
+        wrapper.putString(MediaMetadata.KEY_ALBUM_ARTIST,
+                md.getString(MediaMetadata.KEY_ALBUM_ARTIST));
+        wrapper.putString(MediaMetadata.KEY_COMPOSER, md.getString(MediaMetadata.KEY_COMPOSER));
+        wrapper.putString(MediaMetadata.KEY_SERIES_TITLE,
+                md.getString(MediaMetadata.KEY_SERIES_TITLE));
+        wrapper.putInt(MediaMetadata.KEY_SEASON_NUMBER,
+                md.getInt(MediaMetadata.KEY_SEASON_NUMBER));
+        wrapper.putInt(MediaMetadata.KEY_EPISODE_NUMBER,
+                md.getInt(MediaMetadata.KEY_EPISODE_NUMBER));
+        Calendar releaseCalendar = md.getDate(MediaMetadata.KEY_RELEASE_DATE);
+        if (releaseCalendar != null) {
+            long releaseMillis = releaseCalendar.getTimeInMillis();
+            wrapper.putLong(MediaMetadata.KEY_RELEASE_DATE, releaseMillis);
+        }
+        wrapper.putInt(KEY_MEDIA_TYPE, info.getMetadata().getMediaType());
         wrapper.putString(KEY_URL, info.getContentId());
         wrapper.putString(MediaMetadata.KEY_STUDIO, md.getString(MediaMetadata.KEY_STUDIO));
         wrapper.putString(KEY_CONTENT_TYPE, info.getContentType());
@@ -229,12 +237,31 @@ public final class Utils {
             return null;
         }
 
-        MediaMetadata metaData = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+        MediaMetadata metaData = new MediaMetadata(wrapper.getInt(KEY_MEDIA_TYPE));
 
         metaData.putString(MediaMetadata.KEY_SUBTITLE,
                 wrapper.getString(MediaMetadata.KEY_SUBTITLE));
         metaData.putString(MediaMetadata.KEY_TITLE, wrapper.getString(MediaMetadata.KEY_TITLE));
         metaData.putString(MediaMetadata.KEY_STUDIO, wrapper.getString(MediaMetadata.KEY_STUDIO));
+        metaData.putString(MediaMetadata.KEY_ALBUM_ARTIST,
+                wrapper.getString(MediaMetadata.KEY_ALBUM_ARTIST));
+        metaData.putString(MediaMetadata.KEY_ALBUM_TITLE,
+                wrapper.getString(MediaMetadata.KEY_ALBUM_TITLE));
+        metaData.putString(MediaMetadata.KEY_COMPOSER,
+                wrapper.getString(MediaMetadata.KEY_COMPOSER));
+        metaData.putString(MediaMetadata.KEY_SERIES_TITLE,
+                wrapper.getString(MediaMetadata.KEY_SERIES_TITLE));
+        metaData.putInt(MediaMetadata.KEY_SEASON_NUMBER,
+                wrapper.getInt(MediaMetadata.KEY_SEASON_NUMBER));
+        metaData.putInt(MediaMetadata.KEY_EPISODE_NUMBER,
+                wrapper.getInt(MediaMetadata.KEY_EPISODE_NUMBER));
+
+        long releaseDateMillis = wrapper.getLong(MediaMetadata.KEY_RELEASE_DATE, 0);
+        if (releaseDateMillis > 0) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(releaseDateMillis);
+            metaData.putDate(MediaMetadata.KEY_RELEASE_DATE, calendar);
+        }
         ArrayList<String> images = wrapper.getStringArrayList(KEY_IMAGES);
         if (images != null && !images.isEmpty()) {
             for (String url : images) {
@@ -256,7 +283,7 @@ public final class Utils {
         if (wrapper.getString(KEY_TRACKS_DATA) != null) {
             try {
                 JSONArray jsonArray = new JSONArray(wrapper.getString(KEY_TRACKS_DATA));
-                mediaTracks = new ArrayList<MediaTrack>();
+                mediaTracks = new ArrayList<>();
                 if (jsonArray.length() > 0) {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObj = (JSONObject) jsonArray.get(i);
@@ -360,7 +387,7 @@ public final class Utils {
         }
         MediaQueueItem[] rebuiltQueue = new MediaQueueItem[items.size()];
         for (int i = 0; i < items.size(); i++) {
-            rebuiltQueue[i] =rebuildQueueItem(items.get(i));
+            rebuiltQueue[i] = rebuildQueueItem(items.get(i));
         }
 
         return rebuiltQueue;
@@ -393,4 +420,95 @@ public final class Utils {
     public static MediaQueueItem rebuildQueueItem(MediaQueueItem item) {
         return new MediaQueueItem.Builder(item).clearItemId().build();
     }
+
+    /**
+     * Returns {@code true} if and only if the current thread is the UI thread.
+     */
+    public static boolean isUiThread() {
+        return Looper.getMainLooper().equals(Looper.myLooper());
+    }
+
+    /**
+     * Asserts that the current thread is the UI thread; if not, this method throws an
+     * {@link IllegalStateException}.
+     */
+    public static void assertUiThread() {
+        if (!isUiThread()) {
+            throw new IllegalStateException("Not a UI thread");
+        }
+    }
+
+    /**
+     * Asserts that the current thread is a worker (i.e. non-UI) thread; if not, this
+     * method throws an {@link IllegalStateException}.
+     */
+    public static void assertNonUiThread() {
+        if (isUiThread()) {
+            throw new IllegalStateException("Not a non-UI thread");
+        }
+    }
+
+    /**
+     * Returns the {@code object} if it is not {@code null}, or throws a
+     * {@link NullPointerException} otherwise.
+     *
+     * @param object The object to inspect
+     * @param name A name for the object to be used in the NPE message
+     */
+    public static <T> T assertNotNull(T object, String name) {
+        if (object == null) {
+            throw new NullPointerException(name + " cannot be null");
+        }
+        return object;
+    }
+
+    /**
+     * Asserts that the {@code string} is not empty or {@code null}. It throws  an
+     * {@link IllegalArgumentException} if it is, otherwise returns the original string.
+     *
+     * @param string The string to inspect
+     * @param name A name for the string to be used in the NPE message
+     */
+    public static String assertNotEmpty(String string, String name) {
+        if (TextUtils.isEmpty(string)) {
+            throw new IllegalArgumentException(name + " cannot be null");
+        }
+        return string;
+    }
+
+    // Display.getHeight() and getWidth() are deprecated but Display.getSize(), which is now the
+    // recommended replacement was introduced in API level 13+.
+    @SuppressWarnings("deprecation")
+    /**
+     * Returns the screen/display size.
+     */
+    public static Point getDisplaySize(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+            return new Point(display.getWidth(), display.getHeight());
+        } else {
+            Point outSize = new Point();
+            display.getSize(outSize);
+            return outSize;
+        }
+    }
+
+    /**
+     * Returns {@code true} if and only if the {@code tracks} include at least one audio or text
+     * track.
+     */
+    public static boolean hasAudioOrTextTrack(List<MediaTrack> tracks) {
+        if (tracks == null || tracks.isEmpty()) {
+            return false;
+        }
+        for (MediaTrack track : tracks) {
+            if (track.getType() == MediaTrack.TYPE_AUDIO
+                    || track.getType() == MediaTrack.TYPE_TEXT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

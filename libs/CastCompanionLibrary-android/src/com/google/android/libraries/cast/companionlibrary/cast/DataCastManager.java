@@ -16,15 +16,14 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast;
 
-import android.content.Context;
-import android.support.v7.app.MediaRouteDialogFactory;
-import android.support.v7.media.MediaRouter.RouteInfo;
-import android.text.TextUtils;
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGE;
 
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.Cast.CastOptions.Builder;
 import com.google.android.gms.cast.CastDevice;
+import com.google.android.gms.cast.CastStatusCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.ResultCallback;
@@ -36,14 +35,15 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConn
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.google.android.libraries.cast.companionlibrary.utils.LogUtils;
 
+import android.content.Context;
+import android.support.v7.media.MediaRouter.RouteInfo;
+import android.text.TextUtils;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGE;
 
 /**
  * A concrete subclass of {@link BaseCastManager} that is suitable for data-centric applications
@@ -51,16 +51,13 @@ import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.
  * <p>
  * This is a singleton that needs to be "initialized" (by calling <code>initialize()</code>) prior
  * to usage. Subsequent to initialization, an easier way to get access to the singleton class is to
- * call a variant of <code>getInstance()</code>. After initialization, callers can enable any
- * available feature (all features are off by default). To do so, call <code>enableFeature()</code>
- * and pass an OR-ed expression built from one ore more of the following constants:
- * <p>
- * <ul>
- * <li>FEATURE_DEBUGGING: to enable Google Play Services level logging</li>
- * </ul>
- * Beyond managing the connectivity to a cast device, this class provides easy-to-use methods to
- * send and receive messages using one or more namespaces. These namespaces can be configured during
- * the initialization as part of the call to <code>initialize()</code> or can be added later on.
+ * call a variant of <code>getInstance()</code>. Prior to initialization, build an instance of
+ * {@link CastConfiguration} object with the features that you need and use that to initialize this
+ * singleton.
+ *
+ * <p>Beyond managing the connectivity to a cast device, this class provides easy-to-use methods to
+ * send and receive messages using one or more namespaces. These namespaces can be configured when
+ * you are building the instance of {@link CastConfiguration} or can be added later on.
  * Clients can subclass this class to extend the features and functionality beyond what this class
  * provides. This class manages various states of the remote cast device. Client applications,
  * however, can complement the default behavior of this class by hooking into various callbacks that
@@ -86,18 +83,8 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
     private DataCastManager() {
     }
 
-    /**
-     * Initializes the DataCastManager for clients. Before clients can use DataCastManager, they
-     * need to initialize it by calling this static method. Then clients can obtain an instance of
-     * this singleton class by calling {@link DataCastManager#getInstance()}. Failing to initialize
-     * this class before requesting an instance will result in a {@link CastException} exception.
-     *
-     * @param context
-     * @param applicationId the application ID for your application
-     * @param namespaces Namespaces to be set up for this class.
-     */
     public static synchronized DataCastManager initialize(Context context,
-            String applicationId, String... namespaces) {
+            CastConfiguration castConfiguration) {
         if (sInstance == null) {
             LOGD(TAG, "New instance of DataCastManager is created");
             if (ConnectionResult.SUCCESS != GooglePlayServicesUtil
@@ -106,13 +93,14 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
                 LOGE(TAG, msg);
                 throw new RuntimeException(msg);
             }
-            sInstance = new DataCastManager(context, applicationId, namespaces);
+            sInstance = new DataCastManager(context, castConfiguration);
         }
         return sInstance;
     }
 
-    protected DataCastManager(Context context, String applicationId, String... namespaces) {
-        super(context, applicationId);
+    protected DataCastManager(Context context, CastConfiguration castConfiguration) {
+        super(context, castConfiguration);
+        List<String> namespaces = castConfiguration.getNamespaces();
         if (namespaces != null) {
             for (String namespace : namespaces) {
                 if (!TextUtils.isEmpty(namespace)) {
@@ -233,7 +221,7 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
 
         Builder builder = Cast.CastOptions.builder(
                 mSelectedCastDevice, new CastListener());
-        if (isFeatureEnabled(FEATURE_DEBUGGING)) {
+        if (isFeatureEnabled(CastConfiguration.FEATURE_DEBUGGING)) {
             builder.setVerboseLoggingEnabled(true);
         }
         return builder;
@@ -258,11 +246,6 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
         public void onApplicationStatusChanged() {
             DataCastManager.this.onApplicationStatusChanged();
         }
-    }
-
-    @Override
-    protected MediaRouteDialogFactory getMediaRouteDialogFactory() {
-        return null;
     }
 
     @Override
@@ -292,7 +275,7 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
                 if (!found) {
                     // we were hoping to have the route that we wanted, but we
                     // didn't so we deselect the device
-                    onDeviceSelected(null);
+                    onDeviceSelected(null /* CastDevice */, null /* RouteInfo */);
                     mReconnectionStatus = RECONNECTION_STATUS_INACTIVE;
                     return;
                 }
@@ -351,9 +334,22 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
 
     @Override
     public void onApplicationConnectionFailed(int errorCode) {
-        onDeviceSelected(null);
-        for (DataCastConsumer consumer : mDataConsumers) {
-            consumer.onApplicationConnectionFailed(errorCode);
+        if (mReconnectionStatus == RECONNECTION_STATUS_IN_PROGRESS) {
+            if (errorCode == CastStatusCodes.APPLICATION_NOT_RUNNING) {
+                // while trying to re-establish session, we found out that the app is not running
+                // so we need to disconnect
+                mReconnectionStatus = RECONNECTION_STATUS_INACTIVE;
+                onDeviceSelected(null /* CastDevice */, null /* RouteInfo */);
+            }
+        } else {
+            for (DataCastConsumer consumer : mDataConsumers) {
+                consumer.onApplicationConnectionFailed(errorCode);
+            }
+            onDeviceSelected(null /* CastDevice */, null /* RouteInfo */);
+            if (mMediaRouter != null) {
+                LOGD(TAG, "onApplicationConnectionFailed(): Setting route to default");
+                mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
+            }
         }
     }
 
@@ -364,7 +360,7 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
         if (mMediaRouter != null) {
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
         }
-        onDeviceSelected(null);
+        onDeviceSelected(null /* CastDevice */, null /* RouteInfo */);
 
     }
 
@@ -390,6 +386,16 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
         for (DataCastConsumer consumer : mDataConsumers) {
             consumer.onApplicationStopFailed(errorCode);
         }
+    }
+
+    @Override
+    public void onConnectivityRecovered() {
+        try {
+            attachDataChannels();
+        } catch (IOException | IllegalStateException e) {
+            LOGE(TAG, "onConnectivityRecovered(): Failed to reattach data channels", e);
+        }
+        super.onConnectivityRecovered();
     }
 
     @Override
@@ -434,5 +440,4 @@ public class DataCastManager extends BaseCastManager implements Cast.MessageRece
             mDataConsumers.remove(listener);
         }
     }
-
 }

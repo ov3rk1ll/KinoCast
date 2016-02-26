@@ -32,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
+import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -41,6 +42,7 @@ import com.google.android.gms.drive.DriveApi;
 import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
 import com.google.android.libraries.cast.companionlibrary.widgets.MiniController;
@@ -51,8 +53,6 @@ import com.ov3rk1ll.kinocast.api.Movie4kParser;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
-import com.ov3rk1ll.kinocast.utils.CastHelper;
-import com.ov3rk1ll.kinocast.utils.ShowcaseHelper;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.winsontan520.wversionmanager.library.WVersionManager;
 
@@ -68,15 +68,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean mIsSearchView = false;
     private ProgressBar mProgressBar;
 
-    private VideoCastManager mVideoCastManager;
-    private MiniController mMini;
     private SearchSuggestionAdapter searchSuggestionAdapter;
     private MenuItem mediaRouteMenuItem;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private int mNavItemId;
     private final Handler mDrawerActionHandler = new Handler();
-    private VideoCastConsumerImpl mCastConsumer;
     private GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -88,6 +85,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
+        CastConfiguration options = new CastConfiguration.Builder(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
+                .enableAutoReconnect()
+                .enableCaptionManagement()
+                .enableDebug()
+                .enableLockScreen()
+                .enableWifiReconnection()
+                .enableNotification()
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true)
+                .build();
+        VideoCastManager.initialize(this, options);
         setContentView(R.layout.activity_main);
         //supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
@@ -133,11 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar.addView(mProgressBar, layoutParams);
         setSupportActionBar(toolbar);
 
-        if(BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
-        mVideoCastManager = CastHelper.getVideoCastManager(this);
-        mMini = (MiniController) findViewById(R.id.miniController);
-        mVideoCastManager.addMiniController(mMini);
-        mVideoCastManager.reconnectSessionIfPossible();
+        VideoCastManager.getInstance().reconnectSessionIfPossible();
 
 
         // listen for navigation events
@@ -154,39 +159,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigate(mNavItemId);
 
-        mCastConsumer = new VideoCastConsumerImpl() {
-            @Override
-            public void onFailed(int resourceId, int statusCode) {
-
-            }
-
-            @Override
-            public void onConnectionSuspended(int cause) {
-            }
-
-            @Override
-            public void onConnectivityRecovered() {
-            }
-
-            @Override
-            public void onCastDeviceDetected(final MediaRouter.RouteInfo info) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mediaRouteMenuItem != null && mediaRouteMenuItem.isVisible()) {
-                            ShowcaseHelper.showChromecastHelp(MainActivity.this);
-                        }
-                    }
-                }, 1000);
-            }
-        };
-
         final ArrayAdapter<Parser> adapter = new ArrayAdapter<Parser>(this,
                 android.R.layout.simple_list_item_1,
                 new Parser[]{new KinoxParser(), new Movie4kParser()});
 
 
-        ((Spinner)findViewById(R.id.spinner)).setAdapter(adapter);
+        /*((Spinner)findViewById(R.id.spinner)).setAdapter(adapter);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         int parserId = preferences.getInt("parser", KinoxParser.PARSER_ID);
         ((Spinner)findViewById(R.id.spinner)).setSelection(parserId);
@@ -207,15 +185,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             }
         });
+        */
     }
 
     @Override
     protected void onDestroy() {
-        mVideoCastManager.removeMiniController(mMini);
-
         /*BackupManager bm = new BackupManager(this);
         bm.dataChanged();*/
-
         super.onDestroy();
     }
 
@@ -228,15 +204,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        mVideoCastManager.addVideoCastConsumer(mCastConsumer);
-        mVideoCastManager.incrementUiCounter();
+        VideoCastManager.getInstance().incrementUiCounter();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mVideoCastManager.removeVideoCastConsumer(mCastConsumer);
-        mVideoCastManager.decrementUiCounter();
+        VideoCastManager.getInstance().decrementUiCounter();
     }
 
     @Override
@@ -249,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        return mVideoCastManager.onDispatchVolumeKeyEvent(event, 0.05) || super.dispatchKeyEvent(event);
+        return VideoCastManager.getInstance().onDispatchVolumeKeyEvent(event, 0.05) || super.dispatchKeyEvent(event);
     }
 
     public void restoreActionBar() {
@@ -266,11 +240,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(final Menu menu) {
         if (!mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             getMenuInflater().inflate(R.menu.main, menu);
-            mediaRouteMenuItem = mVideoCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
-
-            if(mCastConsumer != null){
-                mCastConsumer.onCastDeviceDetected(null);
-            }
+            mediaRouteMenuItem = VideoCastManager.getInstance().addMediaRouterButton(menu, R.id.media_route_menu_item);
 
             final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
 

@@ -16,13 +16,13 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast.player;
 
-import android.view.View;
-import android.widget.SeekBar;
-
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.CastException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.tracks.OnTracksSelectedListener;
+
+import android.view.View;
+import android.widget.SeekBar;
 
 /**
  * An interface that enables an alternative implementation of

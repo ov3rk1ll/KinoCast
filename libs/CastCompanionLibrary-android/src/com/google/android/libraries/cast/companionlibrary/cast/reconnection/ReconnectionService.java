@@ -16,6 +16,17 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast.reconnection;
 
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGE;
+
+import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
+import com.google.android.libraries.cast.companionlibrary.utils.LogUtils;
+import com.google.android.libraries.cast.companionlibrary.utils.Utils;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,18 +37,8 @@ import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.SystemClock;
 
-import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
-import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
-import com.google.android.libraries.cast.companionlibrary.utils.LogUtils;
-import com.google.android.libraries.cast.companionlibrary.utils.Utils;
-
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGE;
 
 /**
  * A service to run in the background when the playback of a media starts, to help with reconnection
@@ -121,7 +122,7 @@ public class ReconnectionService extends Service {
         LOGD(TAG, "WIFI connectivity changed to " + (connected ? "enabled" : "disabled"));
         if (connected && !mWifiConnectivity) {
             mWifiConnectivity = true;
-            if (mCastManager.isFeatureEnabled(BaseCastManager.FEATURE_WIFI_RECONNECT)) {
+            if (mCastManager.isFeatureEnabled(CastConfiguration.FEATURE_WIFI_RECONNECT)) {
                 mCastManager.startCastDiscovery();
                 mCastManager.reconnectSessionIfPossible(RECONNECTION_ATTEMPT_PERIOD_S, networkSsid);
             }
@@ -194,7 +195,7 @@ public class ReconnectionService extends Service {
 
     private void handleTermination() {
         if (!mCastManager.isConnected()) {
-            mCastManager.removeRemoteControlClient();
+            mCastManager.clearMediaSession();
             mCastManager.clearPersistedConnectionInfo(BaseCastManager.CLEAR_ALL);
             stopSelf();
         } else {

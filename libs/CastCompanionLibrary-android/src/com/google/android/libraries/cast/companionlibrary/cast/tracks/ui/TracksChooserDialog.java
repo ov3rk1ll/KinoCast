@@ -16,22 +16,24 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast.tracks.ui;
 
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaTrack;
+import com.google.android.libraries.cast.companionlibrary.R;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.utils.Utils;
+
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
-
-import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaTrack;
-import com.google.android.libraries.cast.companionlibrary.R;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +54,15 @@ public class TracksChooserDialog extends DialogFragment {
     private int mSelectedTextPosition = 0;
     private int mSelectedAudioPosition = -1;
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
+        // since dialog doesn't expose its root view at this point (doesn't exist yet), we cannot
+        // attach to the unknown eventual parent, so we need to pass null for the rootView parameter
+        // of the inflate() method
+        @SuppressLint("InflateParams")
         View view = inflater.inflate(R.layout.custom_tracks_dialog_layout, null);
         setUpView(view);
 

@@ -10,16 +10,10 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.TrackingApplication;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,16 +36,14 @@ public class Utils {
     }
 
     public static JSONObject readJson(String url) {
-        HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, USER_AGENT);
-        HttpGet httpGet = new HttpGet(url);
+        OkHttpClient client = new OkHttpClient();
+        client.networkInterceptors().add(new UserAgentInterceptor(USER_AGENT));
+        Request request = new Request.Builder().url(url).build();
+
         Log.i("Utils", "read json from " + url);
         try {
-            HttpResponse response = client.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            return new JSONObject(EntityUtils.toString(entity));
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            Response response = client.newCall(request).execute();
+            return new JSONObject(response.body().string());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -61,16 +53,13 @@ public class Utils {
     }
 
     public static String readUrl(String url) {
-        HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, USER_AGENT);
-        HttpGet httpGet = new HttpGet(url);
+        OkHttpClient client = new OkHttpClient();
+        client.networkInterceptors().add(new UserAgentInterceptor(USER_AGENT));
+        Request request = new Request.Builder().url(url).build();
         Log.i("Utils", "read text from " + url);
         try {
-            HttpResponse response = client.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            return EntityUtils.toString(entity);
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            Response response = client.newCall(request).execute();
+            return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,13 +67,13 @@ public class Utils {
     }
 
     public static String getRedirectTarget(String url){
-        HttpClient client = new DefaultHttpClient();
-        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, USER_AGENT);
-        client.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-        HttpGet httpGet = new HttpGet(url);
+        OkHttpClient client = new OkHttpClient();
+        client.setFollowRedirects(false);
+        client.networkInterceptors().add(new UserAgentInterceptor(USER_AGENT));
+        Request request = new Request.Builder().url(url).build();
         try {
-            HttpResponse response = client.execute(httpGet);
-            return response.getFirstHeader("Location").getValue();
+            Response response = client.newCall(request).execute();
+            return response.header("Location");
         } catch (Exception e) {
             e.printStackTrace();
         }

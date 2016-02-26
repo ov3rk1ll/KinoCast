@@ -16,7 +16,7 @@
   -->
 <resources>
 
-    <string name="ccl_version">2.1.1</string>
+    <string name="ccl_version">2.8.1</string>
     <string name="ccl_media_route_menu_title">Play on&#8230;</string>
     <string name="ccl_live">Live</string>
     <string name="ccl_cancel">Cancel</string>
@@ -24,6 +24,7 @@
     <string name="ccl_off">Off</string>
     <string name="ccl_info_na">Information Not Available</string>
     <string name="ccl_pause">Pause</string>
+    <string name="ccl_play">Play</string>
     <string name="ccl_disconnect">Disconnect</string>
     <string name="ccl_none">None</string>
 
@@ -62,6 +63,17 @@
     <string name="ccl_failed_receiver_player_error">Receiver player has encountered a severe error</string>
     <string name="ccl_failed_authorization_timeout">Authorization timed out</string>
     <string name="ccl_failed_to_set_track_style">Failed to update the captions style.</string>
+
+    <!-- Upcoming item in a queue with autoplay/preload -->
     <string name="ccl_mini_upnext">Up Next</string>
+
+    <!-- Notification Actions -->
+    <string name="ccl_skip_next">Skip Next</string>
+    <string name="ccl_skip_previous">Skip Previous</string>
+    <string name="ccl_forward">Forward</string>
+    <string name="ccl_rewind">Rewind</string>
+
+    <!-- Introductory Overlay -->
+    <string name="ccl_intro_overlay_button_text">@android:string/ok</string>
 
 </resources>

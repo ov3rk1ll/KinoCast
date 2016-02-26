@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2016 Google Inc. All rights reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+    <attr name="ccl_widget_disconnect_policy" format="enum">
+        <enum name="invisible" value="1" />
+        <enum name="gone" value="2" />
+        <enum name="disabled" value="3" />
+        <enum name="visible" value="4" />
+    </attr>
+
+    <declare-styleable name="CCLPlayPauseButton">
+        <attr name="ccl_widget_play_drawable" format="integer" />
+        <attr name="ccl_widget_stop_drawable" format="integer" />
+        <attr name="ccl_widget_pause_drawable" format="integer" />
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+    <declare-styleable name="CCLSeekBar">
+        <attr name="ccl_widget_progress_text" format="reference" />
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+    <declare-styleable name="CCLProgressText">
+        <attr name="ccl_widget_type" format="enum">
+            <enum name="progress" value="0" />
+            <enum name="duration" value="1" />
+        </attr>
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+    <declare-styleable name="CCLMediaControlButton">
+        <attr name="ccl_widget_media_control_type" format="enum">
+            <enum name="skip_next" value="0" />
+            <enum name="skip_previous" value="1" />
+            <enum name="forward" value="2" />
+            <enum name="rewind" value="3" />
+        </attr>
+        <attr name="ccl_widget_forward_duration" format="integer|reference" />
+        <attr name="ccl_widget_rewind_duration" format="integer|reference" />
+        <attr name="ccl_widget_disconnect_policy" />
+        <attr name="ccl_widget_next_prev_visibility_policy" format="enum">
+            <enum name="hidden" value="0" />
+            <enum name="disabled" value="1" />
+            <enum name="visible" value="2" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="CCLMediaInfoText">
+        <attr name="ccl_widget_info" format="enum">
+            <enum name="title" value="0" />
+            <enum name="subtitle" value="1" />
+            <enum name="studio" value="2" />
+            <enum name="album_artist" value="3" />
+            <enum name="album_title" value="4" />
+            <enum name="composer" value="5" />
+            <enum name="series_title" value="6" />
+            <enum name="season_number" value="7" />
+            <enum name="episode_number" value="8" />
+            <enum name="release_date" value="9" />
+        </attr>
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+    <declare-styleable name="CCLMediaImageView">
+        <attr name="ccl_widget_placeholder_drawable" format="integer" />
+        <attr name="ccl_widget_image_index" format="integer" />
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+    <declare-styleable name="CCLProgressBar">
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+    <declare-styleable name="CCLClosedCaptionButton">
+        <attr name="ccl_widget_disconnect_policy" />
+    </declare-styleable>
+
+</resources>

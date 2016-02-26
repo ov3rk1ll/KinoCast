@@ -16,6 +16,15 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast.tracks;
 
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
+
+import com.google.android.gms.cast.TextTrackStyle;
+import com.google.android.libraries.cast.companionlibrary.R;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.google.android.libraries.cast.companionlibrary.utils.LogUtils;
+import com.google.android.libraries.cast.companionlibrary.utils.PreferenceAccessor;
+import com.google.android.libraries.cast.companionlibrary.utils.Utils;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -28,17 +37,8 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.view.accessibility.CaptioningManager;
 
-import com.google.android.gms.cast.TextTrackStyle;
-import com.google.android.libraries.cast.companionlibrary.R;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.utils.LogUtils;
-import com.google.android.libraries.cast.companionlibrary.utils.PreferenceAccessor;
-import com.google.android.libraries.cast.companionlibrary.utils.Utils;
-
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
 
 /**
  * This class manages preference settings for captions for Android versions prior to KitKat and

@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -306,7 +308,8 @@ public class KinoxParser extends Parser{
         }
         String suggestions[] = data.split("\n");
         if(suggestions[0].trim().equals("")) return null;
-        return suggestions;
+        // TODO Remove duplicates
+        return new HashSet<String>(Arrays.asList(suggestions)).toArray(new String[0]);
     }
 
     @Override

@@ -29,10 +29,6 @@
         <item name="android:background">@null</item>
     </style>
 
-    <style name="ShowcaseViewDark" parent="ShowcaseView">
-        <item name="sv_backgroundColor">#aa000000</item>
-    </style>
-
     <style name="Theme.AppCompat.Light.NoActionBar" parent="@style/Theme.AppCompat.Light">
         <item name="android:windowNoTitle">true</item>
     </style>

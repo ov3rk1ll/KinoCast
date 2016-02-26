@@ -16,13 +16,13 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast;
 
-import android.support.v7.media.MediaRouter;
-import android.support.v7.media.MediaRouter.RouteInfo;
+import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
 
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.libraries.cast.companionlibrary.utils.LogUtils;
 
-import static com.google.android.libraries.cast.companionlibrary.utils.LogUtils.LOGD;
+import android.support.v7.media.MediaRouter;
+import android.support.v7.media.MediaRouter.RouteInfo;
 
 /**
  * Provides a handy implementation of {@link MediaRouter.Callback}. When a {@link RouteInfo} is
@@ -39,7 +39,7 @@ public class CastMediaRouterCallback extends MediaRouter.Callback {
     private boolean mRouteAvailable = false;
 
     public CastMediaRouterCallback(BaseCastManager castManager) {
-        this.mCastManager = castManager;
+        mCastManager = castManager;
     }
 
     @Override
@@ -54,35 +54,36 @@ public class CastMediaRouterCallback extends MediaRouter.Callback {
         mCastManager.getPreferenceAccessor().saveStringToPreference(
                 BaseCastManager.PREFS_KEY_ROUTE_ID, info.getId());
         CastDevice device = CastDevice.getFromBundle(info.getExtras());
-        mCastManager.onDeviceSelected(device);
-        LOGD(TAG, "onRouteSelected: mSelectedDevice=" + device.getFriendlyName());
+        mCastManager.onDeviceSelected(device, info);
+        LOGD(TAG, "onRouteSelected: mSelectedDevice=" + (device != null ? device.getFriendlyName()
+                : "Null"));
     }
 
     @Override
-    public void onRouteUnselected(MediaRouter router, RouteInfo route) {
-        LOGD(TAG, "onRouteUnselected: route=" + route);
-        mCastManager.onDeviceSelected(null);
+    public void onRouteUnselected(MediaRouter router, RouteInfo routeInfo) {
+        LOGD(TAG, "onRouteUnselected: route=" + routeInfo);
+        mCastManager.onDeviceSelected(null, routeInfo);
     }
 
     @Override
-    public void onRouteAdded(MediaRouter router, RouteInfo route) {
-        if (!router.getDefaultRoute().equals(route)) {
+    public void onRouteAdded(MediaRouter router, RouteInfo routeInfo) {
+        if (!router.getDefaultRoute().equals(routeInfo)) {
             notifyRouteAvailabilityChangedIfNeeded(router);
-            mCastManager.onCastDeviceDetected(route);
+            mCastManager.onCastDeviceDetected(routeInfo);
         }
         if (mCastManager.getReconnectionStatus()
                 == BaseCastManager.RECONNECTION_STATUS_STARTED) {
             String routeId = mCastManager.getPreferenceAccessor().getStringFromPreference(
                     BaseCastManager.PREFS_KEY_ROUTE_ID);
-            if (route.getId().equals(routeId)) {
+            if (routeInfo.getId().equals(routeId)) {
                 // we found the route, so lets go with that
-                LOGD(TAG, "onRouteAdded: Attempting to recover a session with info=" + route);
+                LOGD(TAG, "onRouteAdded: Attempting to recover a session with info=" + routeInfo);
                 mCastManager.setReconnectionStatus(BaseCastManager.RECONNECTION_STATUS_IN_PROGRESS);
 
-                CastDevice device = CastDevice.getFromBundle(route.getExtras());
+                CastDevice device = CastDevice.getFromBundle(routeInfo.getExtras());
                 LOGD(TAG, "onRouteAdded: Attempting to recover a session with device: "
-                        + device.getFriendlyName());
-                mCastManager.onDeviceSelected(device);
+                        + (device != null ? device.getFriendlyName() : "Null"));
+                mCastManager.onDeviceSelected(device, routeInfo);
             }
         }
     }
@@ -90,6 +91,7 @@ public class CastMediaRouterCallback extends MediaRouter.Callback {
     @Override
     public void onRouteRemoved(MediaRouter router, RouteInfo route) {
         notifyRouteAvailabilityChangedIfNeeded(router);
+        mCastManager.onRouteRemoved(route);
     }
 
     @Override

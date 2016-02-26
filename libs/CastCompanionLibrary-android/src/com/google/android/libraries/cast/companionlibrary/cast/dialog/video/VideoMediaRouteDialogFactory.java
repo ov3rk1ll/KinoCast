@@ -16,6 +16,7 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast.dialog.video;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.MediaRouteDialogFactory;
 
 /**
@@ -23,6 +24,7 @@ import android.support.v7.app.MediaRouteDialogFactory;
  */
 public class VideoMediaRouteDialogFactory extends MediaRouteDialogFactory {
 
+    @NonNull
     @Override
     public VideoMediaRouteControllerDialogFragment onCreateControllerDialogFragment() {
         return new VideoMediaRouteControllerDialogFragment();

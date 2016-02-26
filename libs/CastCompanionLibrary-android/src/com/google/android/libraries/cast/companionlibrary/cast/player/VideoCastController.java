@@ -16,9 +16,10 @@
 
 package com.google.android.libraries.cast.companionlibrary.cast.player;
 
-import android.graphics.Bitmap;
-
 import com.google.android.gms.cast.MediaStatus;
+import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
+
+import android.graphics.Bitmap;
 
 /**
  * An interface that can be used to display a remote controller for the video that is playing on
@@ -29,11 +30,6 @@ public interface VideoCastController {
     int CC_ENABLED = 1;
     int CC_DISABLED = 2;
     int CC_HIDDEN = 3;
-
-
-    int NEXT_PREV_VISIBILITY_POLICY_HIDDEN = 1;
-    int NEXT_PREV_VISIBILITY_POLICY_DISABLED = 2;
-    int NEXT_PREV_VISIBILITY_POLICY_ALWAYS = 3;
 
     /**
      * Sets the bitmap for the album art
@@ -58,7 +54,7 @@ public interface VideoCastController {
 
     /**
      * Assigns a {@link OnVideoCastControllerListener} listener to be notified of the changes in
-     * the {@link }VideoCastController}
+     * the {@link VideoCastController}
      */
     void setOnVideoCastControllerChangedListener(OnVideoCastControllerListener listener);
 
@@ -70,7 +66,7 @@ public interface VideoCastController {
     void setStreamType(int streamType);
 
     /**
-     * Updates the position and total duration for the seekbar that presents the progress of media.
+     * Updates the position and total duration for the seek bar that presents the progress of media.
      * Both of these need to be provided in milliseconds.
      */
     void updateSeekbar(int position, int duration);
@@ -99,11 +95,30 @@ public interface VideoCastController {
 
     /**
      * Updates the visual status of the Closed Caption icon. Possible states are provided by
-     * <code>CC_ENABLED, CC_DISABLED, CC_HIDDEN</code>
+     * {@code CC_ENABLED, CC_DISABLED, CC_HIDDEN}
      */
     void setClosedCaptionState(int status);
 
+    /**
+     * Called when the queue items are updated and provides information about the updated size of
+     * the queue and the position of the current item in the queue. This can be useful to update
+     * the UI if the relative position of the current item is relevant (e.g. to disable or hide
+     * "skip next/prev" buttons).
+     */
     void onQueueItemsUpdated(int queueLength, int position);
 
-    void setNextPreviousVisibilityPolicy(int policy);
+    /**
+     * Sets the policy for the visibility/status of the Skip Next/Prev buttons. The policy declares
+     * what should the visibility or status of these buttons be when the position of the current
+     * item is at the edges of the queue. For example, if the current item is the last item in the
+     * queue, what should be the visibility or status of the "Skip Next" button. Available policies
+     * are:
+     * <ul>
+     *   <li>{@link CastConfiguration#NEXT_PREV_VISIBILITY_POLICY_ALWAYS}: always show the button
+     *   <li>{@link CastConfiguration#NEXT_PREV_VISIBILITY_POLICY_DISABLED}: disable the button
+     *   <li>{@link CastConfiguration#NEXT_PREV_VISIBILITY_POLICY_HIDDEN}: hide the button
+     * </ul>
+     * The default behavior is {@link CastConfiguration#NEXT_PREV_VISIBILITY_POLICY_DISABLED}
+     */
+    void setNextPreviousVisibilityPolicy(@CastConfiguration.PrevNextPolicy int policy);
 }
