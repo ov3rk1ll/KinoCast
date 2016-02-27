@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/libs/CastCompanionLibrary-android/CastCompanionLibrary-android.iml" filepath="$PROJECT_DIR$/libs/CastCompanionLibrary-android/CastCompanionLibrary-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/KinoCast.iml" filepath="$PROJECT_DIR$/KinoCast.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/kinocast.iml" filepath="$PROJECT_DIR$/kinocast.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/libs.iml" filepath="$PROJECT_DIR$/libs/libs.iml" />
     </modules>
   </component>
 </project>
