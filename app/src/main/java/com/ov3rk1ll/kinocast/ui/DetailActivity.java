@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -130,6 +131,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         ((TextView) findViewById(R.id.detail)).setText(item.getSummary());
 
         final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
+        findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
         //headerImage.setVisibility(View.GONE);
         headerImage.setImageItem(item.getImageRequest(screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
@@ -140,8 +142,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             @Override
             public void onComplete(Bitmap bitmap) {
                 headerImage.setVisibility(View.VISIBLE);
+                findViewById(R.id.progressBar).clearAnimation();
                 findViewById(R.id.progressBar).setVisibility(View.GONE);
+                findViewById(R.id.progressBar).invalidate();
+                findViewById(R.id.top_content).invalidate();
                 attemptColor(bitmap);
+                Log.i("progressBar", "Visibility in complete = " + findViewById(R.id.progressBar).getVisibility());
             }
         });
 
@@ -235,11 +241,13 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     //collapsingToolbarLayout.setExpandedTitleColor(swatch.getTitleTextColor());
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        Log.i("progressBar", "set color to " + swatch.getRgb());
                         ((ProgressBar) findViewById(R.id.progressBar)).setIndeterminateTintList(ColorStateList.valueOf(swatch.getRgb()));
                         float hsv[] = new float[3];
                         Color.colorToHSV(swatch.getRgb(), hsv);
                         hsv[2] = 0.2f;
                         getWindow().setStatusBarColor(Color.HSVToColor(hsv));
+                        Log.i("progressBar", "Visibility in color = " + findViewById(R.id.progressBar).getVisibility());
                     }
 
                     hasColors = true;
@@ -518,7 +526,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         protected void onPostExecute(final String link) {
             super.onPostExecute(link);
             progressDialog.dismiss();
-            if (link != null) {
+            if (!TextUtils.isEmpty(link)) {
                 Log.i("Play", "Getting player for '" + link + "'");
                 final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                 intent.setDataAndType(Uri.parse(link), "video/mp4");
@@ -587,9 +595,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             Season s = item.getSeasons()[((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition()];
             String e = s.episodes[((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition()];
             mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW);
-            mediaMetadata.putString(MediaMetadata.KEY_SERIES_TITLE, item.getTitle());
-            mediaMetadata.putString(MediaMetadata.KEY_SEASON_NUMBER, s.name);
-            mediaMetadata.putString(MediaMetadata.KEY_EPISODE_NUMBER, e);
+            mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle() + " - Folge " + s.id + "x" + e);
         } else {
             mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
             mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle());
@@ -601,6 +607,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         mediaMetadata.addImage(new WebImage(Uri.parse(
                 new CoverImage(item.getImageRequest(getResources().getDisplayMetrics().widthPixels, "poster")).getBitmapUrl(getApplication()))
         ));
+        Log.i("cast", "play " + link);
         MediaInfo mediaInfo = new MediaInfo.Builder(link)
                 .setContentType("video/mp4")
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
