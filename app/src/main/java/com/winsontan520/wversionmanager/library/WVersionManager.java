@@ -18,11 +18,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
+import com.ov3rk1ll.kinocast.utils.UserAgentInterceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -320,46 +320,29 @@ public class WVersionManager {
 
         @Override
         protected String doInBackground(String... uri) {
-            DefaultHttpClient client = new DefaultHttpClient();
-            String responseBody = null;
-            HttpResponse httpResponse = null;
-            ByteArrayOutputStream out = null;
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder().url(uri[0]).build();
 
             try {
-                HttpGet httpget = new HttpGet(uri[0]);
-                httpResponse = client.execute(httpget);
-                statusCode = httpResponse.getStatusLine().getStatusCode();
-
-                if(statusCode == HttpStatus.SC_OK){
-                    out = new ByteArrayOutputStream();
-                    httpResponse.getEntity().writeTo(out);
-                    responseBody = out.toString();
-                }
+                Response response = client.newCall(request).execute();
+                return response.body().string();
 
             }catch (Exception e) {
                 Log.e(TAG, e.toString());
-            } finally {
-                if(out != null){
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        Log.e(TAG, e.toString());
-                    }
-                }
             }
-            return responseBody;
+            return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
             versionCode = 0;
             String content = null;
-            if(statusCode != HttpStatus.SC_OK){
-                Log.e(TAG, "Response invalid. status code=" + statusCode);
+            if(result == null){
+                Log.e(TAG, "Response invalid");
             }else{
                 try{
                     if(!result.startsWith("{")){ // for response who append with unknown char
-                        result= result.substring(1);
+                        result = result.substring(1);
                     }
                     // json format from server:
                     JSONObject json = (JSONObject)new JSONTokener(result).nextValue();

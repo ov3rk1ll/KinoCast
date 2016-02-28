@@ -2,6 +2,7 @@ package com.ov3rk1ll.kinocast.api;
 
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 
 import java.util.List;
 
@@ -38,11 +39,9 @@ public abstract class Parser {
 
     public abstract List<Host> getHosterList(ViewModel item, int season, String episode);
 
-    public abstract String getMirrorLink(String url);
+    public abstract String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int hoster, int mirror);
 
-    public abstract String getMirrorLink(ViewModel item, int hoster, int mirror);
-
-    public abstract String getMirrorLink(ViewModel item, int hoster, int mirror, int season, String episode);
+    public abstract String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int hoster, int mirror, int season, String episode);
 
     public abstract String[] getSearchSuggestions(String query);
 

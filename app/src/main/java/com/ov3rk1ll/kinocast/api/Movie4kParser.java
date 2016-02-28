@@ -5,6 +5,7 @@ import android.util.SparseArray;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.jsoup.Jsoup;
@@ -123,19 +124,13 @@ public class Movie4kParser extends Parser{
     }
 
     @Override
-    public String getMirrorLink(String url){
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int id, int mirror, int i, String url){
         //TODO
         return null;
     }
 
     @Override
-    public String getMirrorLink(ViewModel item, int hoster, int mirror){
-        //TODO
-        return null;
-    }
-
-    @Override
-    public String getMirrorLink(ViewModel item, int hoster, int mirror, int season, String episode){
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryPlayTask, ViewModel item, int hoster, int mirror){
         //TODO
         return null;
     }

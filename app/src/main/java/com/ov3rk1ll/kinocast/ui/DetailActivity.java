@@ -18,12 +18,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -41,8 +39,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
-import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.cast.MediaInfo;
@@ -50,8 +46,6 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.android.libraries.cast.companionlibrary.widgets.MiniController;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -63,8 +57,6 @@ import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
-import com.ov3rk1ll.kinocast.utils.CastHelper;
-import com.ov3rk1ll.kinocast.utils.ShowcaseHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,9 +67,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     private ViewModel item;
 
     private VideoCastManager mVideoCastManager;
-    private MiniController mMini;
-
-    private VideoCastConsumerImpl mCastConsumer;
     private MenuItem mediaRouteMenuItem;
 
     private boolean SHOW_ADS = true;
@@ -108,9 +97,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         bookmarkManager.restore();
 
         if (BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
-        mVideoCastManager = CastHelper.getVideoCastManager(this);
-        mMini = (MiniController) findViewById(R.id.miniController);
-        mVideoCastManager.addMiniController(mMini);
+        mVideoCastManager = VideoCastManager.getInstance();
         mVideoCastManager.reconnectSessionIfPossible();
 
         item = (ViewModel) getIntent().getSerializableExtra(ARG_ITEM);
@@ -138,32 +125,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             mAdView.setVisibility(View.GONE);
             findViewById(R.id.hr2).setVisibility(View.GONE);
         }
-
-        mCastConsumer = new VideoCastConsumerImpl() {
-            @Override
-            public void onFailed(int resourceId, int statusCode) {
-            }
-
-            @Override
-            public void onConnectionSuspended(int cause) {
-            }
-
-            @Override
-            public void onConnectivityRecovered() {
-            }
-
-            @Override
-            public void onCastDeviceDetected(final MediaRouter.RouteInfo info) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mediaRouteMenuItem.isVisible()) {
-                            ShowcaseHelper.showChromecastHelp(DetailActivity.this);
-                        }
-                    }
-                }, 1000);
-            }
-        };
 
         int screenWidthPx = getResources().getDisplayMetrics().widthPixels;
 
@@ -297,14 +258,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     @Override
     protected void onDestroy() {
-        mVideoCastManager.removeMiniController(mMini);
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mVideoCastManager.addVideoCastConsumer(mCastConsumer);
         mVideoCastManager.incrementUiCounter();
         //TODO Check if we are playing the current item
 
@@ -314,7 +273,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     @Override
     protected void onPause() {
         super.onPause();
-        mVideoCastManager.removeVideoCastConsumer(mCastConsumer);
         mVideoCastManager.decrementUiCounter();
 
         //Update Bookmark to keep series info
@@ -350,34 +308,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         } else {
             menu.findItem(R.id.action_bookmark_on).setVisible(false);
             menu.findItem(R.id.action_bookmark_off).setVisible(true);
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ShowcaseHelper.showBookmarkHelp(DetailActivity.this, new OnShowcaseEventListener() {
-                        @Override
-                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
-
-                        }
-
-                        @Override
-                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                            if (item.getType() == ViewModel.Type.SERIES) {
-                                if (findViewById(R.id.layoutSeries).getVisibility() == View.VISIBLE) {
-                                    doShowSeriesHelp();
-                                }
-                            } else {
-                                ShowcaseHelper.showMirrorHelp(DetailActivity.this);
-                            }
-                        }
-
-                        @Override
-                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-                        }
-                    });
-                }
-            }, 200);
         }
         return true;
     }
@@ -486,7 +416,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     ((Spinner) findViewById(R.id.spinnerSeason)).setSelection(mRestoreSeasonIndex);
                     mRestoreSeasonIndex = -1;
                 }
-                doShowSeriesHelp();
                 findViewById(R.id.layoutSeries).setVisibility(View.VISIBLE);
             } else {
                 findViewById(R.id.layoutSeries).setVisibility(View.GONE);
@@ -494,27 +423,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             }
             ActivityCompat.invalidateOptionsMenu(DetailActivity.this);
         }
-    }
-
-    public void doShowSeriesHelp() {
-        ShowcaseHelper.showSeriesHelp(DetailActivity.this, new OnShowcaseEventListener() {
-            @Override
-            public void onShowcaseViewHide(ShowcaseView showcaseView) {
-
-            }
-
-            @Override
-            public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                if (findViewById(R.id.layoutMirror).getVisibility() == View.VISIBLE) {
-                    ShowcaseHelper.showMirrorHelp(DetailActivity.this);
-                }
-            }
-
-            @Override
-            public void onShowcaseViewShow(ShowcaseView showcaseView) {
-
-            }
-        });
     }
 
     public class QueryHosterTask extends AsyncTask<Void, Void, List<Host>> {
@@ -544,14 +452,15 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         }
     }
 
-    public class QueryPlayTask extends AsyncTask<Void, Void, String> {
+    public class QueryPlayTask extends AsyncTask<Void, String, String> {
         private ProgressDialog progressDialog;
-
+        private Context context;
         Host host;
         int spinnerSeasonItemPosition;
         int spinnerEpisodeItemPosition;
 
         public QueryPlayTask(Context context) {
+            this.context = context;
             progressDialog = new ProgressDialog(context);
             progressDialog.setIndeterminate(true);
             progressDialog.setMessage(getString(R.string.loading));
@@ -586,6 +495,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             progressDialog.dismiss();
         }
 
+        public void updateProgress(String... values){
+            publishProgress(values);
+        }
+
         @Override
         protected String doInBackground(Void... params) {
             String link;
@@ -594,13 +507,19 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[spinnerSeasonItemPosition];
                 String e = s.episodes[spinnerEpisodeItemPosition];
-                link = Parser.getInstance().getMirrorLink(item, host.getId(), host.getMirror(), s.id, e);
+                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror(), s.id, e);
             } else {
-                link = Parser.getInstance().getMirrorLink(item, host.getId(), host.getMirror());
+                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror());
             }
 
             host.setUrl(link);
-            return host.getVideoPath();
+            return host.getVideoPath(this);
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            progressDialog.setMessage(getString(R.string.loading) + "\n" + values[0]);
         }
 
         @Override
@@ -663,6 +582,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             } else { // no link found
                 Toast.makeText(DetailActivity.this, getString(R.string.host_resolve_error), Toast.LENGTH_SHORT).show();
             }
+        }
+
+        public Context getContext() {
+            return context;
         }
     }
 

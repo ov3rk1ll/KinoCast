@@ -2,6 +2,8 @@ package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.util.Log;
 
+import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.json.JSONException;
@@ -16,12 +18,13 @@ public class DivxStage extends Host {
     }
 
     @Override
-    public String getVideoPath() {
+    public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
         try {
             url = url.replace("/Out/?s=", "");
             Log.d(TAG, "Resolve " + url);
             String videoId = url.substring(url.lastIndexOf("/") + 1);
             Log.d(TAG, "API call to " + "http://www.divxstage.to/mobile/ajax.php?videoId=" + videoId);
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid, videoId));
             JSONObject json = Utils.readJson("http://www.divxstage.to/mobile/ajax.php?videoId=" + videoId);
             return Utils.getRedirectTarget("http://www.divxstage.to/mobile/" + json.getJSONArray("items").getJSONObject(0).getString("download"));
         } catch (JSONException e) {

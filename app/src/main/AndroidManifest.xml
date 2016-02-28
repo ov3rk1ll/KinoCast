@@ -66,24 +66,13 @@
             android:theme="@android:style/Theme.Translucent" />
 
         <service
-            android:name="com.google.sample.castcompanionlibrary.notification.VideoCastNotificationService"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.google.sample.castcompanionlibrary.action.toggleplayback" />
-                <action android:name="com.google.sample.castcompanionlibrary.action.stop" />
-                <action android:name="com.google.sample.castcompanionlibrary.action.notificationvisibility" />
-            </intent-filter>
-        </service>
-        <service android:name="com.google.sample.castcompanionlibrary.cast.reconnection.ReconnectionService" />
+            android:name="com.google.android.libraries.cast.companionlibrary.notification.VideoCastNotificationService"/>
 
-        <receiver android:name="com.google.sample.castcompanionlibrary.remotecontrol.VideoIntentReceiver" >
-            <intent-filter>
-                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-                <action android:name="com.google.sample.castcompanionlibrary.action.toggleplayback" />
-                <action android:name="com.google.sample.castcompanionlibrary.action.stop" />
-            </intent-filter>
-        </receiver>
+        <service
+            android:name="com.google.android.libraries.cast.companionlibrary.cast.reconnection.ReconnectionService"/>
+
+        <receiver
+            android:name="com.google.android.libraries.cast.companionlibrary.remotecontrol.VideoIntentReceiver" />
 
         <activity
             android:name=".ui.SettingsActivity"
