@@ -1,5 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
+import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.jsoup.Jsoup;
@@ -14,9 +16,10 @@ public class NowVideo extends Host {
     }
 
     @Override
-    public String getVideoPath() {
+    public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
         try {
             String id = url.substring(url.lastIndexOf("/") + 1);
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid, id));
             Document doc = Jsoup.connect("http://www.nowvideo.sx/mobile/video.php?id=" + id)
                     .userAgent(Utils.USER_AGENT)
                     .timeout(3000)

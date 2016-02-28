@@ -1,5 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
+
 public class Host {
     protected int id;
     protected int mirror;
@@ -63,7 +65,7 @@ public class Host {
         this.url = url;
     }
 
-    public String getVideoPath(){
+    public String getVideoPath(DetailActivity.QueryPlayTask queryTask){
         return null;
     }
 

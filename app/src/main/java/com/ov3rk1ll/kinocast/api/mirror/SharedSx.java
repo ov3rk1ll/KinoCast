@@ -3,6 +3,8 @@ package com.ov3rk1ll.kinocast.api.mirror;
 import android.os.SystemClock;
 import android.util.Log;
 
+import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.jsoup.Jsoup;
@@ -19,8 +21,9 @@ public class SharedSx extends Host {
     }
 
     @Override
-    public String getVideoPath() {
+    public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
         Log.d(TAG, "resolve " + url);
+        queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
         try {
             Document doc = Jsoup.connect(url)
                     .userAgent(Utils.USER_AGENT)
@@ -31,10 +34,13 @@ public class SharedSx extends Host {
             String expires = doc.select("form > input[name=expires]").val();
             String timestamp = doc.select("form > input[name=timestamp]").val();
 
-            SystemClock.sleep(7 * 1000);
+            for(int i = 7; i >= 0; i--){
+                queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_wait, String.valueOf(i)));
+                SystemClock.sleep(1000);
+            }
 
             Log.d(TAG, "Send data [hash: " + hash + ", expires: " + expires + ", timestamp: " + timestamp + "]");
-
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_senddatato, url));
             doc = Jsoup.connect(url)
                     .data("hash", hash)
                     .data("expires", expires)
@@ -44,6 +50,7 @@ public class SharedSx extends Host {
                     .post();
 
             String link = doc.select("div.stream-content").attr("data-url");
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_gettinglink));
             Log.d(TAG, "File is at " + link);
             return link;
         } catch (IOException e) {

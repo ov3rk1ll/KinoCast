@@ -9,6 +9,7 @@ import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.json.JSONObject;
@@ -274,12 +275,14 @@ public class KinoxParser extends Parser{
         return null;
     }
 
-    @Override
-    public String getMirrorLink(String url){
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, String url){
         try {
+            queryTask.updateProgress("Get host from " + URL_BASE + url);
             JSONObject json = Utils.readJson(URL_BASE + url);
             Document doc = Jsoup.parse(json.getString("Stream"));
-            return doc.select("a").attr("href");
+            String href = doc.select("a").attr("href");
+            queryTask.updateProgress("Get video from " + href);
+            return href;
         } catch (Exception e1) {
             e1.printStackTrace();
         }
@@ -287,13 +290,13 @@ public class KinoxParser extends Parser{
     }
 
     @Override
-    public String getMirrorLink(ViewModel item, int hoster, int mirror){
-        return getMirrorLink("aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror);
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int hoster, int mirror){
+        return getMirrorLink(queryTask, "aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror);
     }
 
     @Override
-    public String getMirrorLink(ViewModel item, int hoster, int mirror, int season, String episode){
-        return getMirrorLink("aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror + "&Season=" + season + "&Episode=" + episode);
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int hoster, int mirror, int season, String episode){
+        return getMirrorLink(queryTask, "aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror + "&Season=" + season + "&Episode=" + episode);
     }
 
     @Override

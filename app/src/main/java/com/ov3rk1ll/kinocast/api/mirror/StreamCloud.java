@@ -3,6 +3,8 @@ package com.ov3rk1ll.kinocast.api.mirror;
 import android.os.SystemClock;
 import android.util.Log;
 
+import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.jsoup.Jsoup;
@@ -21,18 +23,26 @@ public class StreamCloud extends Host {
     }
 
     @Override
-    public String getVideoPath() {
+    public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
         Pattern pattern = Pattern.compile("http:\\/\\/streamcloud\\.eu\\/(.*)\\/(.*)\\.html");
         Matcher matcher = pattern.matcher(url);
         Log.d(TAG, "resolve " + url);
         if (matcher.find() && matcher.groupCount() == 2) {
             Log.d(TAG, "Request player [id:" + matcher.group(1) + ", fname: " + matcher.group(2) + "]");
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid,  matcher.group(1)));
             String link = getLink(url, matcher.group(1), matcher.group(2));
             Log.d(TAG, "1st Request. Got " + link);
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_1sttry));
             if(link != null) return link;
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_wait, "10"));
             Log.d(TAG, "single request failed. Waiting 10s and retry.");
-            SystemClock.sleep(11 * 1000);
+            for(int i = 10; i >= 0; i--){
+                queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_wait, String.valueOf(i)));
+                SystemClock.sleep(1000);
+            }
             link = getLink(url, matcher.group(1), matcher.group(2));
+            queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_2ndtry));
             Log.d(TAG, "2nd Request. Got " + link);
             return link;
         }

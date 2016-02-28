@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="de">
 
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-2382574370348580/1626448157</string>
     <string name="ga_trackingId" translatable="false">UA-45877229-4</string>
@@ -61,5 +61,13 @@ Trozdem fortfahren?</string>
     <string name="showcast_bookmarks_title">Favoriten</string>
     <string name="showcast_bookmarks_text">Füge deine Lieblingsfilme und Serien zu den Favoriten hinzu.
 Deine Favoriten findest du im Menü auf der linken Seite.</string>
+
+    <string name="host_progress_getvideoforid">Hole video mit ID %1$s</string>
+    <string name="host_progress_getdatafrom">Lade Daten von %1$s</string>
+    <string name="host_progress_wait">Warte für %1$s Sekunden</string>
+    <string name="host_progress_senddatato">Senden Daten an %1$s</string>
+    <string name="host_progress_gettinglink">Hole Videolink</string>
+    <string name="host_progress_1sttry">Link beim ersten Versuch gefunden</string>
+    <string name="host_progress_2ndtry">Link beim zweiten Versuch gefunden</string>
 
 </resources>

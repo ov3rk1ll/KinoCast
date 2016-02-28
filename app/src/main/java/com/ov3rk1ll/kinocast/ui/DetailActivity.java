@@ -18,12 +18,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
-import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -446,14 +444,15 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         }
     }
 
-    public class QueryPlayTask extends AsyncTask<Void, Void, String> {
+    public class QueryPlayTask extends AsyncTask<Void, String, String> {
         private ProgressDialog progressDialog;
-
+        private Context context;
         Host host;
         int spinnerSeasonItemPosition;
         int spinnerEpisodeItemPosition;
 
         public QueryPlayTask(Context context) {
+            this.context = context;
             progressDialog = new ProgressDialog(context);
             progressDialog.setIndeterminate(true);
             progressDialog.setMessage(getString(R.string.loading));
@@ -488,6 +487,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             progressDialog.dismiss();
         }
 
+        public void updateProgress(String... values){
+            publishProgress(values);
+        }
+
         @Override
         protected String doInBackground(Void... params) {
             String link;
@@ -496,13 +499,19 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[spinnerSeasonItemPosition];
                 String e = s.episodes[spinnerEpisodeItemPosition];
-                link = Parser.getInstance().getMirrorLink(item, host.getId(), host.getMirror(), s.id, e);
+                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror(), s.id, e);
             } else {
-                link = Parser.getInstance().getMirrorLink(item, host.getId(), host.getMirror());
+                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror());
             }
 
             host.setUrl(link);
-            return host.getVideoPath();
+            return host.getVideoPath(this);
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            progressDialog.setMessage(getString(R.string.loading) + "\n" + values[0]);
         }
 
         @Override
@@ -565,6 +574,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             } else { // no link found
                 Toast.makeText(DetailActivity.this, getString(R.string.host_resolve_error), Toast.LENGTH_SHORT).show();
             }
+        }
+
+        public Context getContext() {
+            return context;
         }
     }
 
