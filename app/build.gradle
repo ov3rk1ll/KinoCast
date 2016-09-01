@@ -1,15 +1,27 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
+
+def versionMajor = 1
+def versionMinor = 4
+def versionPatch = 2
+def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.2'
 
     defaultConfig {
         applicationId "com.ov3rk1ll.kinocast"
         minSdkVersion 10
-        targetSdkVersion 23
-        versionName '1.4.0'
-        versionCode 1400
+        targetSdkVersion 24
+
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 
         applicationVariants.all { variant ->
             variant.outputs.each { output ->
@@ -27,9 +39,15 @@ android {
 
         buildConfigField "boolean", "GMS_CHECK", "true"
         buildConfigField "boolean", "ENABLE_HELP", "false"
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        resValue "string", "fabric_mopub_key",properties.getProperty('FABRIC_MOPUB_KEY')
+        manifestPlaceholders = [ FABRIC_API_KEY: properties.getProperty('FABRIC_API_KEY')]
     }
     buildTypes {
         release {
+            //shrinkResources true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -37,15 +55,21 @@ android {
 }
 
 dependencies {
-    //compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
-    compile 'com.google.android.gms:play-services:8.4.0'
-    compile 'com.android.support:recyclerview-v7:23.2.0'
-    compile 'com.android.support:palette-v7:23.2.0'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
+    compile 'com.android.support:palette-v7:24.2.0'
     compile 'com.squareup.okhttp:okhttp:2.7.5'
-    compile 'org.jsoup:jsoup:1.8.3'
-    compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.8.2'
-    //compile project(':libs:ShowcaseView')
-    //compile project(':libs:CastCompanionLibrary-android')
+    compile 'org.jsoup:jsoup:1.9.1'
+    compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.8.4'
+    compile('com.mopub:mopub-sdk:4.8.0@aar') {
+        transitive = true;
+    }
+    compile('io.fabric.sdk.android:fabric:1.3.10@aar') {
+        transitive = true;
+    }
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+        transitive = true;
+    }
 }

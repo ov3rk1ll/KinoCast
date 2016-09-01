@@ -19,7 +19,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,8 +30,8 @@ public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
     public static final String URL_BASE = "http://www.kinox.tv/";
 
-    private static final SparseArray<Integer> languageResMap = new SparseArray<Integer>();
-    private static final SparseArray<String> languageKeyMap = new SparseArray<String>();
+    private static final SparseArray<Integer> languageResMap = new SparseArray<>();
+    private static final SparseArray<String> languageKeyMap = new SparseArray<>();
     static {
         languageResMap.put(1, R.drawable.lang_de); languageKeyMap.put(1, "de");
         languageResMap.put(2, R.drawable.lang_en); languageKeyMap.put(2, "de");
@@ -65,7 +64,7 @@ public class KinoxParser extends Parser{
     }
 
     private List<ViewModel> parseList(Document doc){
-        List<ViewModel> list = new ArrayList<ViewModel>();
+        List<ViewModel> list = new ArrayList<>();
         Elements files = doc.select("div.MiniEntry");
 
         for(Element element : files){
@@ -127,7 +126,7 @@ public class KinoxParser extends Parser{
             item.setSeriesID(Integer.valueOf(rel));
             // Fill seasons and episodes
             Elements seasons = doc.select("select#SeasonSelection > option");
-            List <Season> list = new ArrayList<Season>();
+            List <Season> list = new ArrayList<>();
             for(Element season : seasons){
                 String[] rels = season.attr("rel").split(",");
                 Season s = new Season();
@@ -139,7 +138,7 @@ public class KinoxParser extends Parser{
             item.setSeasons(list.toArray(new Season[list.size()]));
         }else{
             item.setType(ViewModel.Type.MOVIE);
-            List<Host> hostlist = new ArrayList<Host>();
+            List<Host> hostlist = new ArrayList<>();
             Elements hosts = doc.select("ul#HosterList").select("li");
             for(Element host: hosts){
                 int hosterId = 0;
@@ -249,7 +248,7 @@ public class KinoxParser extends Parser{
                     .timeout(10000)
                     .get();
 
-            List<Host> hostlist = new ArrayList<Host>();
+            List<Host> hostlist = new ArrayList<>();
             Elements hosts = doc.select("li");
             for(Element host: hosts){
                 int hosterId = Integer.valueOf(host.id().replace("Hoster_", ""));
@@ -279,7 +278,7 @@ public class KinoxParser extends Parser{
         try {
             queryTask.updateProgress("Get host from " + URL_BASE + url);
             JSONObject json = Utils.readJson(URL_BASE + url);
-            Document doc = Jsoup.parse(json.getString("Stream"));
+            Document doc = Jsoup.parse(json != null ? json.getString("Stream") : null);
             String href = doc.select("a").attr("href");
             queryTask.updateProgress("Get video from " + href);
             return href;
@@ -299,20 +298,21 @@ public class KinoxParser extends Parser{
         return getMirrorLink(queryTask, "aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror + "&Season=" + season + "&Episode=" + episode);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String[] getSearchSuggestions(String query){
         String url = URL_BASE + "aGET/Suggestions/?q=" + URLEncoder.encode(query) + "&limit=10&timestamp=" + SystemClock.elapsedRealtime();
         String data = Utils.readUrl(url);
-        try {
+        /*try {
             byte ptext[] = data.getBytes("ISO-8859-1");
             data = new String(ptext, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        }
-        String suggestions[] = data.split("\n");
+        }*/
+        String suggestions[] = data != null ? data.split("\n") : new String[0];
         if(suggestions[0].trim().equals("")) return null;
-        // TODO Remove duplicates
-        return new HashSet<String>(Arrays.asList(suggestions)).toArray(new String[0]);
+        // Remove duplicates
+        return new HashSet<>(Arrays.asList(suggestions)).toArray(new String[new HashSet<>(Arrays.asList(suggestions)).size()]);
     }
 
     @Override
@@ -320,6 +320,7 @@ public class KinoxParser extends Parser{
         return URL_BASE + "Stream/" + item.getSlug() + ".html";
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String getSearchPage(String query){
         return URL_BASE + "Search.html?q=" + URLEncoder.encode(query);

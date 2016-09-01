@@ -1,14 +1,11 @@
 package com.ov3rk1ll.kinocast.ui;
 
 import android.content.Intent;
-import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -17,48 +14,32 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.media.MediaRouter;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 
 import com.google.android.gms.cast.CastMediaControlIntent;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveApi;
-import com.google.android.gms.drive.DriveFolder;
-import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.android.libraries.cast.companionlibrary.widgets.MiniController;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.KinoxParser;
 import com.ov3rk1ll.kinocast.api.Movie4kParser;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
-import com.ov3rk1ll.kinocast.utils.BookmarkManager;
-import com.ov3rk1ll.kinocast.utils.Utils;
 import com.winsontan520.wversionmanager.library.WVersionManager;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private final int RESOLVE_CONNECTION_REQUEST_CODE = 5001;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    // private final int RESOLVE_CONNECTION_REQUEST_CODE = 5001;
 
     private static final String STATE_TITLE = "state_title";
     private static final String STATE_IS_SEARCHVIEW = "state_is_searchview";
@@ -69,13 +50,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressBar mProgressBar;
 
     private SearchSuggestionAdapter searchSuggestionAdapter;
-    private MenuItem mediaRouteMenuItem;
     private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
     private int mNavItemId;
     private final Handler mDrawerActionHandler = new Handler();
-    private GoogleApiClient mGoogleApiClient;
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
         //super.setSupportProgressBarIndeterminateVisibility(visible);
@@ -103,14 +82,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         WVersionManager versionManager = new WVersionManager(this);
         versionManager.setVersionContentUrl("http://ov3rk1ll.github.io/KinoCast/update.json");
         versionManager.checkVersion();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Drive.API)
-                .addScope(Drive.SCOPE_FILE)
-                .addScope(Drive.SCOPE_APPFOLDER)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
 
         /*BackupManager bm = new BackupManager(this);
         bm.requestRestore(new RestoreObserver() {
@@ -153,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.getMenu().findItem(mNavItemId).setChecked(true);
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
@@ -240,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(final Menu menu) {
         if (!mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             getMenuInflater().inflate(R.menu.main, menu);
-            mediaRouteMenuItem = VideoCastManager.getInstance().addMediaRouterButton(menu, R.id.media_route_menu_item);
+            VideoCastManager.getInstance().addMediaRouterButton(menu, R.id.media_route_menu_item);
 
             final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
 
@@ -298,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mIsSearchView = true;
         mTitle = "\"" + query + "\"";
         restoreActionBar();
-        Utils.trackPath(MainActivity.this, "Search.html?q=" + query);
+        // TODO Utils.trackPath(MainActivity.this, "Search.html?q=" + query);
         fragmentManager.beginTransaction()
                 .replace(R.id.container, ListFragment.newInstance(Parser.getInstance().getSearchPage(query)))
                 .commit();
@@ -381,82 +352,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 fragment = ListFragment.newInstance(query);
             }
-            Utils.trackPath(MainActivity.this, query);
+            // TODO Utils.trackPath(MainActivity.this, query);
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)
                     .commit();
         }
     }
-
-    @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        switch (requestCode) {
-            case RESOLVE_CONNECTION_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
-                    mGoogleApiClient.connect();
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Drive.DriveApi.newDriveContents(mGoogleApiClient)
-                .setResultCallback(driveContentsCallback);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                connectionResult.startResolutionForResult(this, RESOLVE_CONNECTION_REQUEST_CODE);
-            } catch (IntentSender.SendIntentException e) {
-                // Unable to resolve, message user appropriately
-            }
-        } else {
-            GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0).show();
-        }
-    }
-
-    final private ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
-            new ResultCallback<DriveApi.DriveContentsResult>() {
-                @Override
-                public void onResult(DriveApi.DriveContentsResult result) {
-                    if (!result.getStatus().isSuccess()) {
-                        Log.i("Drive", "Error while trying to create new file contents");
-                        return;
-                    }
-
-                    MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-                            .setTitle("bookmark.dat")
-                            .setMimeType("text/plain")
-                            .build();
-                    Drive.DriveApi.getAppFolder(mGoogleApiClient)
-                            .createFile(mGoogleApiClient, changeSet, result.getDriveContents())
-                            .setResultCallback(fileCallback);
-                }
-            };
-
-    final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new
-            ResultCallback<DriveFolder.DriveFileResult>() {
-                @Override
-                public void onResult(DriveFolder.DriveFileResult result) {
-                    if (!result.getStatus().isSuccess()) {
-                        Log.i("Drive", "Error while trying to create the file");
-                        return;
-                    }
-
-                    BookmarkManager bookmarks = new BookmarkManager(MainActivity.this);
-                    bookmarks.backup(result, mGoogleApiClient);
-
-                    Log.i("Drive", "Should do backup");
-
-                }
-            };
 }

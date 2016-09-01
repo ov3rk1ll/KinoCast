@@ -39,13 +39,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.mopub.mobileads.MoPubView;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -62,17 +61,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings("ConstantConditions")
 public class DetailActivity extends AppCompatActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     private ViewModel item;
+    private MoPubView moPubView;
 
     private VideoCastManager mVideoCastManager;
-    private MenuItem mediaRouteMenuItem;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private boolean SHOW_ADS = true;
 
     private BookmarkManager bookmarkManager;
-    private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
 
     private int mRestoreSeasonIndex = -1;
@@ -112,17 +112,14 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         initInstances();
         attemptColor(null);
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
+        moPubView = (MoPubView) findViewById(R.id.adView);
         if (SHOW_ADS) {
-            mAdView.setVisibility(View.VISIBLE);
-            findViewById(R.id.hr2).setVisibility(View.VISIBLE);
-            AdRequest adRequest = new AdRequest.Builder()
-                    .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                    .addTestDevice("9E6DD569F43AF307B296CE50D7766370")
-                    .build();
-            mAdView.loadAd(adRequest);
+            // TODO: Replace this test id with your personal ad unit id
+            moPubView.setAdUnitId(getString(R.string.fabric_mopub_key));
+            moPubView.loadAd();
+
         } else {
-            mAdView.setVisibility(View.GONE);
+            moPubView.setVisibility(View.GONE);
             findViewById(R.id.hr2).setVisibility(View.GONE);
         }
 
@@ -159,7 +156,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 final Spinner spinnerEpisode = (Spinner) findViewById(R.id.spinnerEpisode);
 
                 spinnerEpisode.setAdapter(
-                        new ArrayAdapter<String>(DetailActivity.this, android.R.layout.simple_list_item_1, item.getSeasons()[position].episodes));
+                        new ArrayAdapter<>(DetailActivity.this, android.R.layout.simple_list_item_1, item.getSeasons()[position].episodes));
 
                 if (mRestoreEpisodeIndex != -1) {
                     spinnerEpisode.setSelection(mRestoreEpisodeIndex);
@@ -209,7 +206,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     }
 
     private void initToolbar() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
 
@@ -258,6 +255,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     @Override
     protected void onDestroy() {
+        moPubView.destroy();
         super.onDestroy();
     }
 
@@ -297,7 +295,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         //menu = ((ActionMenuView) findViewById(R.id.bar_split)).getMenu();
         menu.clear();
         getMenuInflater().inflate(R.menu.detail, menu);
-        mediaRouteMenuItem = mVideoCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
+        mVideoCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         // Set visibility depending on detail data
         menu.findItem(R.id.action_imdb).setVisible(item.getImdbId() != null);
 
@@ -359,13 +357,13 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     private void setMirrorSpinner(Host mirrors[]) {
         if (mirrors != null && mirrors.length > 0) {
             ((Spinner) findViewById(R.id.spinnerMirror)).setAdapter(
-                    new ArrayAdapter<Host>(DetailActivity.this, android.R.layout.simple_list_item_1,
+                    new ArrayAdapter<>(DetailActivity.this, android.R.layout.simple_list_item_1,
                             mirrors));
             findViewById(R.id.spinnerMirror).setEnabled(true);
             findViewById(R.id.buttonPlay).setEnabled(true);
         } else {
             ((Spinner) findViewById(R.id.spinnerMirror)).setAdapter(
-                    new ArrayAdapter<String>(DetailActivity.this, android.R.layout.simple_list_item_1,
+                    new ArrayAdapter<>(DetailActivity.this, android.R.layout.simple_list_item_1,
                             new String[]{getString(R.string.no_host_found)}));
             findViewById(R.id.spinnerMirror).setEnabled(false);
             findViewById(R.id.buttonPlay).setEnabled(false);
@@ -389,7 +387,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html");
+            //TODO com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html");
             item = Parser.getInstance().loadDetail(item);
             return true;
         }
@@ -410,7 +408,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     seasons[i] = String.valueOf(item.getSeasons()[i].id);
                 }
                 ((Spinner) findViewById(R.id.spinnerSeason)).setAdapter(
-                        new ArrayAdapter<String>(DetailActivity.this, android.R.layout.simple_list_item_1, seasons));
+                        new ArrayAdapter<>(DetailActivity.this, android.R.layout.simple_list_item_1, seasons));
 
                 if (mRestoreSeasonIndex != -1) {
                     ((Spinner) findViewById(R.id.spinnerSeason)).setSelection(mRestoreSeasonIndex);
@@ -483,6 +481,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         protected void onPreExecute() {
             super.onPreExecute();
             progressDialog.show();
+            //noinspection unchecked
             ArrayAdapter<Host> hosts = (ArrayAdapter<Host>) ((Spinner) findViewById(R.id.spinnerMirror)).getAdapter();
             host = hosts.getItem(((Spinner) findViewById(R.id.spinnerMirror)).getSelectedItemPosition());
             spinnerSeasonItemPosition = ((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition();
@@ -502,7 +501,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         @Override
         protected String doInBackground(Void... params) {
             String link;
-            com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html?host=" + host.toString());
+            // TODO com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html?host=" + host.toString());
 
             if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[spinnerSeasonItemPosition];
@@ -522,6 +521,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             progressDialog.setMessage(getString(R.string.loading) + "\n" + values[0]);
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         protected void onPostExecute(final String link) {
             super.onPostExecute(link);
@@ -536,7 +536,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
                 PackageManager pm = getPackageManager();
                 List<ResolveInfo> launchables = pm.queryIntentActivities(intent, 0);
-                List<AppAdapter.App> apps = new ArrayList<AppAdapter.App>();
+                List<AppAdapter.App> apps = new ArrayList<>();
                 Collections.sort(launchables, new ResolveInfo.DisplayNameComparator(pm));
                 if (mVideoCastManager.isConnected()) {
                     apps.add(new AppAdapter.App(
@@ -644,6 +644,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             return view;
         }
 
+        @SuppressWarnings("unused")
         public static class App {
             private CharSequence label;
             private Drawable icon;

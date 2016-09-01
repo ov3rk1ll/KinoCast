@@ -1,23 +1,14 @@
 package com.ov3rk1ll.kinocast.utils;
 
 import android.content.Context;
-import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.drive.DriveApi;
-import com.google.android.gms.drive.DriveContents;
-import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.DriveFolder;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -67,46 +58,9 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
             for(int i = 0; i < simpleClass.size(); i++){
                 super.add(simpleClass.get(i));
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
-    }
-
-    public void backup(DriveFolder.DriveFileResult result, GoogleApiClient mGoogleApiClient){
-        result.getDriveFile().open(mGoogleApiClient, DriveFile.MODE_WRITE_ONLY, null).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
-            @Override
-            public void onResult(DriveApi.DriveContentsResult result) {
-                if (!result.getStatus().isSuccess()) {
-                    // Handle error
-                    return;
-                }
-                DriveContents driveContents = result.getDriveContents();
-                try {
-                    ParcelFileDescriptor parcelFileDescriptor = driveContents.getParcelFileDescriptor();
-                    FileInputStream fileInputStream = new FileInputStream(parcelFileDescriptor.getFileDescriptor());
-                    ObjectInputStream is = new ObjectInputStream(fileInputStream);
-                    try {
-                        BookmarkManager simpleClass = (BookmarkManager) is.readObject();
-                        Log.i("Drive", "Item: " + simpleClass.size());
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Append to the file.
-                    FileOutputStream fileOutputStream = new FileOutputStream(parcelFileDescriptor
-                            .getFileDescriptor());
-                    //Writer writer = new OutputStreamWriter(fileOutputStream);
-                    //writer.write("hello world");
-
-                    ObjectOutputStream os = new ObjectOutputStream(fileOutputStream);
-                    os.writeObject(BookmarkManager.this);
-                    os.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     @Override

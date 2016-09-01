@@ -1,5 +1,4 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,12 +6,13 @@
 
     <com.google.android.libraries.cast.companionlibrary.widgets.MiniController
         android:id="@+id/miniController"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:visibility="gone" />
+        app:auto_setup="true"
+        android:visibility="gone"  />
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/rootLayout"
@@ -137,13 +137,20 @@
                         android:background="@android:color/black"
                         android:visibility="gone" />
 
-                    <com.google.android.gms.ads.AdView
+                    <!--<com.google.android.gms.ads.AdView
                         android:id="@+id/adView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
-                        ads:adSize="BANNER"
-                        ads:adUnitId="@string/banner_ad_unit_id" />
+                        ads:adSize="SMART_BANNER"
+                        ads:adUnitId="@string/banner_ad_unit_id" /> -->
+
+                    <com.mopub.mobileads.MoPubView
+                        android:id="@+id/adView"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="fill_parent"
+                        android:layout_height="50dp"/>
+
 
                     <View
                         android:id="@+id/hr2"

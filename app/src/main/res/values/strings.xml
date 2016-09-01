@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="de">
 
-    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-2382574370348580/1626448157</string>
-    <string name="ga_trackingId" translatable="false">UA-45877229-4</string>
-
     <string name="app_name">KinoCast</string>
     <string name="title_activity_settings">Einstellungen</string>
     <string name="title_section1">Neue Kinofilme</string>

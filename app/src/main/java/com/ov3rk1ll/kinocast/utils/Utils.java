@@ -1,15 +1,11 @@
 package com.ov3rk1ll.kinocast.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 import com.ov3rk1ll.kinocast.BuildConfig;
-import com.ov3rk1ll.kinocast.TrackingApplication;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -28,12 +24,6 @@ import java.util.Map;
 
 public class Utils {
     public static final String USER_AGENT = "KinoCast v" + BuildConfig.VERSION_NAME;
-
-    public static void trackPath(Activity activity, String path){
-        Tracker t = ((TrackingApplication) activity.getApplication()).getTracker(TrackingApplication.TrackerName.APP_TRACKER);
-        t.setScreenName(path);
-        t.send(new HitBuilders.AppViewBuilder().build());
-    }
 
     public static JSONObject readJson(String url) {
         OkHttpClient client = new OkHttpClient();
