@@ -83,3 +83,4 @@
 
 # Other libs
 -dontwarn okio.**
+-keep class com.woxthebox.draglistview.** { *; }

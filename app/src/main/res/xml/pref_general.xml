@@ -1,5 +1,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+    <Preference
+        android:key="order_hostlist"
+        android:title="Order Hostlist"
+        />
+
     <Preference
         android:key="version_information"
         android:title="Version"

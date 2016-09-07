@@ -52,12 +52,14 @@ import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.PaletteManager;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
+import com.ov3rk1ll.kinocast.utils.Utils;
+import com.ov3rk1ll.kinocast.utils.WeightedHostComparator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -130,7 +132,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
         findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
         //headerImage.setVisibility(View.GONE);
-        headerImage.setImageItem(item.getImageRequest(screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
+        headerImage.setImageUrl(Parser.getInstance().getImageUrl(item, screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
             public void onComplete() {
             }
@@ -356,6 +358,9 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     private void setMirrorSpinner(Host mirrors[]) {
         if (mirrors != null && mirrors.length > 0) {
+            // TODO Sort mirrors depending on settings
+            Arrays.sort(mirrors, new WeightedHostComparator(Utils.getWeightedHostList(getApplicationContext())));
+            //Collections.sort(mirrors, new WeightedHostComparator(new SparseArray<Integer>()));
             ((Spinner) findViewById(R.id.spinnerMirror)).setAdapter(
                     new ArrayAdapter<>(DetailActivity.this, android.R.layout.simple_list_item_1,
                             mirrors));
@@ -602,11 +607,13 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         }
         mediaMetadata.putString(MediaMetadata.KEY_SUBTITLE, getString(R.string.chromecast_subtitle));
         mediaMetadata.addImage(new WebImage(Uri.parse(
-                new CoverImage(item.getImageRequest(96, "poster")).getBitmapUrl(getApplication()))
-        ));
+                Parser.getInstance().getImageUrl(item, 96, "poster")
+        )));
+
         mediaMetadata.addImage(new WebImage(Uri.parse(
-                new CoverImage(item.getImageRequest(getResources().getDisplayMetrics().widthPixels, "poster")).getBitmapUrl(getApplication()))
-        ));
+                Parser.getInstance().getImageUrl(item, getResources().getDisplayMetrics().widthPixels, "poster")
+        )));
+
         Log.i("cast", "play " + link);
         MediaInfo mediaInfo = new MediaInfo.Builder(link)
                 .setContentType("video/mp4")

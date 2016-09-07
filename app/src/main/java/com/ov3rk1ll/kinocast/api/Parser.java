@@ -10,6 +10,7 @@ public abstract class Parser {
     public static final int PARSER_ID = -1;
 
     private static Parser instance;
+
     public static Parser getInstance(){
         return instance;
     }
@@ -17,6 +18,11 @@ public abstract class Parser {
     public static void selectParser(int id){
         instance = selectByParserId(id);
     }
+
+    public static void selectParser(String name){
+        instance = new ApiParser(name);
+    }
+
     public static Parser selectByParserId(int id){
         switch (id){
             case KinoxParser.PARSER_ID: return new KinoxParser();
@@ -58,6 +64,8 @@ public abstract class Parser {
     public abstract String getPopularSeries();
 
     public abstract String getLatestSeries();
+
+    public abstract String getImageUrl(ViewModel item, int targetWidth, String type);
 
     @Override
     public String toString() {

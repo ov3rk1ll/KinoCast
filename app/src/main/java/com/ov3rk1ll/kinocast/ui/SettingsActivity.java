@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.ui;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -32,7 +33,7 @@ public class SettingsActivity extends PreferenceActivity {
     private void setupActionBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            if(getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -61,6 +62,13 @@ public class SettingsActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.pref_general);
 
 
+        findPreference("order_hostlist").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                startActivity(new Intent(SettingsActivity.this, OrderHostlistActivity.class));
+                return true;
+            }
+        });
         findPreference("version_information").setSummary("v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
 
         //bindPreferenceSummaryToValue(findPreference("example_text"));

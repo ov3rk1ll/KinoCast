@@ -177,4 +177,9 @@ public class Movie4kParser extends Parser{
     public String getLatestSeries(){
         return URL_BASE + "Latest-Series.html";
     }
+
+    @Override
+    public String getImageUrl(ViewModel item, int targetWidth, String type) {
+        return null;
+    }
 }

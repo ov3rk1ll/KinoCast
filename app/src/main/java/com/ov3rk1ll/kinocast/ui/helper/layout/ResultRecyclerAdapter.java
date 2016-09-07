@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.PaletteManager;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
@@ -54,7 +55,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
 
         int px = holder.image.getContext().getResources().getDimensionPixelSize(R.dimen.list_item_width);
 
-        holder.image.setImageItem(item.getImageRequest(px, "poster"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
+        holder.image.setImageUrl(Parser.getInstance().getImageUrl(item, px, "poster"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
             public void onComplete() {
                 holder.updatePalette();
