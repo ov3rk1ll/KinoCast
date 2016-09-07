@@ -1249,7 +1249,7 @@ public abstract class BaseLayoutManager extends RecyclerView.LayoutManager {
      */
     protected static class RenderState {
 
-        final static String TAG = "LinearLayoutManager#RenderState";
+        final static String TAG = "LayoutManager#Render";
 
         final static int LAYOUT_START = -1;
 

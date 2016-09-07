@@ -12,6 +12,10 @@ def versionPatch = 2
 def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
 android {
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
     compileSdkVersion 24
     buildToolsVersion '24.0.2'
 
@@ -47,8 +51,8 @@ android {
     }
     buildTypes {
         release {
-            //shrinkResources true
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
