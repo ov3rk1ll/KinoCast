@@ -3,7 +3,8 @@
 
     <Preference
         android:key="order_hostlist"
-        android:title="Order Hostlist"
+        android:title="@string/order_hostlist"
+        android:summary="@string/order_hostlist_summary"
         />
 
     <Preference

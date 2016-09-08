@@ -1,7 +1,6 @@
 package com.ov3rk1ll.kinocast.data;
 
 import com.ov3rk1ll.kinocast.api.mirror.Host;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
 
 import java.io.Serializable;
 
@@ -64,9 +63,9 @@ public class ViewModel implements Serializable {
         return this.image + "&size=" + targetWidth + "&type=" + type;
     }
 
-    public CoverImage.Request getImageRequest(int targetWidth, String type) {
+    /*public CoverImage.Request getImageRequest(int targetWidth, String type) {
         return new CoverImage.Request(this, targetWidth, type);
-    }
+    }*/
 
     public String getSummary() {
         return summary;

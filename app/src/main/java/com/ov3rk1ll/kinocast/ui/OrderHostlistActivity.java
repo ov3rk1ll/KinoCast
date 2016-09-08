@@ -72,7 +72,7 @@ public class OrderHostlistActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    protected void onPause() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = preferences.edit();
         for(int i = 0; i < mItemArray.size(); i++){
@@ -80,7 +80,7 @@ public class OrderHostlistActivity extends AppCompatActivity {
         }
         editor.putInt("order_hostlist_count", mItemArray.size());
         editor.commit();
-        super.onBackPressed();
+        super.onPause();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast.ui.helper.layout;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.graphics.Palette;
@@ -13,23 +14,26 @@ import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.ViewTarget;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.PaletteManager;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAdapter.ViewHolder> implements View.OnClickListener {
 
+    private Context context;
     private List<ViewModel> items;
     private OnRecyclerViewItemClickListener<ViewModel> itemClickListener;
     private int itemLayout;
 
-    public ResultRecyclerAdapter(int itemLayout) {
+    public ResultRecyclerAdapter(Context context, int itemLayout) {
+        this.context = context;
         this.items = new ArrayList<ViewModel>();
         this.itemLayout = itemLayout;
     }
@@ -55,14 +59,29 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
 
         int px = holder.image.getContext().getResources().getDimensionPixelSize(R.dimen.list_item_width);
 
-        holder.image.setImageUrl(Parser.getInstance().getImageUrl(item, px, "poster"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
+        Glide.with(this.context)
+                .load(Parser.getInstance().getImageUrl(item, px, "poster"))
+                .asBitmap()
+                .into(new ViewTarget<ImageView, Bitmap>(holder.image) {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation anim) {
+                        this.view.setImageBitmap(resource);
+                        holder.updatePalette();
+                        holder.image.setVisibility(View.VISIBLE);
+                        holder.progressBar.setVisibility(View.GONE);
+                        // Set your resource on myView and/or start your animation here.
+                    }
+                });
+        holder.image.setVisibility(View.VISIBLE);
+
+        /*holder.image.setImageUrl(Parser.getInstance().getImageUrl(item, px, "poster"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
             public void onComplete() {
                 holder.updatePalette();
                 holder.image.setVisibility(View.VISIBLE);
                 holder.progressBar.setVisibility(View.GONE);
             }
-        });
+        });*/
     }
 
     @Override public int getItemCount() {
@@ -107,7 +126,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private RelativeLayout background;
-        public SmartImageView image;
+        public ImageView image;
         public TextView title;
         public ImageView language;
         public RatingBar rating;
@@ -118,7 +137,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
         public ViewHolder(View itemView) {
             super(itemView);
             background = (RelativeLayout) itemView.findViewById(R.id.layoutInfo);
-            image = (SmartImageView) itemView.findViewById(R.id.image);
+            image = (ImageView) itemView.findViewById(R.id.image);
             title = (TextView) itemView.findViewById(R.id.title);
             language = (ImageView) itemView.findViewById(R.id.language);
             rating = (RatingBar) itemView.findViewById(R.id.rating);

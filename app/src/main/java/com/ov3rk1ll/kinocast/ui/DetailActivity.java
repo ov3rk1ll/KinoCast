@@ -1,6 +1,5 @@
 package com.ov3rk1ll.kinocast.ui;
 
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -39,6 +38,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.ViewTarget;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
@@ -52,8 +54,6 @@ import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.PaletteManager;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.ov3rk1ll.kinocast.utils.WeightedHostComparator;
@@ -129,10 +129,28 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         ((TextView) findViewById(R.id.detail)).setText(item.getSummary());
 
-        final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
+        final ImageView headerImage = (ImageView) findViewById(R.id.image_header);
         findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+
+        Glide.with(this)
+                .load(Parser.getInstance().getImageUrl(item, screenWidthPx, "backdrop"))
+                .asBitmap()
+                .into(new ViewTarget<ImageView, Bitmap>(headerImage) {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation anim) {
+                        this.view.setImageBitmap(resource);
+                        headerImage.setVisibility(View.VISIBLE);
+                        findViewById(R.id.progressBar).clearAnimation();
+                        findViewById(R.id.progressBar).setVisibility(View.GONE);
+                        findViewById(R.id.progressBar).invalidate();
+                        findViewById(R.id.top_content).invalidate();
+                        attemptColor(resource);
+                    }
+                });
+        headerImage.setVisibility(View.VISIBLE);
+
         //headerImage.setVisibility(View.GONE);
-        headerImage.setImageUrl(Parser.getInstance().getImageUrl(item, screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
+        /*headerImage.setImageUrl(Parser.getInstance().getImageUrl(item, screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
             @Override
             public void onComplete() {
             }
@@ -148,7 +166,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 attemptColor(bitmap);
                 Log.i("progressBar", "Visibility in complete = " + findViewById(R.id.progressBar).getVisibility());
             }
-        });
+        });*/
 
         ((ImageView) findViewById(R.id.language)).setImageResource(item.getLanguageResId());
 

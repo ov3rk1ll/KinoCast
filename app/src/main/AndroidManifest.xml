@@ -67,12 +67,17 @@
 
         <activity
             android:name=".ui.SettingsActivity"
+            android:theme="@style/SettingsTheme"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".ui.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ov3rk1ll.kinocast.ui.MainActivity" />
         </activity>
+
+
+        <activity android:name=".ui.OrderHostlistActivity" android:label="@string/order_hostlist"></activity>
+
         <activity
             android:name=".ui.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -100,7 +105,6 @@
         <activity
             android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity android:name=".ui.OrderHostlistActivity"></activity>
     </application>
 
 </manifest>

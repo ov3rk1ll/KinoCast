@@ -7,7 +7,8 @@
     android:layout_margin="@dimen/spacing_xsmall"
     android:foreground="?attr/selectableItemBackground"
     tools:layout_gravity="center">
-    <com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView
+
+    <ImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

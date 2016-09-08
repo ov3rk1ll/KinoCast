@@ -176,6 +176,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         VideoCastManager.getInstance().incrementUiCounter();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
+        // remove active state from settings
+        navigationView.setCheckedItem(mNavItemId);
+
     }
 
     @Override
@@ -289,9 +293,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(final MenuItem menuItem) {
-        //TODO onNavigationItemSelected
         menuItem.setChecked(true);
-        mNavItemId = menuItem.getItemId();
+        if(menuItem.getItemId() != R.string.title_section7) {
+            mNavItemId = menuItem.getItemId();
+        }
 
         // allow some time after closing the drawer before performing real navigation
         // so the user can see what is happening

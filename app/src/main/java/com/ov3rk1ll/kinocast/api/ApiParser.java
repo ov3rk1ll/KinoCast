@@ -9,6 +9,8 @@ import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
+import com.ov3rk1ll.kinocast.utils.UserAgentInterceptor;
+import com.ov3rk1ll.kinocast.utils.Utils;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -18,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +57,7 @@ public class ApiParser extends Parser {
 
     public ApiParser(String name){
         this.mName = name;
+        client.networkInterceptors().add(new UserAgentInterceptor(Utils.USER_AGENT));
     }
 
     @Override
@@ -220,17 +224,37 @@ public class ApiParser extends Parser {
 
     @Override
     public String[] getSearchSuggestions(String query) {
-        return new String[0];
+
+        String url = URL_BASE + mName + "/movies/search?q=" + URLEncoder.encode(query);
+        Log.i(TAG, "GET " + url);
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("apikey", API_KEY)
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            JSONArray entries = new JSONArray(response.body().string());
+            if(entries.length() == 0) return null;
+            String[] results = new String[entries.length()];
+            for (int i = 0; i < results.length; i++) {
+                results[i] = entries.getString(i);
+            }
+            return results;
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public String getPageLink(ViewModel item) {
-        return null;
+        return URL_BASE + mName + "/movies/" + item.getSlug();
     }
 
     @Override
     public String getSearchPage(String query) {
-        return null;
+        return URL_BASE + mName + "/movies/list/search?q=" + URLEncoder.encode(query);
     }
 
     @Override
