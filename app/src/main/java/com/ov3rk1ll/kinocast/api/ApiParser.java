@@ -90,6 +90,7 @@ public class ApiParser extends Parser {
         try {
             Response response = client.newCall(request).execute();
             JSONArray entries = new JSONArray(response.body().string());
+            Log.i(TAG, "loading " + entries.length() + " entries");
             for (int i = 0; i < entries.length(); i++){
                 ViewModel model = buildModelFromJson(entries.getJSONObject(i));
                 list.add(model);

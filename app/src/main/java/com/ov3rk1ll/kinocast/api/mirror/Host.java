@@ -15,6 +15,7 @@ public class Host {
             case SharedSx.HOST_ID: return new SharedSx(id);
             case Sockshare.HOST_ID: return new Sockshare(id);
             case StreamCloud.HOST_ID: return new StreamCloud(id);
+            case Vodlocker.HOST_ID: return new Vodlocker(id);
         }
         return new Host(id);
     }

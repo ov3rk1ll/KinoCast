@@ -46,7 +46,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.mopub.mobileads.MoPubView;
+import com.mobfox.sdk.bannerads.Banner;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -67,7 +67,8 @@ import java.util.List;
 public class DetailActivity extends AppCompatActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     private ViewModel item;
-    private MoPubView moPubView;
+    private Banner mAdView;
+    //private MoPubView moPubView;
 
     private VideoCastManager mVideoCastManager;
 
@@ -114,14 +115,13 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         initInstances();
         attemptColor(null);
 
-        moPubView = (MoPubView) findViewById(R.id.adView);
+        mAdView = (Banner) findViewById(R.id.adView);
         if (SHOW_ADS) {
-            // TODO: Replace this test id with your personal ad unit id
-            moPubView.setAdUnitId(getString(R.string.fabric_mopub_key));
-            moPubView.loadAd();
+            mAdView.setInventoryHash(getString(R.string.mobfox_hash));
+            mAdView.load();
 
         } else {
-            moPubView.setVisibility(View.GONE);
+            mAdView.setVisibility(View.GONE);
             findViewById(R.id.hr2).setVisibility(View.GONE);
         }
 
@@ -148,25 +148,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     }
                 });
         headerImage.setVisibility(View.VISIBLE);
-
-        //headerImage.setVisibility(View.GONE);
-        /*headerImage.setImageUrl(Parser.getInstance().getImageUrl(item, screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
-            @Override
-            public void onComplete() {
-            }
-
-            @TargetApi(11)
-            @Override
-            public void onComplete(Bitmap bitmap) {
-                headerImage.setVisibility(View.VISIBLE);
-                findViewById(R.id.progressBar).clearAnimation();
-                findViewById(R.id.progressBar).setVisibility(View.GONE);
-                findViewById(R.id.progressBar).invalidate();
-                findViewById(R.id.top_content).invalidate();
-                attemptColor(bitmap);
-                Log.i("progressBar", "Visibility in complete = " + findViewById(R.id.progressBar).getVisibility());
-            }
-        });*/
 
         ((ImageView) findViewById(R.id.language)).setImageResource(item.getLanguageResId());
 
@@ -274,17 +255,11 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     }
 
     @Override
-    protected void onDestroy() {
-        moPubView.destroy();
-        super.onDestroy();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         mVideoCastManager.incrementUiCounter();
         //TODO Check if we are playing the current item
-
+        if(mAdView != null) mAdView.onResume();
         //if(mVideoCastManager.getRemoteMediaInformation())
     }
 
@@ -306,6 +281,8 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 bookmarkManager.set(idx, b);
             }
         }
+
+        if(mAdView != null) mAdView.onPause();
     }
 
     @Override

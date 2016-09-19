@@ -91,3 +91,8 @@
   public *;
 }
 -keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+
+# Mobfox
+-keep class com.mobfox.** { *; } 
+-keep class com.mobfox.adapter.** {*;} 
+-keep class com.mobfox.sdk.** {*;}

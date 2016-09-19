@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.api.ApiParser;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.layout.GridLayoutManager;
@@ -201,7 +202,7 @@ public class ListFragment extends Fragment {
             for(int i = 0; i < bookmarks.size(); i++){
                 BookmarkManager.Bookmark b = bookmarks.get(i);
                 if(!b.isInternal()) {
-                    Parser p = Parser.selectByParserId(b.getParserId());
+                    Parser p = new ApiParser("kinox"); //Parser.selectByParserId(b.getParserId());
                     list.add(p.loadDetail(b.getUrl()));
                 }
             }

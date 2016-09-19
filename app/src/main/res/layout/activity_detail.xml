@@ -143,14 +143,16 @@
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
                         ads:adSize="SMART_BANNER"
-                        ads:adUnitId="@string/banner_ad_unit_id" /> -->
+                        ads:adUnitId="@string/admob_adunit_id" />-->
 
-                    <com.mopub.mobileads.MoPubView
+                    <com.mobfox.sdk.bannerads.Banner
                         android:id="@+id/adView"
+                        android:layout_width="320dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center_horizontal"
                         android:layout_centerHorizontal="true"
-                        android:layout_width="fill_parent"
-                        android:layout_height="50dp"/>
-
+                        android:layout_centerVertical="true">
+                    </com.mobfox.sdk.bannerads.Banner>
 
                     <View
                         android:id="@+id/hr2"
