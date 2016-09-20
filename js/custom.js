@@ -41,7 +41,12 @@
 		errorMessage: 'The requested content cannot be loaded. Please try again later.' // Error message when content can't be loaded
 	});
 	
-	$.getJSON('/update.json', function(response){ $('a.apk-download').attr('href', response.apk); });
+	$.getJSON('/update2.json', function(response){ 
+        	$.getJSON(response.gitlab, function(data){ 
+	            $('a.apk-download').text('Download ' + data.name);
+	            $('a.apk-download').attr('href', data.assets[0].browser_download_url);
+		})
+    	});
 
 	
 })(jQuery);
