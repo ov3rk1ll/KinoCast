@@ -16,8 +16,20 @@ public class SharedSx extends Host {
     private static final String TAG = SharedSx.class.getSimpleName();
     public static final int HOST_ID = 52;
 
-    public SharedSx(int id) {
-        super(id);
+
+    @Override
+    public int getId() {
+        return HOST_ID;
+    }
+
+    @Override
+    public String getName() {
+        return "SharedSx";
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
@@ -59,8 +71,4 @@ public class SharedSx extends Host {
         return null;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

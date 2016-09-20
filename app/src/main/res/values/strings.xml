@@ -67,4 +67,7 @@ Deine Favoriten findest du im Menü auf der linken Seite.</string>
     <string name="host_progress_1sttry">Link beim ersten Versuch gefunden</string>
     <string name="host_progress_2ndtry">Link beim zweiten Versuch gefunden</string>
 
+    <string name="order_hostlist">Hosterliste sortieren</string>
+    <string name="order_hostlist_summary">Sortiere deine Lieblingshoster</string>
+
 </resources>

@@ -44,7 +44,7 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.mopub.mobileads.MoPubView;
+import com.mobfox.sdk.bannerads.Banner;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -56,8 +56,11 @@ import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
 import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
+import com.ov3rk1ll.kinocast.utils.Utils;
+import com.ov3rk1ll.kinocast.utils.WeightedHostComparator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,7 +68,7 @@ import java.util.List;
 public class DetailActivity extends AppCompatActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     private ViewModel item;
-    private MoPubView moPubView;
+    private Banner mAdView;
 
     private VideoCastManager mVideoCastManager;
 
@@ -112,14 +115,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         initInstances();
         attemptColor(null);
 
-        moPubView = (MoPubView) findViewById(R.id.adView);
+        mAdView = (Banner) findViewById(R.id.adView);
         if (SHOW_ADS) {
-            // TODO: Replace this test id with your personal ad unit id
-            moPubView.setAdUnitId(getString(R.string.fabric_mopub_key));
-            moPubView.loadAd();
-
+            mAdView.setInventoryHash(getString(R.string.mobfox_hash));
+            mAdView.load();
         } else {
-            moPubView.setVisibility(View.GONE);
+            mAdView.setVisibility(View.GONE);
             findViewById(R.id.hr2).setVisibility(View.GONE);
         }
 
@@ -254,16 +255,11 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     }
 
     @Override
-    protected void onDestroy() {
-        moPubView.destroy();
-        super.onDestroy();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         mVideoCastManager.incrementUiCounter();
         //TODO Check if we are playing the current item
+        if(mAdView != null) mAdView.onResume();
 
         //if(mVideoCastManager.getRemoteMediaInformation())
     }
@@ -286,6 +282,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 bookmarkManager.set(idx, b);
             }
         }
+        if(mAdView != null) mAdView.onPause();
     }
 
     @Override
@@ -356,6 +353,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     private void setMirrorSpinner(Host mirrors[]) {
         if (mirrors != null && mirrors.length > 0) {
+            Arrays.sort(mirrors, new WeightedHostComparator(Utils.getWeightedHostList(getApplicationContext())));
             ((Spinner) findViewById(R.id.spinnerMirror)).setAdapter(
                     new ArrayAdapter<>(DetailActivity.this, android.R.layout.simple_list_item_1,
                             mirrors));

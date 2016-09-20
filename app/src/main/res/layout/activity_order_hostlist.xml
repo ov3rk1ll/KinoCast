@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ov3rk1ll.kinocast.ui.OrderHostlistActivity">
+
+    <TextView
+        android:id="@+id/textview_helper"
+        android:text="Sortiere die Hoster wie du willst!"
+        android:layout_below="@+id/toolbar_actionbar"
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <FrameLayout
+        android:layout_below="@+id/textview_helper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.woxthebox.draglistview.DragListView
+            android:id="@+id/drag_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </FrameLayout>
+
+    <include
+        layout="@layout/toolbar_default"
+        android:id="@+id/toolbar_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</RelativeLayout>

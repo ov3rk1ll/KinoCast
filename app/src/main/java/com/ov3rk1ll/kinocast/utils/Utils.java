@@ -1,9 +1,12 @@
 package com.ov3rk1ll.kinocast.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.squareup.okhttp.OkHttpClient;
@@ -107,4 +110,16 @@ public class Utils {
         return ((netInfo != null) && netInfo.isConnected());
     }
 
+    public static SparseArray<Integer> getWeightedHostList(Context context){
+        SparseArray<Integer> sparseArray = new SparseArray<>();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int count = preferences.getInt("order_hostlist_count", -1);
+        if(count == -1) return null;
+        for(int i = 0; i < count; i++){
+            int key = preferences.getInt("order_hostlist_" + i, i);
+            int value = i;
+            sparseArray.put(key, value);
+        }
+        return sparseArray;
+    }
 }

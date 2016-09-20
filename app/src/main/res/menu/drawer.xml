@@ -20,5 +20,8 @@
         <item
             android:id="@string/title_section6"
             android:title="@string/title_section6"/>
+        <item
+            android:id="@string/title_section7"
+            android:title="@string/title_section7"/>
     </group>
 </menu>

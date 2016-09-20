@@ -11,8 +11,19 @@ public class NowVideo extends Host {
     private static final String TAG = NowVideo.class.getSimpleName();
     public static final int HOST_ID = 40;
 
-    public NowVideo(int id) {
-        super(id);
+    @Override
+    public int getId() {
+        return HOST_ID;
+    }
+
+    @Override
+    public String getName() {
+        return "NowVideo";
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
@@ -30,10 +41,5 @@ public class NowVideo extends Host {
             e.printStackTrace();
         }
         return null;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 }

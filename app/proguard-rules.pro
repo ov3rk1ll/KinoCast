@@ -82,4 +82,18 @@
 -keepattributes SourceFile,LineNumberTable
 
 # Other libs
+-keeppackagenames org.jsoup.nodes
 -dontwarn okio.**
+-keep class com.woxthebox.draglistview.** { *; }
+#-keep class com.bumptech.glide.integration.okhttp.OkHttpGlideModule
+#-keep public class * implements com.bumptech.glide.module.GlideModule
+#-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+#  **[] $VALUES;
+#  public *;
+#}
+#-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+
+# Mobfox
+-keep class com.mobfox.** { *; }
+-keep class com.mobfox.adapter.** {*;}
+-keep class com.mobfox.sdk.** {*;}

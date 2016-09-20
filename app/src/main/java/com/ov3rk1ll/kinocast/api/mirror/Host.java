@@ -2,30 +2,46 @@ package com.ov3rk1ll.kinocast.api.mirror;
 
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
 
-public class Host {
-    protected int id;
+import java.lang.reflect.InvocationTargetException;
+
+public abstract class Host {
     protected int mirror;
-    protected String name;
     protected String url;
 
+    public static Class<?>[] HOSTER_LIST = {
+            DivxStage.class,
+            NowVideo.class,
+            SharedSx.class,
+            Sockshare.class,
+            StreamCloud.class,
+            Vodlocker.class,
+    };
+
     public static Host selectById(int id){
-        switch (id){
-            case DivxStage.HOST_ID: return new DivxStage(id);
-            case NowVideo.HOST_ID: return new NowVideo(id);
-            case SharedSx.HOST_ID: return new SharedSx(id);
-            case Sockshare.HOST_ID: return new Sockshare(id);
-            case StreamCloud.HOST_ID: return new StreamCloud(id);
+        for (Class<?> h: HOSTER_LIST) {
+            try {
+                Host host = (Host) h.getConstructor().newInstance();
+                if(host.getId() == id){
+                    return host;
+                }
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
         }
-        return new Host(id);
+        return null;
     }
 
-    public Host(int id){
-        this.id = id;
+    public Host(){
+
     }
 
-    public Host(int id, String name, int mirror){
-        this.id = id;
-        this.name = name;
+    public Host(int mirror){
         this.mirror = mirror;
     }
 
@@ -33,13 +49,8 @@ public class Host {
         return false;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
+    public abstract int getId();
+    public abstract String getName();
 
     public int getMirror() {
         return mirror;
@@ -47,14 +58,6 @@ public class Host {
 
     public void setMirror(int mirror) {
         this.mirror = mirror;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getUrl() {
@@ -71,6 +74,6 @@ public class Host {
 
     @Override
     public String toString() {
-        return name + " #" + mirror;
+        return getName() + " #" + mirror;
     }
 }

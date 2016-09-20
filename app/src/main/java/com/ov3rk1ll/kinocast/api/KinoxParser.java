@@ -157,7 +157,7 @@ public class KinoxParser extends Parser{
                 }
                 for(int i = 0; i < c; i++){
                     Host h = Host.selectById(hosterId);
-                    h.setName(name);
+                    if(h == null) continue;
                     h.setMirror(i + 1);
                     if(h.isEnabled()){
                         hostlist.add(h);
@@ -258,7 +258,7 @@ public class KinoxParser extends Parser{
                 int c = Integer.valueOf(count);
                 for(int i = 0; i < c; i++){
                     Host h = Host.selectById(hosterId);
-                    h.setName(name);
+                    if(h == null) continue;
                     h.setMirror(i + 1);
                     if(h.isEnabled()){
                         hostlist.add(h);
