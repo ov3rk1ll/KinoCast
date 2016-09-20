@@ -6,28 +6,21 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.text.Html;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
-import com.ov3rk1ll.kinocast.utils.UserAgentInterceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -111,7 +104,7 @@ public class WVersionManager {
 
         builder.setIcon(getIcon());
         builder.setTitle(getTitle());
-        builder.setMessage(Html.fromHtml(getMessage(), null, getCustomTagHandler()));
+        builder.setMessage(getMessage());
 
         switch (mMode) {
             case MODE_CHECK_VERSION:
@@ -310,7 +303,21 @@ public class WVersionManager {
         }
     }
 
-    class VersionContentRequest extends AsyncTask<String, Void, String>{
+    class VersionInformation{
+        private int versionCode;
+        private String name;
+        private String body;
+        private String downloadUrl;
+
+        public VersionInformation(int versionCode, String name, String body, String downloadUrl) {
+            this.versionCode = versionCode;
+            this.name = name;
+            this.body = body;
+            this.downloadUrl = downloadUrl;
+        }
+    }
+
+    class VersionContentRequest extends AsyncTask<String, Void, VersionInformation>{
         Context context;
         int statusCode;
 
@@ -319,14 +326,25 @@ public class WVersionManager {
         }
 
         @Override
-        protected String doInBackground(String... uri) {
+        protected VersionInformation doInBackground(String... uri) {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder().url(uri[0]).build();
 
             try {
                 Response response = client.newCall(request).execute();
-                return response.body().string();
-
+                JSONObject json = new JSONObject(response.body().string());
+                int currentVersionCode = getCurrentVersionCode();
+                int versionCode = json.optInt("version_code", 0);
+                if(currentVersionCode < versionCode){
+                    request = new Request.Builder().url(json.getString("gitlab")).build();
+                    response = client.newCall(request).execute();
+                    JSONObject gitlab = new JSONObject(response.body().string());
+                    return new VersionInformation(versionCode,
+                            gitlab.getString("name"),
+                            gitlab.getString("body"),
+                            gitlab.getJSONArray("assets").getJSONObject(0).getString("browser_download_url")
+                    );
+                }
             }catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
@@ -334,38 +352,14 @@ public class WVersionManager {
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            versionCode = 0;
-            String content = null;
+        protected void onPostExecute(VersionInformation result) {
             if(result == null){
                 Log.e(TAG, "Response invalid");
             }else{
-                try{
-                    if(!result.startsWith("{")){ // for response who append with unknown char
-                        result = result.substring(1);
-                    }
-                    // json format from server:
-                    JSONObject json = (JSONObject)new JSONTokener(result).nextValue();
-                    versionCode = json.optInt("version_code");
-                    content = json.optString("content");
-
-                    int currentVersionCode = getCurrentVersionCode();
-                    if(currentVersionCode < versionCode){
-                        // new versionCode will always higher than currentVersionCode
-                        if(versionCode != getIgnoreVersionCode()){ // check is new versionCode is ignore version
-                            setUpdateUrl(json.optString("apk"));
-                            // set dialog message
-                            setMessage(content);
-
-                            // show update dialog
-                            showDialog();
-                        }
-                    }
-                }catch (JSONException e){
-                    Log.e(TAG, "is your server response have valid json format?");
-                }catch(Exception e) {
-                    Log.e(TAG, e.toString());
-                }
+                setUpdateUrl(result.downloadUrl);
+                setMessage(result.body);
+                setTitle("Update " + result.name);
+                showDialog();
             }
         }
     }
@@ -480,15 +474,7 @@ public class WVersionManager {
     }
 
     public int getCurrentVersionCode() {
-        int currentVersionCode = 0;
-        PackageInfo pInfo;
-        try {
-            pInfo = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
-            currentVersionCode = pInfo.versionCode;
-        } catch (NameNotFoundException e) {
-            // return 0
-        }
-        return currentVersionCode;
+        return BuildConfig.VERSION_CODE;
     }
 
     public int getIgnoreVersionCode() {
