@@ -62,7 +62,12 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
                 holder.progressBar.setVisibility(View.GONE);
             }
         });
+        if(position == 1){
+            holder.itemView.setSelected(true);
+        }
+
     }
+
 
     @Override public int getItemCount() {
         return items.size();
@@ -141,6 +146,8 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
                 }
             });
         }
+
+
     }
 
     public interface OnRecyclerViewItemClickListener<Model> {

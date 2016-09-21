@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ov3rk1ll.kinocast.R;
@@ -36,6 +37,7 @@ public class StreamCloud extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        if(TextUtils.isEmpty(url)) return null;
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
         Pattern pattern = Pattern.compile("http:\\/\\/streamcloud\\.eu\\/(.*)\\/(.*)\\.html");
         Matcher matcher = pattern.matcher(url);

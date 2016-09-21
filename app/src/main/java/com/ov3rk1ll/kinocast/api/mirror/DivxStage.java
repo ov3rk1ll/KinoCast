@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ov3rk1ll.kinocast.R;
@@ -30,6 +31,7 @@ public class DivxStage extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        if(TextUtils.isEmpty(url)) return null;
         try {
             url = url.replace("/Out/?s=", "");
             Log.d(TAG, "Resolve " + url);

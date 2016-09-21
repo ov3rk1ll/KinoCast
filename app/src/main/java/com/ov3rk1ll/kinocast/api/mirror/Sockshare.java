@@ -1,5 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
+import android.text.TextUtils;
+
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
 
 public class Sockshare extends Host {
@@ -24,6 +26,7 @@ public class Sockshare extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        if(TextUtils.isEmpty(url)) return null;
         //TODO implement Sockshare
         return null;
     }

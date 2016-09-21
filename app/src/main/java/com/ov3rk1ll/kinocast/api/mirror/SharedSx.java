@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ov3rk1ll.kinocast.R;
@@ -34,6 +35,7 @@ public class SharedSx extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        if(TextUtils.isEmpty(url)) return null;
         Log.d(TAG, "resolve " + url);
         queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getdatafrom, url));
         try {

@@ -12,4 +12,5 @@
     <color name="divider">#B6B6B6</color>
 
     <color name="list_item_background">#AACCCCCC</color>
+    <color name="accent_70">#46ffeb3b</color>
 </resources>

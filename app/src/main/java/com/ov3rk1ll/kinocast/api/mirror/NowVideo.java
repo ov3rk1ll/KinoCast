@@ -1,5 +1,7 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
+import android.text.TextUtils;
+
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
 import com.ov3rk1ll.kinocast.utils.Utils;
@@ -28,6 +30,7 @@ public class NowVideo extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        if(TextUtils.isEmpty(url)) return null;
         try {
             String id = url.substring(url.lastIndexOf("/") + 1);
             queryTask.updateProgress(queryTask.getContext().getString(R.string.host_progress_getvideoforid, id));

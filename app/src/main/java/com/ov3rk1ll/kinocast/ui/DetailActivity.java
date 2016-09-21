@@ -39,6 +39,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.ContentViewEvent;
+import com.crashlytics.android.answers.CustomEvent;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
@@ -385,7 +388,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            //TODO com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html");
+            Answers.getInstance().logContentView(new ContentViewEvent()
+                    .putContentName(item.getTitle())
+                    .putContentType(item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series")
+                    .putContentId(item.getSlug()));
             item = Parser.getInstance().loadDetail(item);
             return true;
         }
@@ -444,7 +450,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         @Override
         protected void onPostExecute(List<Host> list) {
             super.onPostExecute(list);
-            setMirrorSpinner(list.toArray(new Host[list.size()]));
+            setMirrorSpinner(list == null ? null : list.toArray(new Host[list.size()]));
         }
     }
 
@@ -499,8 +505,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         @Override
         protected String doInBackground(Void... params) {
             String link;
-            // TODO com.ov3rk1ll.kinocast.utils.Utils.trackPath(DetailActivity.this, "Stream/" + item.getSlug() + ".html?host=" + host.toString());
-
             if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[spinnerSeasonItemPosition];
                 String e = s.episodes[spinnerEpisodeItemPosition];
@@ -563,12 +567,18 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     @Override
                     public void onClick(DialogInterface dialog, int position) {
                         AppAdapter.App app = adapter.getItem(position);
+                        CustomEvent customEvent = new CustomEvent("Played Steam");
+                        customEvent.putCustomAttribute("Hoster", host.getName());
+                        customEvent.putCustomAttribute("Movie", item.getTitle());
                         if (app.getComponent() == null) {
                             startPlaybackOnChromecast(link);
+                            customEvent.putCustomAttribute("Player", "Chromecast");
                         } else {
                             intent.setComponent(app.getComponent());
+                            customEvent.putCustomAttribute("Player", app.getComponent().toString());
                             startActivity(intent);
                         }
+                        Answers.getInstance().logCustom(customEvent);
                         dialog.dismiss();
                     }
                 });
@@ -599,12 +609,14 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             mediaMetadata.putString(MediaMetadata.KEY_TITLE, item.getTitle());
         }
         mediaMetadata.putString(MediaMetadata.KEY_SUBTITLE, getString(R.string.chromecast_subtitle));
-        mediaMetadata.addImage(new WebImage(Uri.parse(
-                new CoverImage(item.getImageRequest(96, "poster")).getBitmapUrl(getApplication()))
-        ));
-        mediaMetadata.addImage(new WebImage(Uri.parse(
-                new CoverImage(item.getImageRequest(getResources().getDisplayMetrics().widthPixels, "poster")).getBitmapUrl(getApplication()))
-        ));
+
+        String url =  new CoverImage(item.getImageRequest(96, "poster")).getBitmapUrl(getApplication());
+        if(TextUtils.isEmpty(url)) url = "http://kinocast.ov3rk1ll.com/img/kinocast_icon_512.png";
+        mediaMetadata.addImage(new WebImage(Uri.parse(url)));
+
+        url =  new CoverImage(item.getImageRequest(getResources().getDisplayMetrics().widthPixels, "poster")).getBitmapUrl(getApplication());
+        if(TextUtils.isEmpty(url)) url = "http://kinocast.ov3rk1ll.com/img/kinocast_icon_512.png";
+        mediaMetadata.addImage(new WebImage(Uri.parse(url)));
         Log.i("cast", "play " + link);
         MediaInfo mediaInfo = new MediaInfo.Builder(link)
                 .setContentType("video/mp4")

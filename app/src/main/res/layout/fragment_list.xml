@@ -6,13 +6,13 @@
     tools:context="com.ov3rk1ll.kinocast.ui.ListFragment">
 
     <android.support.v7.widget.RecyclerView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/spacing_xsmall"
         android:clipToPadding="false"
+        android:descendantFocusability="afterDescendants"
+        android:drawSelectorOnTop="true"
         tools:context=".MainActivity"
         />
 

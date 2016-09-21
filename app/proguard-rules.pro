@@ -78,6 +78,9 @@
 -keep class android.support.v7.** { *; }
 -keep interface android.support.v7.** { *; }
 
+#Cast Companion
+-keep class com.google.android.libraries.** { *; }
+
 # Crashlytics
 -keepattributes SourceFile,LineNumberTable
 

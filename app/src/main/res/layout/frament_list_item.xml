@@ -5,15 +5,19 @@
     android:layout_width="@dimen/list_item_width"
     android:layout_height="@dimen/list_item_height"
     android:layout_margin="@dimen/spacing_xsmall"
-    android:foreground="?attr/selectableItemBackground"
-    tools:layout_gravity="center">
+    android:foreground="@drawable/selector_medium_high"
+    android:drawSelectorOnTop="true"
+    tools:layout_gravity="center"
+    android:clickable="true"
+    android:focusable="true">
     <com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:transitionName="photo_hero"
-        tools:src="@drawable/ic_launcher" />
+        tools:src="@drawable/ic_launcher"
+        android:visibility="invisible"/>
 
 
     <ProgressBar

@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast.api.mirror;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
@@ -36,6 +37,7 @@ public class Vodlocker extends Host {
 
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
+        if(TextUtils.isEmpty(url)) return null;
         try {
             Log.d(TAG, "GET " + url);
             Document doc = Jsoup.connect(url)
