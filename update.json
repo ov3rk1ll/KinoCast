@@ -1,6 +1,6 @@
 {
-"version_code": 15100,
-"content": "Version 1.5.1 <p>Changelog:</p><ul><li>[Neu] Einstellungen zum sortieren der Hosterliste</li><li>[Neu] Überarbeitetes Layout in der Detailansicht</li><li>[Fix] Optimierungen und Reduktion der Gesamtgröße der App</li></ul>",
-"apk": "https://dl.dropboxusercontent.com/u/35486665/Android/apk/KinoCast/com.ov3rk1ll.kinocast_v1.5.1.apk",
-"gitlab": "https://api.github.com/repos/ov3rk1ll/KinoCast/releases/4180121"
+"version_code": 15200,
+"content": "Version 1.5.2 <p>Changelog:</p><ul><li>[Fix] Fehler mit Chromecast-Player behoben</li><li> - [Fix] Verbesserung bei einigen Hoster</li></ul>",
+"apk": "https://dl.dropboxusercontent.com/u/35486665/Android/apk/KinoCast/com.ov3rk1ll.kinocast_v1.5.2.apk",
+"gitlab": "https://api.github.com/repos/ov3rk1ll/KinoCast/releases/4355325"
 }
