@@ -1,5 +1,7 @@
 package com.ov3rk1ll.kinocast.ui;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout mDrawerLayout;
     private int mNavItemId;
     private final Handler mDrawerActionHandler = new Handler();
+    private MenuItem searchMenuItem;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -217,17 +220,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getMenuInflater().inflate(R.menu.main, menu);
             VideoCastManager.getInstance().addMediaRouterButton(menu, R.id.media_route_menu_item);
 
-            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
+            searchMenuItem = menu.findItem(R.id.action_search);
 
-            String[] from = {"item"};
-            int[] to = {android.R.id.text1};
+            final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchMenuItem);
+            searchView.setQueryHint(getResources().getString(R.string.searchable_hint));
 
             searchSuggestionAdapter = new SearchSuggestionAdapter(
                     getSupportActionBar().getThemedContext(),
                     android.R.layout.simple_list_item_1,
                     null,
-                    from,
-                    to,
+                    new String[]{"item"},
+                    new int[]{android.R.id.text1},
                     0);
 
             searchView.setSuggestionsAdapter(searchSuggestionAdapter);
@@ -241,12 +244,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public boolean onSuggestionClick(int position) {
                     Cursor cursor = (Cursor) searchSuggestionAdapter.getItem(position);
                     doSearch(cursor.getString(1));
-                    MenuItemCompat.collapseActionView(menu.findItem(R.id.action_search));
+                    MenuItemCompat.collapseActionView(searchMenuItem);
                     return true;
                 }
             });
 
-            SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextChange(String newText) {
                     if(newText.length() >= 2)
@@ -256,16 +259,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    MenuItemCompat.collapseActionView(menu.findItem(R.id.action_search));
+                    MenuItemCompat.collapseActionView(searchMenuItem);
                     doSearch(query);
                     return true;
                 }
-            };
-            searchView.setOnQueryTextListener(queryTextListener);
+            });
+            
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             //restoreActionBar();
             return true;
         }
         return super.onCreateOptionsMenu(menu);
+    }
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            doSearch(query);
+            MenuItemCompat.collapseActionView(searchMenuItem);
+        }
     }
 
     private void doSearch(String query){

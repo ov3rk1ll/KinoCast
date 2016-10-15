@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.TextUtils;
 import android.widget.FilterQueryProvider;
 
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -19,8 +20,9 @@ public class SearchSuggestionAdapter extends SimpleCursorAdapter {
                 MatrixCursor matrixCursor = new MatrixCursor(new String[] { "_id", "item" });
 
                 if(constraint == null) return matrixCursor;
-
-                String suggestions[] = Parser.getInstance().getSearchSuggestions(constraint.toString());
+                String query = constraint.toString();
+                if(TextUtils.isEmpty(query)) return matrixCursor;
+                String suggestions[] = Parser.getInstance().getSearchSuggestions(query);
                 if(suggestions == null) return matrixCursor;
 
                 for (int i = 0; i < suggestions.length; i++) {

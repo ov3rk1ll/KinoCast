@@ -32,6 +32,7 @@ Die Datei wurde möglicherweiße gelöscht.</string>
     <string name="no_host_found">Kein Hoster verfügbar</string>
     <string name="pref_ringtone_silent">Lautlos</string>
     <string name="menu_search">Suchen</string>
+    <string name="searchable_hint">Suche</string>
     <string name="title_activity_player">Player</string>
     <string name="action_settings">Settings</string>
 
