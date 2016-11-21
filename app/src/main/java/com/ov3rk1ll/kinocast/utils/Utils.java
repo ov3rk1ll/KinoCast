@@ -8,6 +8,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
+import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -121,5 +124,19 @@ public class Utils {
             sparseArray.put(key, value);
         }
         return sparseArray;
+    }
+
+    public static VideoCastManager initializeCastManager(Context context) {
+        CastConfiguration options = new CastConfiguration.Builder(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
+                .enableAutoReconnect()
+                .enableCaptionManagement()
+                .enableDebug()
+                .enableLockScreen()
+                .enableWifiReconnection()
+                .enableNotification()
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true)
+                .build();
+        return VideoCastManager.initialize(context, options);
     }
 }

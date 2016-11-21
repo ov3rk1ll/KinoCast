@@ -93,7 +93,13 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
+        mVideoCastManager = Utils.initializeCastManager(this);
+
         setContentView(R.layout.activity_detail);
+
+        mVideoCastManager.reconnectSessionIfPossible();
 
         // actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -101,10 +107,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         bookmarkManager = new BookmarkManager(getApplication());
         bookmarkManager.restore();
-
-        if (BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
-        mVideoCastManager = VideoCastManager.getInstance();
-        mVideoCastManager.reconnectSessionIfPossible();
 
         item = (ViewModel) getIntent().getSerializableExtra(ARG_ITEM);
 
