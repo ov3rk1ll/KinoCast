@@ -28,6 +28,7 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
     }
 
     public void save(){
+        // TODO Push to server
         try {
             File f = new File(context.getFilesDir(), FILENAME);
             if(f.exists()) f.delete();

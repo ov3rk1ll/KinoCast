@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="de">
+    <string name="api_server">https://floating-dusk-21938.herokuapp.com</string>
+    <!--<string name="api_server">http://192.168.199.111.xip.io:9000</string>-->
 
     <string name="app_name">KinoCast</string>
     <string name="title_activity_settings">Einstellungen</string>

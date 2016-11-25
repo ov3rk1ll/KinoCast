@@ -28,6 +28,7 @@ import java.util.Set;
 
 public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
+    public static final String PARSER_NAME = "kinox";
     public static final String URL_BASE = "http://www.kinox.tv/";
 
     private static final SparseArray<Integer> languageResMap = new SparseArray<>();

@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,9 +24,17 @@ import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.layout.GridLayoutManager;
 import com.ov3rk1ll.kinocast.ui.helper.layout.ResultRecyclerAdapter;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
+import com.ov3rk1ll.kinocast.utils.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ListFragment extends Fragment {
     private static final String ARG_URL = "param_url";
@@ -66,7 +75,7 @@ public class ListFragment extends Fragment {
             if(getArguments().containsKey(ARG_SPECIAL))
                 mSpecialId = getArguments().getInt(ARG_SPECIAL);
         }
-        adapter = new ResultRecyclerAdapter(R.layout.frament_list_item);
+        adapter = new ResultRecyclerAdapter(getActivity(), R.layout.frament_list_item);
     }
 
     @Override
@@ -196,15 +205,38 @@ public class ListFragment extends Fragment {
 
         @Override
         protected ViewModel[] doInBackground(Context... params) {
-            BookmarkManager bookmarks = new BookmarkManager(params[0]);
+
             List<ViewModel> list = new ArrayList<ViewModel>();
+            try {
+                OkHttpClient client = Utils.buildHttpClient(getActivity());
+                Request request = new Request.Builder()
+                        .url(getString(R.string.api_server) + "/api/users/me/favorites")
+                        .build();
+
+                Response response = client.newCall(request).execute();
+                String responseBody = response.body().string();
+                Log.i("favorites", "GOT " + response.code() + " - " + responseBody);
+                JSONArray array = new JSONArray(responseBody);
+                for(int i = 0; i < array.length(); i++){
+                    JSONObject entry = array.getJSONObject(i);
+                    if(entry.getBoolean("internal"))
+                        continue;
+
+                    Parser p = Parser.selectByName(entry.getString("parser"));
+                    list.add(p.loadDetail(entry.getString("url")));
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            /*BookmarkManager bookmarks = new BookmarkManager(params[0]);
             for(int i = 0; i < bookmarks.size(); i++){
                 BookmarkManager.Bookmark b = bookmarks.get(i);
                 if(!b.isInternal()) {
                     Parser p = Parser.selectByParserId(b.getParserId());
                     list.add(p.loadDetail(b.getUrl()));
                 }
-            }
+            }*/
             return list.toArray(new ViewModel[list.size()]);
         }
 

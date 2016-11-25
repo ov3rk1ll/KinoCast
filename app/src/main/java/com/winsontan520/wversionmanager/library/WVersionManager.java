@@ -15,9 +15,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONObject;
 
@@ -29,6 +26,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class WVersionManager {
     private static final String TAG = "WVersionManager";

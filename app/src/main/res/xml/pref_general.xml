@@ -8,6 +8,12 @@
         />
 
     <Preference
+        android:key="login"
+        android:title="Login"
+        android:summary="not logged in yet"
+        />
+
+    <Preference
         android:key="version_information"
         android:title="Version"
         />

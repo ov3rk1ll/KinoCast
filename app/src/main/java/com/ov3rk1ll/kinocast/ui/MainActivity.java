@@ -5,9 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +22,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -26,7 +31,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.ov3rk1ll.kinocast.BuildConfig;
@@ -38,8 +54,18 @@ import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.winsontan520.wversionmanager.library.WVersionManager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+import java.io.IOException;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
     // private final int RESOLVE_CONNECTION_REQUEST_CODE = 5001;
 
     private static final String STATE_TITLE = "state_title";
@@ -55,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mNavItemId;
     private final Handler mDrawerActionHandler = new Handler();
     private MenuItem searchMenuItem;
+    private GoogleApiClient mGoogleApiClient;
+    private NavigationView mNavigationView;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -111,10 +139,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // listen for navigation events
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView = (NavigationView) findViewById(R.id.navigation);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
-        navigationView.getMenu().findItem(mNavItemId).setChecked(true);
+        mNavigationView.getMenu().findItem(mNavItemId).setChecked(true);
 
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -149,6 +177,71 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         */
+
+        // Login stuff
+        mGoogleApiClient = Utils.buildAuthClient(this, this, this);
+
+        //Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        //startActivityForResult(signInIntent, RC_SIGN_IN);
+
+    }
+
+    void handleSignInResult(GoogleSignInResult result){
+        try {
+            GoogleSignInAccount acct = result.getSignInAccount();
+            String authCode = acct.getServerAuthCode();
+
+            Log.i("userdata", "GET " + getString(R.string.api_server) + "/auth/authcode/callback?code=" + authCode);
+            OkHttpClient client = Utils.buildHttpClient(this);
+            Request request = new Request.Builder()
+                    .url(getString(R.string.api_server) + "/auth/authcode/callback?code=" + authCode)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            int statusCode = response.code();
+            if(statusCode == 200){
+                String responseBody = response.body().string();
+                final JSONObject json = new JSONObject(responseBody);
+
+                // TODO Is pro user
+                String role = json.getString("role");
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        View headerLayout = mNavigationView.getHeaderView(0);
+                        try {
+                            final View backgroundLayout = headerLayout.findViewById(R.id.layoutBackground);
+                            ((TextView)headerLayout.findViewById(R.id.name)).setText(json.getString("name"));
+                            ((TextView)headerLayout.findViewById(R.id.email)).setText(json.getString("email"));
+
+                            String avatar = json.getString("image");
+                            Glide.with(MainActivity.this).load(avatar).into((CircleImageView)headerLayout.findViewById(R.id.circleView));
+
+                            String background = json.getString("cover");
+                            Glide.with(MainActivity.this).load(background).asBitmap().into(new SimpleTarget<Bitmap>(backgroundLayout.getWidth(), backgroundLayout.getHeight()) {
+                                @Override
+                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    Drawable drawable = new BitmapDrawable(resource);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                                        backgroundLayout.setBackground(drawable);
+                                    }
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -171,6 +264,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         // remove active state from settings
         navigationView.setCheckedItem(mNavItemId);
+
+        OptionalPendingResult<GoogleSignInResult> pendingResult =
+                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (pendingResult.isDone()) {
+            final GoogleSignInResult result = pendingResult.get();
+            // There's immediate result available.
+            Log.i("GoogleSignInResult", "immediate " + (result.getSignInAccount() != null));
+            if(result.getSignInAccount() != null){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleSignInResult(result);
+                    }
+                }).start();
+            }
+        } else {
+
+            Log.i("GoogleSignInResult", "so async");
+            pendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(@NonNull final GoogleSignInResult result) {
+                    Log.i("GoogleSignInResult", "onResult " + (result.getSignInAccount() != null));
+                    if(result.getSignInAccount() != null){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                handleSignInResult(result);
+                            }
+                        }).start();
+                    }
+                }
+            });
+        }
 
     }
 
@@ -367,5 +493,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .replace(R.id.container, fragment)
                     .commit();
         }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }

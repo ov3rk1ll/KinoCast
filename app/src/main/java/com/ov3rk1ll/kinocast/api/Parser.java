@@ -24,6 +24,13 @@ public abstract class Parser {
         }
         return null;
     }
+    public static Parser selectByName(String name){
+        switch (name){
+            case KinoxParser.PARSER_NAME: return new KinoxParser();
+            case Movie4kParser.PARSER_NAME: return new Movie4kParser();
+        }
+        return null;
+    }
 
     public abstract String getParserName();
 
