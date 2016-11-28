@@ -1,19 +1,18 @@
 package com.ov3rk1ll.kinocast.ui.util.glide;
 
+import android.text.TextUtils;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.utils.TheMovieDb;
-import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -44,22 +43,29 @@ public class OkHttpViewModelStreamFetcher implements DataFetcher<InputStream> {
         GlideUrl url;
         String cacheUrl = Parser.getInstance().getPageLink(model.getViewModel()) + "?size=" + model.getScreenWidthPx() + "&type=" + model.getType();
 
-        String imageUrl = null;
-        try {
-            Map<String, List<String>> para = Utils.splitHashQuery(new URL(cacheUrl));
-            JSONObject json = tmdbCache.get(cacheUrl);
-            if(json != null){
-                String type = para.get("type").get(0);
-                String key = type + "_path";
-                int size = Integer.valueOf(para.get("size").get(0));
-                if(type.equals("backdrop"))
-                    imageUrl = TheMovieDb.IMAGE_BASE_PATH + getBackdropSize(size) + json.getString(key);
-                else
-                    imageUrl = TheMovieDb.IMAGE_BASE_PATH + getPosterSize(size) + json.getString(key);
+        String imageUrl = model.getViewModel().getImageBase();
+        if(TextUtils.isEmpty(imageUrl)) { // No URL - Try via IMDB
+            try {
+                JSONObject json = tmdbCache.get(model.getViewModel(), cacheUrl);
+                if (json != null) {
+                    String type = model.getType();
+                    String key = type + "_path";
+                    int size = model.getScreenWidthPx();
+                    if (type.equals("backdrop"))
+                        imageUrl = TheMovieDb.IMAGE_BASE_PATH + getBackdropSize(size) + json.getString(key);
+                    else
+                        imageUrl = TheMovieDb.IMAGE_BASE_PATH + getPosterSize(size) + json.getString(key);
 
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch(Exception e) {
-            e.printStackTrace();
+        } else { // The server should return a Image url on a know path
+            if (model.getType().equals("backdrop")){
+                imageUrl = imageUrl + "/" + getBackdropSize(model.getScreenWidthPx()) + "/backdrop.jpg";
+            } else {
+                imageUrl = imageUrl + "/" + getPosterSize(model.getScreenWidthPx()) + "/poster.jpg";
+            }
         }
         url = new GlideUrl(imageUrl);
 

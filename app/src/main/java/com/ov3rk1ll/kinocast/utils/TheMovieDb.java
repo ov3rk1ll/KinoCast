@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.utils;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
@@ -48,7 +49,7 @@ public class TheMovieDb {
         writeThread = Executors.newSingleThreadExecutor();
     }
 
-    public JSONObject get(String url) {
+    public JSONObject get(ViewModel item, String url) {
         JSONObject json = null;
         //String url = request.getUrl();
 
@@ -67,7 +68,9 @@ public class TheMovieDb {
         if(json == null) {
             try {
                 // Get IMDB-ID from page
-                ViewModel item = Parser.getInstance().loadDetail(url);
+                if(TextUtils.isEmpty(item.getImdbId())) {
+                    item = Parser.getInstance().loadDetail(item);
+                }
                 String param = url.substring(url.indexOf("#") + 1);
                 // tt1646971?api_key=f9dc7e5d12b2640bf4ef1cf20835a1cc&language=de&external_source=imdb_id
                 JSONObject data = Utils.readJson("http://api.themoviedb.org/3/find/" + item.getImdbId() + "?api_key=" + API_KEY + "&external_source=imdb_id&" + param);

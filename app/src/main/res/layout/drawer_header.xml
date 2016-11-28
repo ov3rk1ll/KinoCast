@@ -1,36 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layoutBackground"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/accent_70"
-    android:orientation="vertical">
+    android:layout_height="74dp"
+    android:background="@drawable/user_background_drawable"
+    android:paddingBottom="4dp">
+
+    <TextView
+        android:text="Pro"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="@android:color/primary_text_dark"
+        android:background="@color/primary_dark"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textStyle="bold"
+        android:visibility="visible"
+        android:id="@+id/userBadge" />
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/ic_launcher"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="4dp"
         android:id="@+id/circleView"
         />
 
     <LinearLayout
+        android:id="@+id/layout_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingBottom="8dp">
+        android:paddingBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_alignBottom="@+id/circleView"
+        android:layout_toRightOf="@+id/circleView"
+        android:layout_toEndOf="@+id/circleView">
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:textColor="#ffffff"
+            android:textColor="@android:color/primary_text_light"
             android:text="Not logged in"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -41,13 +58,12 @@
             android:id="@+id/email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="5dp"
+            android:textColor="@android:color/primary_text_light"
             android:text="Go to settings to login"
             android:textSize="14sp"
             android:textStyle="normal"
 
             />
     </LinearLayout>
-</LinearLayout>
+
+</RelativeLayout>

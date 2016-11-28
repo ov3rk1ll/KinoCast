@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,8 +31,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -187,61 +182,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     void handleSignInResult(GoogleSignInResult result){
-        try {
-            GoogleSignInAccount acct = result.getSignInAccount();
-            String authCode = acct.getServerAuthCode();
 
-            Log.i("userdata", "GET " + getString(R.string.api_server) + "/auth/authcode/callback?code=" + authCode);
-            OkHttpClient client = Utils.buildHttpClient(this);
-            Request request = new Request.Builder()
-                    .url(getString(R.string.api_server) + "/auth/authcode/callback?code=" + authCode)
-                    .build();
+            final GoogleSignInAccount acct = result.getSignInAccount();
+            final View headerLayout = mNavigationView.getHeaderView(0);
 
-            Response response = client.newCall(request).execute();
-            int statusCode = response.code();
-            if(statusCode == 200){
-                String responseBody = response.body().string();
-                final JSONObject json = new JSONObject(responseBody);
+            ((TextView)headerLayout.findViewById(R.id.name)).setText(acct.getDisplayName());
+            ((TextView)headerLayout.findViewById(R.id.email)).setText(acct.getEmail());
 
-                // TODO Is pro user
-                String role = json.getString("role");
+            Glide.with(MainActivity.this).load(acct.getPhotoUrl()).into((CircleImageView)headerLayout.findViewById(R.id.circleView));
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        View headerLayout = mNavigationView.getHeaderView(0);
-                        try {
-                            final View backgroundLayout = headerLayout.findViewById(R.id.layoutBackground);
-                            ((TextView)headerLayout.findViewById(R.id.name)).setText(json.getString("name"));
-                            ((TextView)headerLayout.findViewById(R.id.email)).setText(json.getString("email"));
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String authCode = acct.getServerAuthCode();
+                        Log.i("userdata", "GET " + getString(R.string.api_server) + "/auth/authcode/callback?code=" + authCode);
+                        OkHttpClient client = Utils.buildHttpClient(MainActivity.this);
+                        Request request = new Request.Builder()
+                                .url(getString(R.string.api_server) + "/auth/authcode/callback?code=" + authCode)
+                                .build();
 
-                            String avatar = json.getString("image");
-                            Glide.with(MainActivity.this).load(avatar).into((CircleImageView)headerLayout.findViewById(R.id.circleView));
+                        Response response = client.newCall(request).execute();
+                        int statusCode = response.code();
+                        if (statusCode == 200) {
+                            String responseBody = response.body().string();
+                            final JSONObject json = new JSONObject(responseBody);
 
-                            String background = json.getString("cover");
-                            Glide.with(MainActivity.this).load(background).asBitmap().into(new SimpleTarget<Bitmap>(backgroundLayout.getWidth(), backgroundLayout.getHeight()) {
-                                @Override
-                                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                    Drawable drawable = new BitmapDrawable(resource);
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                                        backgroundLayout.setBackground(drawable);
-                                    }
-                                }
-                            });
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            // TODO Is pro user?
+                            String role = json.getString("role");
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                });
-
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+                }
+            }).start();
     }
 
     @Override
@@ -268,31 +244,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         OptionalPendingResult<GoogleSignInResult> pendingResult =
                 Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (pendingResult.isDone()) {
-            final GoogleSignInResult result = pendingResult.get();
+            GoogleSignInResult result = pendingResult.get();
             // There's immediate result available.
             Log.i("GoogleSignInResult", "immediate " + (result.getSignInAccount() != null));
             if(result.getSignInAccount() != null){
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleSignInResult(result);
-                    }
-                }).start();
+                handleSignInResult(result);
             }
         } else {
 
             Log.i("GoogleSignInResult", "so async");
             pendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
-                public void onResult(@NonNull final GoogleSignInResult result) {
+                public void onResult(@NonNull GoogleSignInResult result) {
                     Log.i("GoogleSignInResult", "onResult " + (result.getSignInAccount() != null));
                     if(result.getSignInAccount() != null){
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                handleSignInResult(result);
-                            }
-                        }).start();
+                        handleSignInResult(result);
                     }
                 }
             });

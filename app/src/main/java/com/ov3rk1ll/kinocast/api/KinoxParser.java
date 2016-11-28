@@ -76,6 +76,7 @@ public class KinoxParser extends Parser{
                 model.setSlug(url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".")));
                 model.setTitle(element.select("h1").text());
                 model.setSummary(element.select("div.Descriptor").text());
+                // model.setImageBase("https://floating-dusk-21938.herokuapp.com/api/kinox/movies/" + model.getSlug());
 
                 String ln = element.select("div.Genre > div.floatleft").eq(0).select("img").attr("src");
                 ln = ln.substring(ln.lastIndexOf("/") + 1);
@@ -93,7 +94,7 @@ public class KinoxParser extends Parser{
                 rating = rating.substring(rating.indexOf(":") + 1, rating.indexOf("/") - 1);
                 model.setRating(Float.valueOf(rating.trim()));
 
-                model.setImage(getPageLink(model) + "#language=" + language);
+                // model.setImage(null);
 
                 list.add(model);
             }catch (Exception e){
@@ -212,16 +213,12 @@ public class KinoxParser extends Parser{
             model.setSlug(url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".")));
             model.setTitle(doc.select("h1 > span:eq(0)").text());
             model.setSummary(doc.select("div.Descriptore").text());
-            model.setImage(URL_BASE + doc.select("div.Grahpics img").attr("src"));
             String ln = doc.select("div.Flag > img").attr("src");
             ln = ln.substring(ln.lastIndexOf("/") + 1);
             ln = ln.substring(0, ln.indexOf("."));
             int lnId = Integer.valueOf(ln);
 
             model.setLanguageResId(languageResMap.get(lnId));
-            String language = languageKeyMap.get(lnId);
-
-            model.setImage(getPageLink(model) + "#language=" + language);
 
             model.setGenre(doc.select("li[Title=Genre]").text());
 

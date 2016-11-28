@@ -78,14 +78,15 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.2'
     compile 'com.github.woxthebox:draglistview:1.2.9'
     compile 'org.jsoup:jsoup:1.9.1'
-    compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.8.4'
-    compile 'com.github.mobfox:MobFox-Android-SDK-Core:2.1.9'
+    compile 'com.google.android.libraries.cast.companionlibrary:ccl:2.9.1'
+    compile 'com.github.mobfox:MobFox-Android-SDK-Core:3.0.3'
     compile('io.fabric.sdk.android:fabric:1.3.14@aar') {
         transitive = true;
     }
     compile('com.crashlytics.sdk.android:crashlytics:2.6.4@aar') {
         transitive = true;
     }
+    compile 'com.google.android.gms:play-services-ads:9.8.0'
     compile 'com.google.android.gms:play-services-auth:9.8.0'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'

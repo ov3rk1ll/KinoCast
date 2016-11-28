@@ -9,8 +9,7 @@ public class ViewModel implements Serializable {
     private int seriesID;
     private String slug;
     private String title;
-    private String image;
-    private String backdrop;
+    private String imageBase;
     private String summary;
     private float rating;
     private int languageResId;
@@ -49,18 +48,6 @@ public class ViewModel implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getImage() {
-        return this.image;
-    }
-
-    public String getImage(int targetWidth, String type) {
-        return this.image + "&size=" + targetWidth + "&type=" + type;
     }
 
     public String getSummary() {
@@ -133,6 +120,14 @@ public class ViewModel implements Serializable {
 
     public void setYear(String year) {
         this.year = year;
+    }
+
+    public String getImageBase() {
+        return imageBase;
+    }
+
+    public void setImageBase(String imageBase) {
+        this.imageBase = imageBase;
     }
 
     public enum Type{
