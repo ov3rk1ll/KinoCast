@@ -4,8 +4,10 @@ import com.ov3rk1ll.kinocast.ui.DetailActivity;
 
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class Host {
+public class Host {
+    protected int id;
     protected int mirror;
+    protected String name;
     protected String url;
 
     public static Class<?>[] HOSTER_LIST = {
@@ -20,7 +22,7 @@ public abstract class Host {
     public static Host selectById(int id){
         for (Class<?> h: HOSTER_LIST) {
             try {
-                Host host = (Host) h.getConstructor().newInstance();
+                Host host = (Host) h.getConstructor(int.class).newInstance(id);
                 if(host.getId() == id){
                     return host;
                 }
@@ -37,11 +39,13 @@ public abstract class Host {
         return null;
     }
 
-    public Host(){
-
+    public Host(int id){
+        this.id = id;
     }
 
-    public Host(int mirror){
+    public Host(int id, String name, int mirror){
+        this.id = id;
+        this.name = name;
         this.mirror = mirror;
     }
 
@@ -49,8 +53,13 @@ public abstract class Host {
         return false;
     }
 
-    public abstract int getId();
-    public abstract String getName();
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getMirror() {
         return mirror;
@@ -58,6 +67,14 @@ public abstract class Host {
 
     public void setMirror(int mirror) {
         this.mirror = mirror;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUrl() {
@@ -74,6 +91,6 @@ public abstract class Host {
 
     @Override
     public String toString() {
-        return getName() + " #" + mirror;
+        return name + " #" + mirror;
     }
 }

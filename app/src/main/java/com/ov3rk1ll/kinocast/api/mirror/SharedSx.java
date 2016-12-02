@@ -17,6 +17,10 @@ public class SharedSx extends Host {
     private static final String TAG = SharedSx.class.getSimpleName();
     public static final int HOST_ID = 52;
 
+    public SharedSx(int id) {
+        super(id);
+    }
+
 
     @Override
     public int getId() {

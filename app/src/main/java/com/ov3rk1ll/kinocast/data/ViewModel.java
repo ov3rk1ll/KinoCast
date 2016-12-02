@@ -2,6 +2,8 @@ package com.ov3rk1ll.kinocast.data;
 
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 public class ViewModel implements Serializable {
@@ -16,6 +18,7 @@ public class ViewModel implements Serializable {
     private String genre;
     private String imdbId;
     private String year;
+    private JSONObject favorites;
 
     private Type type;
 
@@ -128,6 +131,14 @@ public class ViewModel implements Serializable {
 
     public void setImageBase(String imageBase) {
         this.imageBase = imageBase;
+    }
+
+    public JSONObject getFavorites() {
+        return favorites;
+    }
+
+    public void setFavorites(JSONObject favorites) {
+        this.favorites = favorites;
     }
 
     public enum Type{

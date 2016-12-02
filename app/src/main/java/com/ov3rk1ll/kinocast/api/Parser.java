@@ -1,5 +1,7 @@
 package com.ov3rk1ll.kinocast.api;
 
+import android.content.Context;
+
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
@@ -14,6 +16,11 @@ public abstract class Parser {
         return instance;
     }
 
+    public static Parser selectByName(Context context, String name){
+        instance = new ApiParser(context, name);
+        return instance;
+    }
+
     public static void selectParser(int id){
         instance = selectByParserId(id);
     }
@@ -24,13 +31,13 @@ public abstract class Parser {
         }
         return null;
     }
-    public static Parser selectByName(String name){
+    /*public static Parser selectByName(String name){
         switch (name){
             case KinoxParser.PARSER_NAME: return new KinoxParser();
             case Movie4kParser.PARSER_NAME: return new Movie4kParser();
         }
         return null;
-    }
+    }*/
 
     public abstract String getParserName();
 

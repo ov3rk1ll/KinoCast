@@ -13,6 +13,10 @@ public class NowVideo extends Host {
     private static final String TAG = NowVideo.class.getSimpleName();
     public static final int HOST_ID = 40;
 
+    public NowVideo(int id) {
+        super(id);
+    }
+
     @Override
     public int getId() {
         return HOST_ID;

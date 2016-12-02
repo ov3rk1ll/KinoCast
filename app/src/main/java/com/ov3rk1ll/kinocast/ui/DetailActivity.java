@@ -284,7 +284,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         //Update Bookmark to keep series info
         if (item.getType() == ViewModel.Type.SERIES) {
-            BookmarkManager.Bookmark b = new BookmarkManager.Bookmark(Parser.getInstance().getParserId(), Parser.getInstance().getPageLink(item));
+            BookmarkManager.Bookmark b = new BookmarkManager.Bookmark(
+                    Parser.getInstance().getParserName(),
+                    this.item.getSlug(),
+                    Parser.getInstance().getPageLink(this.item)
+            );
+            // TODO Set by value ?
             b.setSeason(((Spinner) findViewById(R.id.spinnerSeason)).getSelectedItemPosition());
             b.setEpisode(((Spinner) findViewById(R.id.spinnerEpisode)).getSelectedItemPosition());
             int idx = bookmarkManager.indexOf(b);
@@ -309,7 +314,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         // Set visibility depending on detail data
         menu.findItem(R.id.action_imdb).setVisible(item.getImdbId() != null);
 
-        BookmarkManager.Bookmark b = bookmarkManager.findItem(this.item);
+        BookmarkManager.Bookmark b = null;
+        try{
+            b = new BookmarkManager.Bookmark(item.getFavorites());
+        } catch (Exception ignored){
+
+        }
         if (b != null && !b.isInternal()) {
             menu.findItem(R.id.action_bookmark_on).setVisible(true);
             menu.findItem(R.id.action_bookmark_off).setVisible(false);
@@ -338,9 +348,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         } else if (id == R.id.action_bookmark_on) {
             //Remove bookmark
             bookmarkManager.remove(new BookmarkManager.Bookmark(
-                            Parser.getInstance().getParserId(),
-                            Parser.getInstance().getPageLink(this.item))
-            );
+                    Parser.getInstance().getParserName(),
+                    this.item.getSlug(),
+                    Parser.getInstance().getPageLink(this.item)
+            ));
             //Show confirmation
             Toast.makeText(getApplication(), getString(R.string.detail_bookmark_on_confirm), Toast.LENGTH_SHORT).show();
             supportInvalidateOptionsMenu();
@@ -348,9 +359,10 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         } else if (id == R.id.action_bookmark_off) {
             //Add bookmark
             bookmarkManager.addAsPublic(new BookmarkManager.Bookmark(
-                            Parser.getInstance().getParserId(),
-                            Parser.getInstance().getPageLink(this.item))
-            );
+                    Parser.getInstance().getParserName(),
+                    this.item.getSlug(),
+                    Parser.getInstance().getPageLink(this.item)
+            ));
             //Show confirmation
             Toast.makeText(getApplication(), getString(R.string.detail_bookmark_off_confirm), Toast.LENGTH_SHORT).show();
             supportInvalidateOptionsMenu();
@@ -411,7 +423,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             super.onPostExecute(aBoolean);
 
             if (item.getType() == ViewModel.Type.SERIES) {
-                BookmarkManager.Bookmark b = bookmarkManager.findItem(item);
+                BookmarkManager.Bookmark b = null;
+                try {
+                    new BookmarkManager.Bookmark(item.getFavorites());
+                }catch (Exception ignored){
+
+                }
                 if (b != null) {
                     mRestoreSeasonIndex = b.getSeason();
                     mRestoreEpisodeIndex = b.getEpisode();

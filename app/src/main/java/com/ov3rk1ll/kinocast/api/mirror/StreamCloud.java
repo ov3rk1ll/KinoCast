@@ -19,6 +19,10 @@ public class StreamCloud extends Host {
     private static final String TAG = StreamCloud.class.getSimpleName();
     public static final int HOST_ID = 30;
 
+    public StreamCloud(int id) {
+        super(id);
+    }
+
 
     @Override
     public int getId() {

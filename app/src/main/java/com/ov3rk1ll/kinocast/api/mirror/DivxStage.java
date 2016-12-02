@@ -14,6 +14,10 @@ public class DivxStage extends Host {
     private static final String TAG = DivxStage.class.getSimpleName();
     public static final int HOST_ID = 8;
 
+    public DivxStage(int id) {
+        super(id);
+    }
+
     @Override
     public int getId() {
         return HOST_ID;

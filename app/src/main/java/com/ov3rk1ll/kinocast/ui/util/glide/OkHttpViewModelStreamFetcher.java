@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.ui.util.glide;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -66,6 +67,7 @@ public class OkHttpViewModelStreamFetcher implements DataFetcher<InputStream> {
             } else {
                 imageUrl = imageUrl + "/" + getPosterSize(model.getScreenWidthPx()) + "/poster.jpg";
             }
+            Log.i("ViewModelStream", "Image from " + imageUrl);
         }
         url = new GlideUrl(imageUrl);
 

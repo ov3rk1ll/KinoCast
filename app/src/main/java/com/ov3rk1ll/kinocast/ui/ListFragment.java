@@ -222,7 +222,7 @@ public class ListFragment extends Fragment {
                     if(entry.getBoolean("internal"))
                         continue;
 
-                    Parser p = Parser.selectByName(entry.getString("parser"));
+                    Parser p = Parser.selectByName(getContext(), entry.getString("parser"));
                     list.add(p.loadDetail(entry.getString("url")));
                 }
             }catch (Exception e){

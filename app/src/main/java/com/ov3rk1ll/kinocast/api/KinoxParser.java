@@ -56,7 +56,7 @@ public class KinoxParser extends Parser{
 
     @Override
     public String getParserName() {
-        return "Kinox";
+        return PARSER_NAME;
     }
 
     @Override

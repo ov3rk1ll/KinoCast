@@ -20,6 +20,10 @@ public class Vodlocker extends Host {
     private static final String TAG = Vodlocker.class.getSimpleName();
     public static final int HOST_ID = 65;
 
+    public Vodlocker(int id) {
+        super(id);
+    }
+
     @Override
     public int getId() {
         return HOST_ID;

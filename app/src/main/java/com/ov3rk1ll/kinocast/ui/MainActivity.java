@@ -150,6 +150,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 new Parser[]{new KinoxParser(), new Movie4kParser()});
 
 
+        // Login stuff
+        mGoogleApiClient = Utils.buildAuthClient(this, this, this);
+        OptionalPendingResult<GoogleSignInResult> pendingResult = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (pendingResult.isDone()) {
+            GoogleSignInResult result = pendingResult.get();
+            // There's immediate result available.
+            Log.i("GoogleSignInResult", "immediate " + (result.getSignInAccount() != null));
+            if(result.getSignInAccount() != null){
+                handleSignInResult(result);
+            }
+        } else {
+            Log.i("GoogleSignInResult", "so async");
+            pendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(@NonNull GoogleSignInResult result) {
+                    Log.i("GoogleSignInResult", "onResult " + (result.getSignInAccount() != null));
+                    if(result.getSignInAccount() != null){
+                        handleSignInResult(result);
+                    }
+                }
+            });
+        }
+
         /*((Spinner)findViewById(R.id.spinner)).setAdapter(adapter);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         int parserId = preferences.getInt("parser", KinoxParser.PARSER_ID);
@@ -172,12 +195,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         */
-
-        // Login stuff
-        mGoogleApiClient = Utils.buildAuthClient(this, this, this);
-
-        //Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        //startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
 
@@ -208,8 +225,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             String responseBody = response.body().string();
                             final JSONObject json = new JSONObject(responseBody);
 
+
                             // TODO Is pro user?
                             String role = json.getString("role");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    headerLayout.findViewById(R.id.userBadge).setVisibility(View.VISIBLE);
+                                }
+                            });
+                        } else {
+                            throw new IOException("Unexpected code " + response);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -240,30 +266,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         // remove active state from settings
         navigationView.setCheckedItem(mNavItemId);
-
-        OptionalPendingResult<GoogleSignInResult> pendingResult =
-                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (pendingResult.isDone()) {
-            GoogleSignInResult result = pendingResult.get();
-            // There's immediate result available.
-            Log.i("GoogleSignInResult", "immediate " + (result.getSignInAccount() != null));
-            if(result.getSignInAccount() != null){
-                handleSignInResult(result);
-            }
-        } else {
-
-            Log.i("GoogleSignInResult", "so async");
-            pendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(@NonNull GoogleSignInResult result) {
-                    Log.i("GoogleSignInResult", "onResult " + (result.getSignInAccount() != null));
-                    if(result.getSignInAccount() != null){
-                        handleSignInResult(result);
-                    }
-                }
-            });
-        }
-
     }
 
     @Override
