@@ -17,7 +17,7 @@ public class TrackingApplication extends Application {
     public void onCreate() {
         //TODO Select Parser depending on settings
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Parser.selectParser(preferences.getInt("parser", KinoxParser.PARSER_ID));
+        Parser.selectParser(this, preferences.getInt("parser", KinoxParser.PARSER_ID));
         Log.i("selectParser", "ID is " + Parser.getInstance().getParserId());
         super.onCreate();
         Fabric.with(this, new Crashlytics());

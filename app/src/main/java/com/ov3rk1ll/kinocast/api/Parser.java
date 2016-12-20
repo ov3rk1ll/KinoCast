@@ -1,5 +1,9 @@
 package com.ov3rk1ll.kinocast.api;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
@@ -8,21 +12,29 @@ import java.util.List;
 
 public abstract class Parser {
     public static final int PARSER_ID = -1;
+    protected String URL_BASE; // = "http://www.kinox.sg/";
 
     private static Parser instance;
     public static Parser getInstance(){
         return instance;
     }
 
-    public static void selectParser(int id){
-        instance = selectByParserId(id);
+    public static void selectParser(Context context, int id){
+        instance = selectByParserId(context, id);
     }
-    public static Parser selectByParserId(int id){
+    public static Parser selectByParserId(Context context, int id){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String url = preferences.getString("url", "http://www.kinox.sg");
+        if(!url.endsWith("/")) url = url + "/";
         switch (id){
-            case KinoxParser.PARSER_ID: return new KinoxParser();
-            case Movie4kParser.PARSER_ID: return new Movie4kParser();
+            case KinoxParser.PARSER_ID: return new KinoxParser(url);
+            case Movie4kParser.PARSER_ID: return new Movie4kParser(url);
         }
         return null;
+    }
+
+    public Parser(String url) {
+        this.URL_BASE = url;
     }
 
     public abstract String getParserName();

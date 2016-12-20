@@ -24,15 +24,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
-import com.ov3rk1ll.kinocast.api.KinoxParser;
-import com.ov3rk1ll.kinocast.api.Movie4kParser;
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.ui.helper.layout.SearchSuggestionAdapter;
 import com.ov3rk1ll.kinocast.utils.Utils;
@@ -122,12 +119,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigate(mNavItemId);
 
-        final ArrayAdapter<Parser> adapter = new ArrayAdapter<Parser>(this,
+        /*final ArrayAdapter<Parser> adapter = new ArrayAdapter<Parser>(this,
                 android.R.layout.simple_list_item_1,
                 new Parser[]{new KinoxParser(), new Movie4kParser()});
 
 
-        /*((Spinner)findViewById(R.id.spinner)).setAdapter(adapter);
+        ((Spinner)findViewById(R.id.spinner)).setAdapter(adapter);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         int parserId = preferences.getInt("parser", KinoxParser.PARSER_ID);
         ((Spinner)findViewById(R.id.spinner)).setSelection(parserId);

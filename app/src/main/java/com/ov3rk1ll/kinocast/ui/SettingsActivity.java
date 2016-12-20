@@ -64,7 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
             findPreference("version_information").setSummary("v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
 
-            //bindPreferenceSummaryToValue(findPreference("example_text"));
+            bindPreferenceSummaryToValue(findPreference("url"));
 
             // Add 'notifications' preferences, and a corresponding header.
         /*PreferenceCategory fakeHeader = new PreferenceCategory(this);

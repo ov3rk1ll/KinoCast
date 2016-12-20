@@ -28,7 +28,6 @@ import java.util.Set;
 
 public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
-    public static final String URL_BASE = "http://www.kinox.tv/";
 
     private static final SparseArray<Integer> languageResMap = new SparseArray<>();
     private static final SparseArray<String> languageKeyMap = new SparseArray<>();
@@ -51,6 +50,10 @@ public class KinoxParser extends Parser{
         languageResMap.put(24, R.drawable.lang_el); languageKeyMap.put(24, "el");
         languageResMap.put(25, R.drawable.lang_ru); languageKeyMap.put(25, "ru");
         languageResMap.put(26, R.drawable.lang_hi); languageKeyMap.put(26, "hi");
+    }
+
+    public KinoxParser(String url) {
+        super(url);
     }
 
     @Override
@@ -105,6 +108,7 @@ public class KinoxParser extends Parser{
     @Override
     public List<ViewModel> parseList(String url){
         try {
+            Log.i("Parser", "parseList: " + url);
             Document doc = Jsoup.connect(url)
                     .userAgent(Utils.USER_AGENT)
                     .cookie("ListMode", "cover")
