@@ -47,7 +47,7 @@ Die Datei wurde möglicherweiße gelöscht.</string>
 Trozdem fortfahren?</string>
 
     <string name="connection_error_title">Verbindungsfehler</string>
-    <string name="connection_error_message">Kinox.to antwortet nicht!</string>
+    <string name="connection_error_message">%1$s antwortet nicht!</string>
     <string name="connection_error_button">Wiederholen</string>
 
     <string name="showcast_series_title">Staffel und Episode</string>
@@ -70,5 +70,12 @@ Deine Favoriten findest du im Menü auf der linken Seite.</string>
 
     <string name="order_hostlist">Hosterliste sortieren</string>
     <string name="order_hostlist_summary">Sortiere deine Lieblingshoster</string>
+
+    <string name="donate_dialog_title">Unterstütze KinoCast</string>
+    <string name="donate_dialog_message">Gefällt dir KinoCast? Dann unterstütze uns doch mit einer kleinen Spende</string>
+    <string name="donate_dialog_yes">Jetzt spenden</string>
+    <string name="donate_dialog_never">Nein, danke</string>
+    <string name="donate_dialog_later">Später</string>
+
 
 </resources>

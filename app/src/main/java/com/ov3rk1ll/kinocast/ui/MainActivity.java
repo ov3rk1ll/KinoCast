@@ -28,6 +28,7 @@ import android.widget.ProgressBar;
 
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+import com.kobakei.ratethisapp.RateThisApp;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mNavItemId;
     private final Handler mDrawerActionHandler = new Handler();
     private MenuItem searchMenuItem;
+    private int mNavItemLast = -1;
 
     @SuppressWarnings("deprecation")
     @Override
@@ -71,6 +73,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         WVersionManager versionManager = new WVersionManager(this);
         versionManager.setVersionContentUrl("http://ov3rk1ll.github.io/KinoCast/update2.json");
         versionManager.checkVersion();
+
+        RateThisApp.onStart(this);
+        RateThisApp.Config config = new RateThisApp.Config();
+        config.setUrl(getString(R.string.paypal_donate));
+        config.setTitle(R.string.donate_dialog_title);
+        config.setMessage(R.string.donate_dialog_message);
+        config.setYesButtonText(R.string.donate_dialog_yes);
+        config.setNoButtonText(R.string.donate_dialog_never);
+        config.setCancelButtonText(R.string.donate_dialog_later);
+        RateThisApp.init(config);
+        // If the criteria is satisfied, "Rate this app" dialog will be shown
+        RateThisApp.showRateDialogIfNeeded(this);
 
         /*BackupManager bm = new BackupManager(this);
         bm.requestRestore(new RestoreObserver() {
@@ -167,7 +181,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         VideoCastManager.getInstance().incrementUiCounter();
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         // remove active state from settings
-        navigationView.setCheckedItem(mNavItemId);
+        if(mNavItemLast != -1) {
+            navigationView.setCheckedItem(mNavItemLast);
+            navigate(mNavItemLast);
+            mNavItemLast = -1;
+        }
 
     }
 
@@ -297,6 +315,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         menuItem.setChecked(true);
         if(menuItem.getItemId() != R.string.title_section7) {
             mNavItemId = menuItem.getItemId();
+        } else {
+            mNavItemLast = mNavItemId;
         }
 
         // allow some time after closing the drawer before performing real navigation

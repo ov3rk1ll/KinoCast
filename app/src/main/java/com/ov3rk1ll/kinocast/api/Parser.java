@@ -3,6 +3,7 @@ package com.ov3rk1ll.kinocast.api;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
@@ -22,16 +23,26 @@ public abstract class Parser {
     public static void selectParser(Context context, int id){
         instance = selectByParserId(context, id);
     }
+    public static void selectParser(Context context, int id, String url){
+        instance = selectByParserId(context, id, url);
+    }
     public static Parser selectByParserId(Context context, int id){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String url = preferences.getString("url", "http://www.kinox.sg");
-        if(!url.endsWith("/")) url = url + "/";
-        switch (id){
-            case KinoxParser.PARSER_ID: return new KinoxParser(url);
-            case Movie4kParser.PARSER_ID: return new Movie4kParser(url);
+        return selectByParserId(context, id, url);
+    }
+    private static Parser selectByParserId(Context context, int id, String url) {
+        if (!url.endsWith("/")) url = url + "/";
+        Log.i("Parser", "selectByParserId: load with #" + id + " for " + url);
+        switch (id) {
+            case KinoxParser.PARSER_ID:
+                return new KinoxParser(url);
+            case Movie4kParser.PARSER_ID:
+                return new Movie4kParser(url);
         }
         return null;
     }
+
 
     public Parser(String url) {
         this.URL_BASE = url;
@@ -70,6 +81,10 @@ public abstract class Parser {
     public abstract String getPopularSeries();
 
     public abstract String getLatestSeries();
+
+    public String getUrl(){
+        return URL_BASE;
+    }
 
     @Override
     public String toString() {

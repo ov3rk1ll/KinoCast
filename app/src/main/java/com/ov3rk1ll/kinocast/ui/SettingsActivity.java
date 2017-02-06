@@ -1,6 +1,7 @@
 package com.ov3rk1ll.kinocast.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -17,6 +18,8 @@ import android.view.MenuItem;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
+import com.ov3rk1ll.kinocast.api.KinoxParser;
+import com.ov3rk1ll.kinocast.api.Parser;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -65,6 +68,18 @@ public class SettingsActivity extends AppCompatActivity {
             findPreference("version_information").setSummary("v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
 
             bindPreferenceSummaryToValue(findPreference("url"));
+            findPreference("url").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    Parser.selectParser(getActivity(), preferences.getInt("parser", KinoxParser.PARSER_ID), o.toString());
+                    sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                            PreferenceManager
+                                    .getDefaultSharedPreferences(preference.getContext())
+                                    .getString(preference.getKey(), ""));
+                    return true;
+                }
+            });
 
             // Add 'notifications' preferences, and a corresponding header.
         /*PreferenceCategory fakeHeader = new PreferenceCategory(this);
