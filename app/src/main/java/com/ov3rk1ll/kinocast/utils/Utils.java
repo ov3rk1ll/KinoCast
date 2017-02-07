@@ -127,16 +127,26 @@ public class Utils {
     }
 
     public static VideoCastManager initializeCastManager(Context context) {
-        CastConfiguration options = new CastConfiguration.Builder(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
+        CastConfiguration.Builder builder = new CastConfiguration.Builder(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
                 .enableAutoReconnect()
                 .enableCaptionManagement()
-                .enableDebug()
-                .enableLockScreen()
-                .enableWifiReconnection()
-                .enableNotification()
-                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
-                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true)
-                .build();
-        return VideoCastManager.initialize(context, options);
+                .enableWifiReconnection();
+
+        if(BuildConfig.DEBUG){
+            builder.enableDebug();
+        }
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if(preferences.getBoolean("chromecast_lock_screen", true)){
+            builder.enableLockScreen();
+        }
+
+        if(preferences.getBoolean("chromecast_notification", true)){
+            builder.enableNotification()
+                    .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
+                    .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true);
+        }
+
+        return VideoCastManager.initialize(context, builder.build());
     }
 }

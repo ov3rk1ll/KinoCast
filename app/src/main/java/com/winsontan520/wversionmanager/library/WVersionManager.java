@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
+import com.ov3rk1ll.kinocast.R;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -61,6 +62,7 @@ public class WVersionManager {
     private int mMode = 100; // default mode
 
     ProgressDialog mProgressDialog;
+    private boolean mToastIfUpToDate = false;
 
     public WVersionManager(Activity act){
         this.activity = act;
@@ -73,7 +75,15 @@ public class WVersionManager {
         return d;
     }
 
+    public void setShowToastIfUpToDate(boolean toastIfUpToDate){
+        this.mToastIfUpToDate = toastIfUpToDate;
+    }
+
     public void checkVersion() {
+        checkVersion(false);
+    }
+
+    public void checkVersion(boolean forceCheck) {
         mMode = MODE_CHECK_VERSION;
         String versionContentUrl = getVersionContentUrl();
         if(versionContentUrl == null){
@@ -89,12 +99,12 @@ public class WVersionManager {
             Log.v(TAG, "reminderTimeStamp="+reminderTimeStamp);
         }
 
-        if(currentTimeStamp > reminderTimeStamp){
+        if(currentTimeStamp > reminderTimeStamp || forceCheck){
             // fire request to get update version content
             if(BuildConfig.DEBUG){
                 Log.v(TAG, "getting update content...");
             }
-            VersionContentRequest request = new VersionContentRequest(activity);
+            VersionContentRequest request = new VersionContentRequest(activity, mToastIfUpToDate);
             request.execute(getVersionContentUrl());
         }
     }
@@ -320,15 +330,18 @@ public class WVersionManager {
     class VersionContentRequest extends AsyncTask<String, Void, VersionInformation>{
         Context context;
         int statusCode;
+        boolean toastIfUpToDate;
 
-        public VersionContentRequest(Context context) {
+        public VersionContentRequest(Context context, boolean toastIfUpToDate) {
             this.context = context;
+            this.toastIfUpToDate = toastIfUpToDate;
         }
 
         @Override
         protected VersionInformation doInBackground(String... uri) {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder().url(uri[0]).build();
+            Log.d(TAG, "GET " + uri[0]);
 
             try {
                 Response response = client.newCall(request).execute();
@@ -354,6 +367,9 @@ public class WVersionManager {
         @Override
         protected void onPostExecute(VersionInformation result) {
             if(result == null){
+                if(toastIfUpToDate){
+                    Toast.makeText(activity, R.string.update_uptodate, Toast.LENGTH_SHORT).show();
+                }
                 Log.e(TAG, "Response invalid");
             }else{
                 setUpdateUrl(result.downloadUrl);

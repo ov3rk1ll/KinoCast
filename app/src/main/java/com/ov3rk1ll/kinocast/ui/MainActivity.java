@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         WVersionManager versionManager = new WVersionManager(this);
-        versionManager.setVersionContentUrl("http://ov3rk1ll.github.io/KinoCast/update2.json");
+        versionManager.setVersionContentUrl(getString(R.string.update_check));
         versionManager.checkVersion();
 
         RateThisApp.onStart(this);

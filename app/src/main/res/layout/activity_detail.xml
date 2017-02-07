@@ -137,13 +137,48 @@
                         android:background="@android:color/black"
                         android:visibility="gone" />
 
-                    <com.mobfox.sdk.bannerads.Banner
+                    <RelativeLayout
                         android:id="@+id/adView"
-                        android:layout_width="320dp"
+                        android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true" />
+                        android:layout_centerVertical="true" >
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/donateView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:gravity="center_vertical"
+                        android:background="@color/list_item_background"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_toLeftOf="@+id/button_donate"
+                            android:layout_toStartOf="@+id/button_donate"
+                            android:gravity="center_vertical"
+                            android:text="Hier sollte eigentlich Werbung sein. Da hier gerade keine Werbung ist würde wir und über eine kleine Unterstützung auf PayPal freuen."
+                            android:textAppearance="@style/TextAppearance.AppCompat" />
+
+                        <Button
+                            android:id="@+id/button_donate"
+                            style="@style/Widget.AppCompat.Button.Colored"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentRight="true"
+                            android:text="Spenden" />
+                    </RelativeLayout>
 
                     <View
                         android:id="@+id/hr2"

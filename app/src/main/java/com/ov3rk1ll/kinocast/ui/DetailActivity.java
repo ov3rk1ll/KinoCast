@@ -35,19 +35,20 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.ContentViewEvent;
-import com.crashlytics.android.answers.CustomEvent;
+import com.flurry.android.FlurryAgent;
+import com.flurry.android.ads.FlurryAdBanner;
+import com.flurry.android.ads.FlurryAdBannerListener;
+import com.flurry.android.ads.FlurryAdErrorType;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.mobfox.sdk.bannerads.Banner;
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -65,13 +66,15 @@ import com.ov3rk1ll.kinocast.utils.WeightedHostComparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
 public class DetailActivity extends AppCompatActivity implements ActionMenuView.OnMenuItemClickListener {
     public static final String ARG_ITEM = "param_item";
     private ViewModel item;
-    private Banner mAdView;
+    private RelativeLayout  mAdView;
 
     private VideoCastManager mVideoCastManager;
 
@@ -83,6 +86,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     private int mRestoreSeasonIndex = -1;
     private int mRestoreEpisodeIndex = -1;
+    private FlurryAdBanner mFlurryAdBanner;
 
     @Override
     public void onBackPressed() {
@@ -120,12 +124,69 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         initInstances();
         attemptColor(null);
 
-        mAdView = (Banner) findViewById(R.id.adView);
+        findViewById(R.id.button_donate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.paypal_donate)));
+                startActivity(intent);
+            }
+        });
+
+        FlurryAgent.onStartSession(this);
+        mAdView = (RelativeLayout)findViewById(R.id.adView);
         if (SHOW_ADS) {
-            mAdView.setInventoryHash(getString(R.string.mobfox_hash));
-            mAdView.load();
+            findViewById(R.id.donateView).setVisibility(View.GONE);
+            String mAdSpaceName = "Detail Banner";
+            mFlurryAdBanner = new FlurryAdBanner(this, mAdView, mAdSpaceName);
+            mFlurryAdBanner.setListener(new FlurryAdBannerListener() {
+                @Override
+                public void onFetched(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onRendered(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onShowFullscreen(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onCloseFullscreen(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onAppExit(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onClicked(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onVideoCompleted(FlurryAdBanner flurryAdBanner) {
+
+                }
+
+                @Override
+                public void onError(FlurryAdBanner flurryAdBanner, FlurryAdErrorType flurryAdErrorType, int i) {
+                    Log.e("FlurryAdBanner", "onError: " + flurryAdErrorType);
+                    mAdView.setVisibility(View.GONE);
+                    findViewById(R.id.donateView).setVisibility(View.VISIBLE);
+                }
+            });
+            mFlurryAdBanner.fetchAndDisplayAd();
+            //mAdView.setInventoryHash(getString(R.string.mobfox_hash));
+            //mAdView.load();
         } else {
             mAdView.setVisibility(View.GONE);
+            findViewById(R.id.donateView).setVisibility(View.GONE);
             findViewById(R.id.hr2).setVisibility(View.GONE);
         }
 
@@ -264,7 +325,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         super.onResume();
         mVideoCastManager.incrementUiCounter();
         //TODO Check if we are playing the current item
-        if(mAdView != null) mAdView.onResume();
+        //if(mAdView != null) mAdView.onResume();
 
         //if(mVideoCastManager.getRemoteMediaInformation())
     }
@@ -287,7 +348,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 bookmarkManager.set(idx, b);
             }
         }
-        if(mAdView != null) mAdView.onPause();
+        //if(mAdView != null) mAdView.onPause();
     }
 
     @Override
@@ -390,10 +451,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            Answers.getInstance().logContentView(new ContentViewEvent()
-                    .putContentName(item.getTitle())
-                    .putContentType(item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series")
-                    .putContentId(item.getSlug()));
+
+            Map<String, String> articleParams = new HashMap<String, String>();
+            articleParams.put("Name", item.getTitle());
+            articleParams.put("Type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
+            articleParams.put("Id", item.getSlug());
+            FlurryAgent.logEvent("Content_View", articleParams);
             item = Parser.getInstance().loadDetail(item);
             return true;
         }
@@ -569,18 +632,22 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     @Override
                     public void onClick(DialogInterface dialog, int position) {
                         AppAdapter.App app = adapter.getItem(position);
-                        CustomEvent customEvent = new CustomEvent("Played Steam");
-                        customEvent.putCustomAttribute("Hoster", host.getName());
-                        customEvent.putCustomAttribute("Movie", item.getTitle());
+                        Map<String, String> articleParams = new HashMap<String, String>();
+                        articleParams.put("Name", item.getTitle());
+                        articleParams.put("Type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
+                        articleParams.put("Id", item.getSlug());
+
+                        articleParams.put("Hoster", host.getName());
+                        articleParams.put("Movie", item.getTitle());
                         if (app.getComponent() == null) {
                             startPlaybackOnChromecast(link);
-                            customEvent.putCustomAttribute("Player", "Chromecast");
+                            articleParams.put("Player", "Chromecast");
                         } else {
                             intent.setComponent(app.getComponent());
-                            customEvent.putCustomAttribute("Player", app.getComponent().toString());
+                            articleParams.put("Player", app.getComponent().toString());
                             startActivity(intent);
                         }
-                        Answers.getInstance().logCustom(customEvent);
+                        FlurryAgent.logEvent("Played_Stream", articleParams);
                         dialog.dismiss();
                     }
                 });

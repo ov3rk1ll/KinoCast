@@ -100,3 +100,11 @@
 -keep class com.mobfox.** { *; }
 -keep class com.mobfox.adapter.** {*;}
 -keep class com.mobfox.sdk.** {*;}
+
+# Required to preserve the Flurry SDK
+-keep class com.flurry.** { *; }
+-dontwarn com.flurry.**
+-keepattributes *Annotation*,EnclosingMethod,Signature
+#-keepclasseswithmembers class * {
+#    public * (android.content.Context, android.util.AttributeSet, int);
+#}

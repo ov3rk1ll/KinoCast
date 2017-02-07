@@ -16,6 +16,30 @@
         android:summary="@string/order_hostlist_summary"
         />
 
+    <PreferenceScreen
+        android:title="Chromecast Einstellungen"
+        android:summary="Einstellungen für Chromecast streaming">
+
+        <CheckBoxPreference android:key="chromecast_lock_screen"
+            android:title="Player am Sperrbildschirm"
+            android:summaryOn="Videosteuerung am Sperrbildschirm anzeigen"
+            android:summaryOff="Videosteuerung nicht am Sperrbildschirm anzeigen"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference android:key="chromecast_notification"
+            android:title="Player als Benachrichtigung"
+            android:summaryOn="Videosteuerung als Benachrichtigung anzeigen"
+            android:summaryOff="Videosteuerung nicht als Benachrichtigung anzeigen"
+            android:defaultValue="true" />
+
+
+    </PreferenceScreen>
+
+    <Preference
+        android:key="donate"
+        android:title="Unterstüze KinoCast"
+        android:summary="Unterstüze KinoCast mit einer Spende auf PayPal" />
+
     <Preference
         android:key="version_information"
         android:title="Version"

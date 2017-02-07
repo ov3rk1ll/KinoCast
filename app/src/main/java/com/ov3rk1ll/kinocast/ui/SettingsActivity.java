@@ -15,11 +15,13 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.ov3rk1ll.kinocast.BuildConfig;
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.KinoxParser;
 import com.ov3rk1ll.kinocast.api.Parser;
+import com.winsontan520.wversionmanager.library.WVersionManager;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -66,6 +68,26 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
             findPreference("version_information").setSummary("v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+            findPreference("version_information").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Toast.makeText(getActivity(), R.string.update_checking, Toast.LENGTH_SHORT).show();
+                    WVersionManager versionManager = new WVersionManager(getActivity());
+                    versionManager.setVersionContentUrl(getString(R.string.update_check));
+                    versionManager.setShowToastIfUpToDate(true);
+                    versionManager.checkVersion(true);
+                    return true;
+                }
+            });
+
+            findPreference("donate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.paypal_donate)));
+                    startActivity(intent);
+                    return true;
+                }
+            });
 
             bindPreferenceSummaryToValue(findPreference("url"));
             findPreference("url").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
