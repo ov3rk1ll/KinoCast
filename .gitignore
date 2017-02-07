@@ -4,4 +4,5 @@
 .DS_Store
 /build
 app/fabric.properties
+app/flurry.config
 *.iml
