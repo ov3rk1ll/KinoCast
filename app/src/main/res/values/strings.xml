@@ -81,5 +81,8 @@ Deine Favoriten findest du im Menü auf der linken Seite.</string>
     <string name="donate_dialog_never">Nein, danke</string>
     <string name="donate_dialog_later">Später</string>
 
+    <string name="detail_donate_text">Hier sollte eigentlich Werbung sein. Da hier gerade keine Werbung ist würde wir und über eine kleine Unterstützung auf PayPal freuen.</string>
+    <string name="detail_donate_button">Spenden</string>
+
 
 </resources>

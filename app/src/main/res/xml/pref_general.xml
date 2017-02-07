@@ -37,8 +37,8 @@
 
     <Preference
         android:key="donate"
-        android:title="Unterstüze KinoCast"
-        android:summary="Unterstüze KinoCast mit einer Spende auf PayPal" />
+        android:title="Unterstütze KinoCast"
+        android:summary="Unterstütze KinoCast mit einer Spende auf PayPal" />
 
     <Preference
         android:key="version_information"
