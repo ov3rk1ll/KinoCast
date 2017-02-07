@@ -16,6 +16,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.Parser;
@@ -99,6 +100,13 @@ public class ListFragment extends Fragment {
             }
         });
 
+        view.findViewById(R.id.button_retry).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadData();
+            }
+        });
+
         return view;
     }
 
@@ -122,6 +130,10 @@ public class ListFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        loadData();
+    }
+
+    public void loadData(){
         if(mUrl != null)
             (new QueryPageTask()).execute(mUrl);
         else if(mSpecialId != -1)
@@ -146,6 +158,8 @@ public class ListFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(true);
+            getActivity().findViewById(R.id.list).setVisibility(View.VISIBLE);
+            getActivity().findViewById(R.id.layout_error).setVisibility(View.GONE);
             super.onPreExecute();
         }
 
@@ -163,22 +177,12 @@ public class ListFragment extends Fragment {
                     adapter.add(m, adapter.getItemCount());
                 }
             }else{
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(getString(R.string.connection_error_title))
-                        .setMessage(getString(R.string.connection_error_message))
-                        .setPositiveButton(getString(R.string.connection_error_button), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                (new QueryPageTask()).execute(mUrl);
-                            }
-                        })
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialogInterface) {
-                                getActivity().finish();
-                            }
-                        })
-                        .show();
+                getActivity().findViewById(R.id.list).setVisibility(View.GONE);
+                ((TextView)getActivity().findViewById(R.id.text_error)).setText(
+                        getString(R.string.connection_error_title) + "\n" +
+                        getString(R.string.connection_error_message, Parser.getInstance().getUrl())
+                );
+                getActivity().findViewById(R.id.layout_error).setVisibility(View.VISIBLE);
             }
             if(getActivity() != null)
                 ((AppCompatActivity)getActivity()).setSupportProgressBarIndeterminateVisibility(false);
@@ -201,7 +205,7 @@ public class ListFragment extends Fragment {
             for(int i = 0; i < bookmarks.size(); i++){
                 BookmarkManager.Bookmark b = bookmarks.get(i);
                 if(!b.isInternal()) {
-                    Parser p = Parser.selectByParserId(b.getParserId());
+                    Parser p = Parser.selectByParserId(getActivity(), b.getParserId());
                     list.add(p.loadDetail(b.getUrl()));
                 }
             }

@@ -44,6 +44,10 @@ public class Movie4kParser extends Parser{
         languageResMap.put(26, R.drawable.lang_hi); languageKeyMap.put(26, "hi");
     }
 
+    public Movie4kParser(String url) {
+        super(url);
+    }
+
     @Override
     public String getParserName() {
         return "Movie4k";

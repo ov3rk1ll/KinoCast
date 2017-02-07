@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="BaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="BaseTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/primary</item>
@@ -15,7 +15,7 @@
     <style name="SettingsTheme" parent="@style/BaseTheme">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
-        <item name="actionBarTheme">@style/Widget.ActionBar.Color</item>
+        <!--<item name="actionBarTheme">@style/Widget.ActionBar.Color</item>-->
     </style>
 
     <style name="Theme.TranslucentActionBar" parent="AppTheme">

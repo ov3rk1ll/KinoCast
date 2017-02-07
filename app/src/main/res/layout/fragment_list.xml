@@ -5,15 +5,38 @@
     android:layout_height="match_parent"
     tools:context="com.ov3rk1ll.kinocast.ui.ListFragment">
 
+    <LinearLayout
+        android:id="@+id/layout_error"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        <Button
+            android:id="@+id/button_retry"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wiederholen" />
+    </LinearLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/spacing_xsmall"
         android:clipToPadding="false"
         android:descendantFocusability="afterDescendants"
         android:drawSelectorOnTop="true"
-        tools:context=".MainActivity"
-        />
+        android:padding="@dimen/spacing_xsmall"
+        tools:context=".MainActivity" />
 
 </LinearLayout>
