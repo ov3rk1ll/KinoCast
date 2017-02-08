@@ -18,12 +18,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ProgressBar;
 
 import com.google.android.libraries.cast.companionlibrary.cast.BaseCastManager;
@@ -55,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem searchMenuItem;
     private int mNavItemLast = -1;
 
+    public static MainActivity activity;
+    public static WebView webView;
+
     @SuppressWarnings("deprecation")
     @Override
     public void setSupportProgressBarIndeterminateVisibility(boolean visible) {
@@ -65,9 +70,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if(BuildConfig.GMS_CHECK) BaseCastManager.checkGooglePlayServices(this);
         Utils.initializeCastManager(this);
         setContentView(R.layout.activity_main);
+
+        activity = this;
+        webView = (WebView)findViewById(R.id.webview);
+        Log.i("CloudflareDdos", "onCreate: static fields are ready");
         //supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         WVersionManager versionManager = new WVersionManager(this);

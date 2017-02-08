@@ -1,15 +1,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ov3rk1ll.kinocast.ui.ListFragment">
+    tools:context="com.ov3rk1ll.kinocast.ui.ListFragment"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/layout_error"
         android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_gravity="center"
         android:gravity="center_vertical|center_horizontal"
         android:orientation="vertical">
@@ -32,11 +33,12 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:clipToPadding="false"
         android:descendantFocusability="afterDescendants"
         android:drawSelectorOnTop="true"
         android:padding="@dimen/spacing_xsmall"
-        tools:context=".MainActivity" />
+        tools:context=".MainActivity"
+        android:layout_weight="2"/>
 
 </LinearLayout>

@@ -5,21 +5,13 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.ov3rk1ll.kinocast.BuildConfig;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -28,44 +20,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class Utils {
     public static final String USER_AGENT = "KinoCast v" + BuildConfig.VERSION_NAME;
 
-    public static JSONObject readJson(String url) {
-        OkHttpClient client = new OkHttpClient();
-        client.networkInterceptors().add(new UserAgentInterceptor(USER_AGENT));
-        Request request = new Request.Builder().url(url).build();
-
-        Log.i("Utils", "read json from " + url);
-        try {
-            Response response = client.newCall(request).execute();
-            return new JSONObject(response.body().string());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String readUrl(String url) {
-        OkHttpClient client = new OkHttpClient();
-        client.networkInterceptors().add(new UserAgentInterceptor(USER_AGENT));
-        Request request = new Request.Builder().url(url).build();
-        Log.i("Utils", "read text from " + url);
-        try {
-            Response response = client.newCall(request).execute();
-            return response.body().string();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static String getRedirectTarget(String url){
-        OkHttpClient client = new OkHttpClient();
-        client.setFollowRedirects(false);
-        client.networkInterceptors().add(new UserAgentInterceptor(USER_AGENT));
+        OkHttpClient client = new OkHttpClient.Builder()
+                .followRedirects(false)
+                .addNetworkInterceptor(new UserAgentInterceptor(USER_AGENT))
+                .build();
         Request request = new Request.Builder().url(url).build();
         try {
             Response response = client.newCall(request).execute();

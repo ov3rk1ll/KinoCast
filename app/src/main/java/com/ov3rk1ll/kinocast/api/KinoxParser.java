@@ -10,7 +10,6 @@ import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
-import com.ov3rk1ll.kinocast.utils.Utils;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -22,8 +21,10 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class KinoxParser extends Parser{
@@ -106,20 +107,12 @@ public class KinoxParser extends Parser{
     }
 
     @Override
-    public List<ViewModel> parseList(String url){
-        try {
-            Log.i("Parser", "parseList: " + url);
-            Document doc = Jsoup.connect(url)
-                    .userAgent(Utils.USER_AGENT)
-                    .cookie("ListMode", "cover")
-                    .timeout(10000)
-                    .get();
-
-            return parseList(doc);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public List<ViewModel> parseList(String url) throws IOException, HttpException {
+        Log.i("Parser", "parseList: " + url);
+        Map<String, String> cookies = new HashMap<>();
+        //cookies.put("ListMode", "cover");
+        Document doc = getDocument(url, cookies);
+        return parseList(doc);
     }
 
     private ViewModel parseDetail(Document doc, ViewModel item){
@@ -181,18 +174,12 @@ public class KinoxParser extends Parser{
     @Override
     public ViewModel loadDetail(ViewModel item){
         try {
-            Document doc = Jsoup.connect(URL_BASE + "Stream/" + item.getSlug() + ".html")
-                    .userAgent(Utils.USER_AGENT)
-                    /*.cookie("StreamHostMirrorMode", "fixed")
-                    .cookie("StreamAutoHideMirrros", "Fixed")
-                    .cookie("StreamShowFacebook", "N")
-                    .cookie("StreamCommentLimit", "0")
-                    .cookie("StreamMirrorMode", "fixed")*/
-                    .timeout(10000)
-                    .get();
+            Document doc = super.getDocument(URL_BASE + "Stream/" + item.getSlug() + ".html");
 
             return parseDetail(doc, item);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (HttpException e) {
             e.printStackTrace();
         }
         return item;
@@ -202,15 +189,13 @@ public class KinoxParser extends Parser{
     public ViewModel loadDetail(String url) {
         ViewModel model = new ViewModel();
         try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent(Utils.USER_AGENT)
-                    .cookie("StreamHostMirrorMode", "fixed")
-                    .cookie("StreamAutoHideMirrros", "Fixed")
-                    .cookie("StreamShowFacebook", "N")
-                    .cookie("StreamCommentLimit", "0")
-                    .cookie("StreamMirrorMode", "fixed")
-                    .timeout(10000)
-                    .get();
+            Map<String, String> cookies = new HashMap<>();
+            cookies.put("StreamHostMirrorMode", "fixed");
+            cookies.put("StreamAutoHideMirrros", "Fixed");
+            cookies.put("StreamShowFacebook", "N");
+            cookies.put("StreamCommentLimit", "0");
+            cookies.put("StreamMirrorMode", "fixed");
+            Document doc = getDocument(url, cookies);
 
             model.setSlug(url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf(".")));
             model.setTitle(doc.select("h1 > span:eq(0)").text());
@@ -239,6 +224,8 @@ public class KinoxParser extends Parser{
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (HttpException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -247,10 +234,7 @@ public class KinoxParser extends Parser{
     public List<Host> getHosterList(ViewModel item, int season, String episode){
         String url = "aGET/MirrorByEpisode/?Addr=" + item.getSlug() + "&SeriesID=" + item.getSeriesID() + "&Season=" + season + "&Episode=" + episode;
         try {
-            Document doc = Jsoup.connect(URL_BASE + url)
-                    .userAgent(Utils.USER_AGENT)
-                    .timeout(10000)
-                    .get();
+            Document doc = getDocument(URL_BASE + url);
 
             List<Host> hostlist = new ArrayList<>();
             Elements hosts = doc.select("li");
@@ -274,6 +258,8 @@ public class KinoxParser extends Parser{
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (HttpException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -281,7 +267,7 @@ public class KinoxParser extends Parser{
     public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, String url){
         try {
             queryTask.updateProgress("Get host from " + URL_BASE + url);
-            JSONObject json = Utils.readJson(URL_BASE + url);
+            JSONObject json = getJson(URL_BASE + url);
             Document doc = Jsoup.parse(json != null ? json.getString("Stream") : null);
             String href = doc.select("a").attr("href");
             queryTask.updateProgress("Get video from " + href);
@@ -306,7 +292,7 @@ public class KinoxParser extends Parser{
     @Override
     public String[] getSearchSuggestions(String query){
         String url = URL_BASE + "aGET/Suggestions/?q=" + URLEncoder.encode(query) + "&limit=10&timestamp=" + SystemClock.elapsedRealtime();
-        String data = Utils.readUrl(url);
+        String data = getBody(url);
         /*try {
             byte ptext[] = data.getBytes("ISO-8859-1");
             data = new String(ptext, "UTF-8");
