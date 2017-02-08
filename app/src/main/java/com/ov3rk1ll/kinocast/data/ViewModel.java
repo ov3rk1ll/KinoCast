@@ -11,7 +11,6 @@ public class ViewModel implements Serializable {
     private String slug;
     private String title;
     private String image;
-    private String backdrop;
     private String summary;
     private float rating;
     private int languageResId;
@@ -130,14 +129,6 @@ public class ViewModel implements Serializable {
 
     public void setImdbId(String imdbId) {
         this.imdbId = imdbId;
-    }
-
-    public String getYear() {
-        return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
     }
 
     public enum Type{

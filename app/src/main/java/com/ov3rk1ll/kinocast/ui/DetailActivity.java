@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -86,7 +87,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
     private int mRestoreSeasonIndex = -1;
     private int mRestoreEpisodeIndex = -1;
-    private FlurryAdBanner mFlurryAdBanner;
 
     @Override
     public void onBackPressed() {
@@ -137,7 +137,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         if (SHOW_ADS) {
             findViewById(R.id.donateView).setVisibility(View.GONE);
             String mAdSpaceName = "Detail Banner";
-            mFlurryAdBanner = new FlurryAdBanner(this, mAdView, mAdSpaceName);
+            FlurryAdBanner mFlurryAdBanner = new FlurryAdBanner(this, mAdView, mAdSpaceName);
             mFlurryAdBanner.setListener(new FlurryAdBannerListener() {
                 @Override
                 public void onFetched(FlurryAdBanner flurryAdBanner) {
@@ -440,7 +440,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         return this.onOptionsItemSelected(menuItem);
     }
 
-    public class QueryDetailTask extends AsyncTask<Void, Void, Boolean> {
+    private class QueryDetailTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected void onPreExecute() {
@@ -452,7 +452,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            Map<String, String> articleParams = new HashMap<String, String>();
+            Map<String, String> articleParams = new HashMap<>();
             articleParams.put("Name", item.getTitle());
             articleParams.put("Type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
             articleParams.put("Id", item.getSlug());
@@ -492,7 +492,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         }
     }
 
-    public class QueryHosterTask extends AsyncTask<Void, Void, List<Host>> {
+    private class QueryHosterTask extends AsyncTask<Void, Void, List<Host>> {
         Season s;
         int position;
 
@@ -632,7 +632,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                     @Override
                     public void onClick(DialogInterface dialog, int position) {
                         AppAdapter.App app = adapter.getItem(position);
-                        Map<String, String> articleParams = new HashMap<String, String>();
+                        Map<String, String> articleParams = new HashMap<>();
                         articleParams.put("Name", item.getTitle());
                         articleParams.put("Type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
                         articleParams.put("Id", item.getSlug());
@@ -706,16 +706,17 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         context.startActivity(intent);
     }*/
 
-    public static class AppAdapter extends ArrayAdapter<AppAdapter.App> {
+    static class AppAdapter extends ArrayAdapter<AppAdapter.App> {
         PackageManager pm;
 
-        public AppAdapter(Context context, List<AppAdapter.App> objects, PackageManager pm) {
+        AppAdapter(Context context, List<AppAdapter.App> objects, PackageManager pm) {
             super(context, R.layout.player_list_item, android.R.id.text1, objects);
             this.pm = pm;
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             App item = getItem(position);
             View view = super.getView(position, convertView, parent);
             ((TextView) view.findViewById(android.R.id.text1)).setText(item.getLabel());
@@ -724,18 +725,18 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         }
 
         @SuppressWarnings("unused")
-        public static class App {
+        static class App {
             private CharSequence label;
             private Drawable icon;
             private ComponentName component;
 
-            public App(CharSequence label, Drawable icon, ComponentName component) {
+            App(CharSequence label, Drawable icon, ComponentName component) {
                 this.label = label;
                 this.icon = icon;
                 this.component = component;
             }
 
-            public CharSequence getLabel() {
+            CharSequence getLabel() {
                 return label;
             }
 
@@ -751,7 +752,7 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                 this.icon = icon;
             }
 
-            public ComponentName getComponent() {
+            ComponentName getComponent() {
                 return component;
             }
 

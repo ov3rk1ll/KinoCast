@@ -1,5 +1,6 @@
 package com.ov3rk1ll.kinocast.ui;
 
+import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +9,10 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -57,7 +60,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem searchMenuItem;
     private int mNavItemLast = -1;
 
+    // TODO: Implement this in a better way
+    @SuppressLint("StaticFieldLeak")
     public static MainActivity activity;
+    @SuppressLint("StaticFieldLeak")
     public static WebView webView;
 
     @SuppressWarnings("deprecation")
@@ -117,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mProgressBar.setVisibility(View.GONE);
         mProgressBar.setIndeterminate(true);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(getResources().getColor(R.color.accent)));
+            mProgressBar.setIndeterminateTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.accent)));
         }
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar_actionbar);
@@ -138,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.getMenu().findItem(mNavItemId).setChecked(true);
 
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        //noinspection deprecation
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
@@ -239,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchMenuItem);
             searchView.setQueryHint(getResources().getString(R.string.searchable_hint));
 
+            //noinspection ConstantConditions
             searchSuggestionAdapter = new SearchSuggestionAdapter(
                     getSupportActionBar().getThemedContext(),
                     android.R.layout.simple_list_item_1,
@@ -321,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onNavigationItemSelected(final MenuItem menuItem) {
+    public boolean onNavigationItemSelected(@NonNull final MenuItem menuItem) {
         menuItem.setChecked(true);
         if(menuItem.getItemId() != R.string.title_section7) {
             mNavItemId = menuItem.getItemId();

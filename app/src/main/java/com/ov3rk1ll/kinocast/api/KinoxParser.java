@@ -4,6 +4,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
@@ -30,7 +31,7 @@ import java.util.Set;
 public class KinoxParser extends Parser{
     public static final int PARSER_ID = 0;
 
-    private static final SparseArray<Integer> languageResMap = new SparseArray<>();
+    private static final SparseIntArray languageResMap = new SparseIntArray();
     private static final SparseArray<String> languageKeyMap = new SparseArray<>();
     static {
         languageResMap.put(1, R.drawable.lang_de); languageKeyMap.put(1, "de");
@@ -53,7 +54,7 @@ public class KinoxParser extends Parser{
         languageResMap.put(26, R.drawable.lang_hi); languageKeyMap.put(26, "hi");
     }
 
-    public KinoxParser(String url) {
+    KinoxParser(String url) {
         super(url);
     }
 
@@ -107,10 +108,10 @@ public class KinoxParser extends Parser{
     }
 
     @Override
-    public List<ViewModel> parseList(String url) throws IOException, HttpException {
+    public List<ViewModel> parseList(String url) throws IOException {
         Log.i("Parser", "parseList: " + url);
         Map<String, String> cookies = new HashMap<>();
-        //cookies.put("ListMode", "cover");
+        cookies.put("ListMode", "cover");
         Document doc = getDocument(url, cookies);
         return parseList(doc);
     }
@@ -145,7 +146,6 @@ public class KinoxParser extends Parser{
                         hosterId = Integer.valueOf(c.substring("MirStyle".length()));
                     }
                 }
-                String name = host.select("div.Named").text();
                 String count = host.select("div.Data").text();
                 int c = 1;
                 if(count.contains("/")) {
@@ -178,8 +178,6 @@ public class KinoxParser extends Parser{
 
             return parseDetail(doc, item);
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (HttpException e) {
             e.printStackTrace();
         }
         return item;
@@ -224,8 +222,6 @@ public class KinoxParser extends Parser{
 
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (HttpException e) {
-            e.printStackTrace();
         }
         return null;
     }
@@ -240,7 +236,6 @@ public class KinoxParser extends Parser{
             Elements hosts = doc.select("li");
             for(Element host: hosts){
                 int hosterId = Integer.valueOf(host.id().replace("Hoster_", ""));
-                String name = host.select("div.Named").text();
                 String count = host.select("div.Data").text();
                 count = count.substring(count.indexOf("/") + 1, count.indexOf(" ", count.indexOf("/")));
                 int c = Integer.valueOf(count);
@@ -258,13 +253,11 @@ public class KinoxParser extends Parser{
 
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (HttpException e) {
-            e.printStackTrace();
         }
         return null;
     }
 
-    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, String url){
+    private String getMirrorLink(DetailActivity.QueryPlayTask queryTask, String url){
         try {
             queryTask.updateProgress("Get host from " + URL_BASE + url);
             JSONObject json = getJson(URL_BASE + url);

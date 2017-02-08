@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,7 +33,7 @@ public class TheMovieDb {
 
     public TheMovieDb(Context context) {
         // Set up in-memory cache store
-        memoryCache = new ConcurrentHashMap<String, SoftReference<JSONObject>>();
+        memoryCache = new ConcurrentHashMap<>();
 
         // Set up disk cache store
         Context appContext = context.getApplicationContext();
@@ -50,7 +49,7 @@ public class TheMovieDb {
     }
 
     public JSONObject get(CoverImage.Request request) {
-        JSONObject json = null;
+        JSONObject json;
         String url = request.getUrl();
 
         // Check for image in memory
@@ -75,10 +74,12 @@ public class TheMovieDb {
                 String param = url.substring(url.indexOf("#") + 1);
                 // tt1646971?api_key=f9dc7e5d12b2640bf4ef1cf20835a1cc&language=de&external_source=imdb_id
                 JSONObject data = Utils.readJson("http://api.themoviedb.org/3/find/" + item.getImdbId() + "?api_key=" + API_KEY + "&external_source=imdb_id&" + param);
-                if(data.getJSONArray("movie_results").length() > 0) {
-                    json = data.getJSONArray("movie_results").getJSONObject(0);
-                }else if(data.getJSONArray("tv_results").length() > 0) {
-                    json = data.getJSONArray("tv_results").getJSONObject(0);
+                if (data != null) {
+                    if(data.getJSONArray("movie_results").length() > 0) {
+                        json = data.getJSONArray("movie_results").getJSONObject(0);
+                    }else if(data.getJSONArray("tv_results").length() > 0) {
+                        json = data.getJSONArray("tv_results").getJSONObject(0);
+                    }
                 }
                 if(json != null) {
                     put(url, json);
@@ -114,18 +115,14 @@ public class TheMovieDb {
             if(file.exists()) {
                 try {
                     BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-                    StringBuffer content = new StringBuffer();
+                    StringBuilder content = new StringBuilder();
                     char[] buffer = new char[1024];
                     int num;
                     while ((num = input.read(buffer)) > 0) {
                         content.append(buffer, 0, num);
                     }
                     json = new JSONObject(content.toString());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
 
@@ -135,7 +132,7 @@ public class TheMovieDb {
     }
 
     private void cacheToMemory(final String url, final JSONObject json) {
-        memoryCache.put(getCacheKey(url), new SoftReference<JSONObject>(json));
+        memoryCache.put(getCacheKey(url), new SoftReference<>(json));
     }
 
     private void cacheToDisk(final String url, final JSONObject json) {
@@ -147,8 +144,6 @@ public class TheMovieDb {
                     try {
                         ostream = new FileOutputStream(new File(diskCachePath, getCacheKey(url)));
                         ostream.write(json.toString().getBytes());
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     } finally {
@@ -157,7 +152,7 @@ public class TheMovieDb {
                                 ostream.flush();
                                 ostream.close();
                             }
-                        } catch (IOException e) {}
+                        } catch (IOException ignored) {}
                     }
                 }
             }

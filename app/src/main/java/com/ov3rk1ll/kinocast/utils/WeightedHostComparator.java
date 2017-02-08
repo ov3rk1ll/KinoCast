@@ -1,18 +1,16 @@
 package com.ov3rk1ll.kinocast.utils;
 
-import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 
 import java.util.Comparator;
 
-/**
- * Created by sg on 07.09.2016.
- */
-public class WeightedHostComparator implements Comparator<Host> {
-    SparseArray<Integer> weightedList;
 
-    public WeightedHostComparator(SparseArray<Integer> weightedList){
+public class WeightedHostComparator implements Comparator<Host> {
+    private SparseIntArray weightedList;
+
+    public WeightedHostComparator(SparseIntArray weightedList){
         this.weightedList = weightedList;
     }
 

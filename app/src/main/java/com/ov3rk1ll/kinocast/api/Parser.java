@@ -31,8 +31,8 @@ import okhttp3.Response;
 
 public abstract class Parser {
     private static final String TAG = Parser.class.getSimpleName();
-    public static final int PARSER_ID = -1;
-    protected String URL_BASE;
+    private static final int PARSER_ID = -1;
+    String URL_BASE;
     private static  OkHttpClient client;
     private static InjectedCookieJar injectedCookieJar;
 
@@ -46,15 +46,15 @@ public abstract class Parser {
         initHttpClient(context);
     }
     public static void selectParser(Context context, int id, String url){
-        instance = selectByParserId(context, id, url);
+        instance = selectByParserId(id, url);
         initHttpClient(context);
     }
     public static Parser selectByParserId(Context context, int id){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String url = preferences.getString("url", "http://www.kinox.sg");
-        return selectByParserId(context, id, url);
+        return selectByParserId(id, url);
     }
-    private static Parser selectByParserId(Context context, int id, String url) {
+    private static Parser selectByParserId(int id, String url) {
         if (!url.endsWith("/")) url = url + "/";
         Log.i(TAG, "selectByParserId: load with #" + id + " for " + url);
         switch (id) {
@@ -68,21 +68,21 @@ public abstract class Parser {
 
     private static void initHttpClient(Context context){
         injectedCookieJar = new InjectedCookieJar();
-        CloudflareDdosInterceptor cloudflareDdosInterceptor = new CloudflareDdosInterceptor(context);
         client = new OkHttpClient.Builder()
+                .followRedirects(false)
+                .followSslRedirects(false)
                 .addNetworkInterceptor(new UserAgentInterceptor(Utils.USER_AGENT))
-                .addInterceptor(cloudflareDdosInterceptor)
+                .addInterceptor(new CloudflareDdosInterceptor(context))
                 .cookieJar(injectedCookieJar)
                 .dns(new CustomDns())
                 .build();
-        cloudflareDdosInterceptor.setClient(client);
     }
 
-    protected Document getDocument(String url) throws IOException, HttpException {
+    Document getDocument(String url) throws IOException {
         return getDocument(url, null);
     }
 
-    protected Document getDocument(String url, Map<String, String> cookies) throws HttpException, IOException {
+    Document getDocument(String url, Map<String, String> cookies) throws  IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -99,7 +99,7 @@ public abstract class Parser {
         }
         Response response = client.newCall(request).execute();
         if(response.code() != 200){
-            throw new HttpException("Unexpected status code " + response.code(), response);
+            throw new IOException("Unexpected status code " + response.code());
         }
         String body = response.body().string();
         if(TextUtils.isEmpty(body)){
@@ -127,16 +127,14 @@ public abstract class Parser {
     }
 
 
-    public JSONObject getJson(String url) {
+    JSONObject getJson(String url) {
         Request request = new Request.Builder().url(url).build();
 
         Log.i("Utils", "read json from " + url);
         try {
             Response response = client.newCall(request).execute();
             return new JSONObject(response.body().string());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
         return null;
@@ -152,7 +150,7 @@ public abstract class Parser {
         return PARSER_ID;
     }
 
-    public abstract List<ViewModel> parseList(String url) throws IOException, HttpException;
+    public abstract List<ViewModel> parseList(String url) throws IOException;
 
     public abstract ViewModel loadDetail(ViewModel item);
 
@@ -193,30 +191,4 @@ public abstract class Parser {
         return client;
     }
 
-    public class HttpException extends Exception{
-        Response response;
-        String body;
-
-        public HttpException(String message, Response response) {
-            super(message);
-            this.response = response;
-            try {
-                this.body = response.body().string();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public int code() {
-            return response.code();
-        }
-
-        public Response response(){
-            return response;
-        }
-
-        public String body(){
-            return body;
-        }
-    }
 }

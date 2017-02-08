@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
-    public static final String FILENAME = "bookmark.dat";
+    private static final String FILENAME = "bookmark.dat";
 
     private transient Context context;
     private transient boolean autoSave = true;
@@ -27,7 +27,7 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
         restore();
     }
 
-    public void save(){
+    private void save(){
         try {
             File f = new File(context.getFilesDir(), FILENAME);
             if(f.exists()) f.delete();
@@ -104,11 +104,11 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
         }
     }
 
-    public boolean isAutoSave() {
+    private boolean isAutoSave() {
         return autoSave;
     }
 
-    public void setAutoSave(boolean autoSave) {
+    private void setAutoSave(boolean autoSave) {
         this.autoSave = autoSave;
     }
 
@@ -119,26 +119,13 @@ public class BookmarkManager extends ArrayList<BookmarkManager.Bookmark> {
         private int episode = 0;
         private boolean internal = true;
 
-        public Bookmark() {
-        }
-
         public Bookmark(int parserId, String url) {
             this.parserId = parserId;
             this.url = url;
         }
 
-        public Bookmark(int parserId, String url, boolean internal) {
-            this.parserId = parserId;
-            this.url = url;
-            this.internal = internal;
-        }
-
         public int getParserId() {
             return parserId;
-        }
-
-        public void setParserId(int parserId) {
-            this.parserId = parserId;
         }
 
         public String getUrl() {

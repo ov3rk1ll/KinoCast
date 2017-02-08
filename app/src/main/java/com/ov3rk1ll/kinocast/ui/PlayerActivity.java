@@ -40,7 +40,6 @@ public class PlayerActivity extends Activity {
 
         mVideoUri = getIntent().getData();
 
-        final VideoView videoView = (VideoView) findViewById(R.id.fullscreen_content);
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
 
         mMediaController = new CustomMediaController(this);

@@ -19,17 +19,12 @@ public class CustomDns implements Dns {
     private static final String TAG = CustomDns.class.getSimpleName();
 
     private boolean mInitialized;
-    private InetAddress mLiveApiStaticIpAddress;
 
     @Override
     public List<InetAddress> lookup(String hostname) throws UnknownHostException {
         // I'm initializing the DNS resolvers here to take advantage of this method being called in a background-thread managed by OkHttp
         init();
-        try {
-            return Collections.singletonList(Address.getByName(hostname));
-        } catch (UnknownHostException e) {
-            throw e;
-        }
+        return Collections.singletonList(Address.getByName(hostname));
     }
 
     private void init() {
@@ -44,7 +39,7 @@ public class CustomDns implements Dns {
             // also try using Amazon
             Resolver amazonResolver = new SimpleResolver("205.251.198.30");
             Lookup.setDefaultResolver(new ExtendedResolver(new Resolver[]{
-                    defaultResolver, googleFirstResolver, googleSecondResolver, amazonResolver}));
+                    googleFirstResolver, googleSecondResolver, amazonResolver, defaultResolver }));
         } catch (UnknownHostException e) {
             Log.w(TAG, "Couldn't initialize custom resolvers");
         }
