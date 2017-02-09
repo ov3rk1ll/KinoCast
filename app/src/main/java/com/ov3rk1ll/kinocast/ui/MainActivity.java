@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         config.setCancelButtonText(R.string.donate_dialog_later);
         RateThisApp.init(config);
         // If the criteria is satisfied, "Rate this app" dialog will be shown
-        RateThisApp.showRateDialogIfNeeded(this);
+        // RateThisApp.showRateDialogIfNeeded(this);
 
         /*BackupManager bm = new BackupManager(this);
         bm.requestRestore(new RestoreObserver() {
