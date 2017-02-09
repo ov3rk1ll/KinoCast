@@ -78,6 +78,12 @@
 -keep class android.support.v7.** { *; }
 -keep interface android.support.v7.** { *; }
 
+-dontnote com.google.android.gms.**
+
+#-keep class com.google.android.gms.common.** { *; }
+#-keep class com.google.android.gms.internal.** { *; }
+#-keep class com.google.android.gms.cast.** { *; }
+
 #Cast Companion
 -keep class com.google.android.libraries.** { *; }
 
@@ -88,6 +94,9 @@
 -keeppackagenames org.jsoup.nodes
 -dontwarn okio.**
 -keep class com.woxthebox.draglistview.** { *; }
+-keep class com.ov3rk1ll.kinocast.ui.helper.smartimageview.** { *; }
+-dontwarn okhttp3.**
+-dontwarn java.awt.**,javax.**,java.beans.**,junit.**
 #-keep class com.bumptech.glide.integration.okhttp.OkHttpGlideModule
 #-keep public class * implements com.bumptech.glide.module.GlideModule
 #-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
@@ -108,3 +117,10 @@
 #-keepclasseswithmembers class * {
 #    public * (android.content.Context, android.util.AttributeSet, int);
 #}
+
+# This dnsjava class uses old Sun API
+-dontnote org.xbill.DNS.spi.DNSJavaNameServiceDescriptor
+-dontwarn org.xbill.DNS.spi.DNSJavaNameServiceDescriptor
+
+# See http://stackoverflow.com/questions/5701126, happens in dnsjava
+-optimizations !code/allocation/variable
