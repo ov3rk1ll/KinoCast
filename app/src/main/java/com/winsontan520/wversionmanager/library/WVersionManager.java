@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -485,7 +486,11 @@ public class WVersionManager {
 
             //Open file
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(localFile), "application/vnd.android.package-archive");
+            Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", localFile);
+            Log.i(TAG, "onPostExecute: open " + uri);
+            // Uri.fromFile(localFile)
+            intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             context.startActivity(intent);
         }
     }
