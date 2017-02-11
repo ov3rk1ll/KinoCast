@@ -27,51 +27,56 @@
         android:id="@+id/progressBar"
         android:layout_gravity="center" />
 
-    <ImageView
-        android:id="@+id/language"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        tools:src="@drawable/lang_de"
-        android:layout_margin="1dp"
-        android:layout_gravity="top|right" />
-
-    <RatingBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/rating"
-        android:isIndicator="true"
-        android:layout_margin="1dp"
-        android:layout_gravity="left|top"
-        style="?android:attr/ratingBarStyleSmall"
-        android:numStars="5" />
-
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/layoutInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:id="@+id/layoutInfo"
         android:background="#B000"
-        android:padding="@dimen/spacing_xsmall">
+        android:padding="@dimen/spacing_xsmall"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginRight="2dp"
-            tools:text="title"
-            android:textSize="16sp" />
+            tools:text="title" />
 
         <TextView
             android:id="@+id/detail"
-            android:layout_below="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
-            tools:text="Details"
-            android:textSize="12sp"/>
-    </RelativeLayout>
+            android:textSize="12sp"
+            tools:text="Details" />
+
+        <FrameLayout
+            android:id="@+id/layoutTop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RatingBar
+                android:id="@+id/rating"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center"
+                android:layout_margin="1dp"
+                android:isIndicator="true"
+                android:numStars="5" />
+
+            <ImageView
+                android:id="@+id/language"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="top|right"
+                android:layout_margin="1dp"
+                tools:src="@drawable/lang_de" />
+        </FrameLayout>
+    </LinearLayout>
 
 
 </FrameLayout>

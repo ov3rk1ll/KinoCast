@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -130,7 +129,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private RelativeLayout background;
+        private View background;
         public ImageView image;
         public TextView title;
         public ImageView language;
@@ -140,7 +139,7 @@ public class ResultRecyclerAdapter extends RecyclerView.Adapter<ResultRecyclerAd
 
         ViewHolder(View itemView) {
             super(itemView);
-            background = (RelativeLayout) itemView.findViewById(R.id.layoutInfo);
+            background = itemView.findViewById(R.id.layoutInfo);
             image = (ImageView) itemView.findViewById(R.id.image);
             title = (TextView) itemView.findViewById(R.id.title);
             language = (ImageView) itemView.findViewById(R.id.language);
