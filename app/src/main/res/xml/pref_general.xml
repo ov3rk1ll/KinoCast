@@ -3,7 +3,7 @@
     <EditTextPreference
         android:key="url"
         android:title="Kinox URL (Neustart erforderlich)"
-        android:defaultValue="http://www.kinox.sg"
+        android:defaultValue="@string/defaul_url"
         android:singleLine="true"
         android:selectAllOnFocus="true"
         android:inputType="textUri"

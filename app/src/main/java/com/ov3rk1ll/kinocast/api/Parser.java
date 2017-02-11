@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.ov3rk1ll.kinocast.R;
 import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.DetailActivity;
@@ -51,7 +52,7 @@ public abstract class Parser {
     }
     public static Parser selectByParserId(Context context, int id){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String url = preferences.getString("url", "http://www.kinox.sg");
+        String url = preferences.getString("url", context.getString(R.string.defaul_url));
         return selectByParserId(id, url);
     }
     private static Parser selectByParserId(int id, String url) {
