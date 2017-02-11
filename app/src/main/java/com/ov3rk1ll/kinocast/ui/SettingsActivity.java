@@ -95,10 +95,7 @@ public class SettingsActivity extends AppCompatActivity {
                 public boolean onPreferenceChange(Preference preference, Object o) {
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     Parser.selectParser(getActivity(), preferences.getInt("parser", KinoxParser.PARSER_ID), o.toString());
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                            PreferenceManager
-                                    .getDefaultSharedPreferences(preference.getContext())
-                                    .getString(preference.getKey(), ""));
+                    preference.setSummary(o.toString());
                     return true;
                 }
             });
