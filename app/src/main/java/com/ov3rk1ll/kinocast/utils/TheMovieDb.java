@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.ov3rk1ll.kinocast.api.Parser;
 import com.ov3rk1ll.kinocast.data.ViewModel;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,9 +47,13 @@ public class TheMovieDb {
         writeThread = Executors.newSingleThreadExecutor();
     }
 
-    public JSONObject get(CoverImage.Request request) {
+    public JSONObject get(String url) {
+        return get(url, true);
+    }
+
+    public JSONObject get(String url, boolean fetchIfNeeded) {
         JSONObject json;
-        String url = request.getUrl();
+        //String url = request.getUrl();
 
         // Check for image in memory
         json = getFromMemory(url);
@@ -64,22 +67,18 @@ public class TheMovieDb {
                 cacheToMemory(url, json);
             }
         }
-        if(json == null) {
+        if(json == null || fetchIfNeeded) {
             try {
-                ViewModel item = request.getItem();
                 // Get IMDB-ID from page
-                if(item.getImdbId() == null) {
-                    item = Parser.getInstance().loadDetail(item);
-                }
+                ViewModel item = Parser.getInstance().loadDetail(url);
                 String param = url.substring(url.indexOf("#") + 1);
                 // tt1646971?api_key=f9dc7e5d12b2640bf4ef1cf20835a1cc&language=de&external_source=imdb_id
                 JSONObject data = Utils.readJson("http://api.themoviedb.org/3/find/" + item.getImdbId() + "?api_key=" + API_KEY + "&external_source=imdb_id&" + param);
-                if (data != null) {
-                    if(data.getJSONArray("movie_results").length() > 0) {
-                        json = data.getJSONArray("movie_results").getJSONObject(0);
-                    }else if(data.getJSONArray("tv_results").length() > 0) {
-                        json = data.getJSONArray("tv_results").getJSONObject(0);
-                    }
+                if(data == null) return null;
+                if(data.getJSONArray("movie_results").length() > 0) {
+                    json = data.getJSONArray("movie_results").getJSONObject(0);
+                }else if(data.getJSONArray("tv_results").length() > 0) {
+                    json = data.getJSONArray("tv_results").getJSONObject(0);
                 }
                 if(json != null) {
                     put(url, json);
@@ -92,7 +91,7 @@ public class TheMovieDb {
         return json;
     }
 
-    public void put(String url, JSONObject json) {
+    private void put(String url, JSONObject json) {
         cacheToMemory(url, json);
         cacheToDisk(url, json);
     }

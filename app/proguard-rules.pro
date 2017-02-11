@@ -97,13 +97,13 @@
 -keep class com.ov3rk1ll.kinocast.ui.helper.smartimageview.** { *; }
 -dontwarn okhttp3.**
 -dontwarn java.awt.**,javax.**,java.beans.**,junit.**
-#-keep class com.bumptech.glide.integration.okhttp.OkHttpGlideModule
-#-keep public class * implements com.bumptech.glide.module.GlideModule
-#-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-#  **[] $VALUES;
-#  public *;
-#}
-#-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+-keep class com.bumptech.glide.integration.okhttp.OkHttpGlideModule
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
 
 # Mobfox
 -keep class com.mobfox.** { *; }

@@ -9,8 +9,8 @@ repositories {
 
 def versionMajor = 1
 def versionMinor = 6
-def versionPatch = 1
-def versionBuild = 99 // bump for dogfood builds, public betas, etc.
+def versionPatch = 2
+def versionBuild = 1 // bump for dogfood builds, public betas, etc.
 ext {
     calculateVersionName = {
         def version = "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -90,6 +90,8 @@ dependencies {
     compile 'com.flurry.android:analytics:6.8.0'
     compile 'io.github.kobakei:ratethisapp:1.1.2'
     compile 'dnsjava:dnsjava:2.1.8'
+    compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
     compile('io.fabric.sdk.android:fabric:1.3.15@aar') {
         transitive = true;
     }

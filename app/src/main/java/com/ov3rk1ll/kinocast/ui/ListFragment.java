@@ -69,7 +69,7 @@ public class ListFragment extends Fragment {
             if(getArguments().containsKey(ARG_SPECIAL))
                 mSpecialId = getArguments().getInt(ARG_SPECIAL);
         }
-        adapter = new ResultRecyclerAdapter(R.layout.frament_list_item);
+        adapter = new ResultRecyclerAdapter(getActivity(), R.layout.frament_list_item);
     }
 
     @Override

@@ -5,7 +5,7 @@ import android.support.v4.util.LruCache;
 import android.support.v7.graphics.Palette;
 
 public class PaletteManager {
-    private LruCache<String, Palette> cache = new LruCache<String, Palette>(100);
+    private LruCache<String, Palette> cache = new LruCache<>(100);
     private static PaletteManager instance;
 
     public static PaletteManager getInstance(){
@@ -25,12 +25,11 @@ public class PaletteManager {
             if(bitmap == null){
                 callback.onPaletteReady(null);
             } else {
-                Palette.generateAsync(bitmap, 24, new Palette.PaletteAsyncListener() {
-                    @Override
-                    public void onGenerated(Palette palette) {
-                        cache.put(key, palette);
-                        callback.onPaletteReady(palette);
-                    }
+                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                  public void onGenerated(Palette p) {
+                      cache.put(key, p);
+                      callback.onPaletteReady(p);
+                  }
                 });
             }
     }

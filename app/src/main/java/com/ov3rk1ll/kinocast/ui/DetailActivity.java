@@ -1,6 +1,5 @@
 package com.ov3rk1ll.kinocast.ui;
 
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -41,6 +40,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.flurry.android.FlurryAgent;
 import com.flurry.android.ads.FlurryAdBanner;
 import com.flurry.android.ads.FlurryAdBannerListener;
@@ -57,12 +61,15 @@ import com.ov3rk1ll.kinocast.api.mirror.Host;
 import com.ov3rk1ll.kinocast.data.Season;
 import com.ov3rk1ll.kinocast.data.ViewModel;
 import com.ov3rk1ll.kinocast.ui.helper.PaletteManager;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.CoverImage;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageTask;
-import com.ov3rk1ll.kinocast.ui.helper.smartimageview.SmartImageView;
+import com.ov3rk1ll.kinocast.ui.util.glide.OkHttpViewModelStreamFetcher;
+import com.ov3rk1ll.kinocast.ui.util.glide.ViewModelGlideRequest;
 import com.ov3rk1ll.kinocast.utils.BookmarkManager;
+import com.ov3rk1ll.kinocast.utils.TheMovieDb;
 import com.ov3rk1ll.kinocast.utils.Utils;
 import com.ov3rk1ll.kinocast.utils.WeightedHostComparator;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -194,26 +201,31 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
 
         ((TextView) findViewById(R.id.detail)).setText(item.getSummary());
 
-        final SmartImageView headerImage = (SmartImageView) findViewById(R.id.image_header);
+        final ImageView headerImage = (ImageView) findViewById(R.id.image_header);
         findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-        //headerImage.setVisibility(View.GONE);
-        headerImage.setImageItem(item.getImageRequest(screenWidthPx, "backdrop"), R.drawable.ic_loading_placeholder, new SmartImageTask.OnCompleteListener() {
-            @Override
-            public void onComplete() {
-            }
+        findViewById(R.id.progressBar).invalidate();
+        Glide.with(this)
+                .load(new ViewModelGlideRequest(item, screenWidthPx, "backdrop"))
+                .placeholder(R.drawable.ic_loading_placeholder)
+                .listener(new RequestListener<ViewModelGlideRequest, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, ViewModelGlideRequest model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        e.printStackTrace();
+                        return false;
+                    }
 
-            @TargetApi(11)
-            @Override
-            public void onComplete(Bitmap bitmap) {
-                headerImage.setVisibility(View.VISIBLE);
-                findViewById(R.id.progressBar).clearAnimation();
-                findViewById(R.id.progressBar).setVisibility(View.GONE);
-                findViewById(R.id.progressBar).invalidate();
-                findViewById(R.id.top_content).invalidate();
-                attemptColor(bitmap);
-                Log.i("progressBar", "Visibility in complete = " + findViewById(R.id.progressBar).getVisibility());
-            }
-        });
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, ViewModelGlideRequest model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        findViewById(R.id.progressBar).clearAnimation();
+                        findViewById(R.id.progressBar).setVisibility(View.GONE);
+                        findViewById(R.id.progressBar).invalidate();
+                        findViewById(R.id.top_content).invalidate();
+                        attemptColor(((GlideBitmapDrawable)resource.getCurrent()).getBitmap());
+                        return false;
+                    }
+                })
+                .into(headerImage);
+        headerImage.setVisibility(View.VISIBLE);
 
         ((ImageView) findViewById(R.id.language)).setImageResource(item.getLanguageResId());
 
@@ -679,11 +691,17 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         }
         mediaMetadata.putString(MediaMetadata.KEY_SUBTITLE, getString(R.string.chromecast_subtitle));
 
-        String url =  new CoverImage(item.getImageRequest(96, "poster")).getBitmapUrl(getApplication());
+
+
+        // Use TheMovieDb to get the image
+        String url = getCachedImage(96, "poster");
+        Log.i("Chromecast", "use image: " + url);
         if(TextUtils.isEmpty(url)) url = "http://kinocast.ov3rk1ll.com/img/kinocast_icon_512.png";
         mediaMetadata.addImage(new WebImage(Uri.parse(url)));
 
-        url =  new CoverImage(item.getImageRequest(getResources().getDisplayMetrics().widthPixels, "poster")).getBitmapUrl(getApplication());
+        // TODO Use Glide to get image
+        url = getCachedImage(getResources().getDisplayMetrics().widthPixels, "poster"); // new CoverImage(item.getImageRequest(getResources().getDisplayMetrics().widthPixels, "poster")).getBitmapUrl(getApplication());
+        Log.i("Chromecast", "use image: " + url);
         if(TextUtils.isEmpty(url)) url = "http://kinocast.ov3rk1ll.com/img/kinocast_icon_512.png";
         mediaMetadata.addImage(new WebImage(Uri.parse(url)));
         Log.i("cast", "play " + link);
@@ -705,6 +723,24 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
         intent.putExtra(ColorfulVideoCastControllerActivity.EXTRA_TEXT_COLOR, mTitleColor);
         context.startActivity(intent);
     }*/
+
+    private String getCachedImage(int size, String type){
+        TheMovieDb tmdbCache = new TheMovieDb(getApplication());
+        String cacheUrl = Parser.getInstance().getPageLink(item);
+        JSONObject json = tmdbCache.get(cacheUrl, false);
+        if(json != null){
+            try {
+                String key = type + "_path";
+                if (type.equals("backdrop"))
+                    return TheMovieDb.IMAGE_BASE_PATH + OkHttpViewModelStreamFetcher.getBackdropSize(size) + json.getString(key);
+                else
+                    return TheMovieDb.IMAGE_BASE_PATH + OkHttpViewModelStreamFetcher.getPosterSize(size) + json.getString(key);
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
 
     static class AppAdapter extends ArrayAdapter<AppAdapter.App> {
         PackageManager pm;
