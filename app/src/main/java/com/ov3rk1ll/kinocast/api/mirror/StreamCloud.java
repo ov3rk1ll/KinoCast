@@ -35,6 +35,18 @@ public class StreamCloud extends Host {
         return true;
     }
 
+    public static String getMirrorLink(Document doc){
+        try {
+
+            String href = doc.select("a").attr("href");
+
+            return href;
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public String getVideoPath(DetailActivity.QueryPlayTask queryTask) {
         if(TextUtils.isEmpty(url)) return null;

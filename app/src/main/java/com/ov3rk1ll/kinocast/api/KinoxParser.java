@@ -19,6 +19,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -257,12 +258,31 @@ public class KinoxParser extends Parser{
         return null;
     }
 
-    private String getMirrorLink(DetailActivity.QueryPlayTask queryTask, String url){
+
+    private String getMirrorLink(DetailActivity.QueryPlayTask queryTask, Host host, String url){
+
+        String href = "";
+        Method getLink = null;
+
+        try {
+            getLink = host.getClass().getMethod("getMirrorLink", Document.class);
+        } catch (NoSuchMethodException e) {
+            //not implemented
+            //i'm not a java developer so i didn't want to change much of the code
+        }
+
         try {
             queryTask.updateProgress("Get host from " + URL_BASE + url);
             JSONObject json = getJson(URL_BASE + url);
             Document doc = Jsoup.parse(json != null ? json.getString("Stream") : null);
-            String href = doc.select("a").attr("href");
+
+            if (getLink == null){
+                //fallback to old
+                href = doc.select("a").attr("href");
+            } else {
+                href = (String) getLink.invoke(null, doc);
+            }
+
             queryTask.updateProgress("Get video from " + href);
             return href;
         } catch (Exception e1) {
@@ -272,13 +292,13 @@ public class KinoxParser extends Parser{
     }
 
     @Override
-    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int hoster, int mirror){
-        return getMirrorLink(queryTask, "aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror);
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, Host host){
+        return getMirrorLink(queryTask, host,"aGET/Mirror/" + item.getSlug() + "&Hoster=" + host.getId() + "&Mirror=" + host.getMirror());
     }
 
     @Override
-    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int hoster, int mirror, int season, String episode){
-        return getMirrorLink(queryTask, "aGET/Mirror/" + item.getSlug() + "&Hoster=" + hoster + "&Mirror=" + mirror + "&Season=" + season + "&Episode=" + episode);
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, Host host, int season, String episode){
+        return getMirrorLink(queryTask, host,"aGET/Mirror/" + item.getSlug() + "&Hoster=" + host.getId() + "&Mirror=" + host.getMirror() + "&Season=" + season + "&Episode=" + episode);
     }
 
     @SuppressWarnings("deprecation")

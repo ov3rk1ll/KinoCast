@@ -15,6 +15,7 @@ public abstract class Host {
             Sockshare.class,
             StreamCloud.class,
             Vodlocker.class,
+            StreamCherry.class
     };
 
     public static Host selectById(int id){

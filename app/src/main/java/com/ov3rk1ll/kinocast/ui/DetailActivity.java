@@ -45,10 +45,6 @@ import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.flurry.android.FlurryAgent;
-import com.flurry.android.ads.FlurryAdBanner;
-import com.flurry.android.ads.FlurryAdBannerListener;
-import com.flurry.android.ads.FlurryAdErrorType;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
@@ -139,56 +135,12 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             }
         });
 
-        FlurryAgent.onStartSession(this);
         mAdView = (RelativeLayout)findViewById(R.id.adView);
         if (SHOW_ADS) {
             findViewById(R.id.donateView).setVisibility(View.GONE);
             String mAdSpaceName = "Detail Banner";
-            FlurryAdBanner mFlurryAdBanner = new FlurryAdBanner(this, mAdView, mAdSpaceName);
-            mFlurryAdBanner.setListener(new FlurryAdBannerListener() {
-                @Override
-                public void onFetched(FlurryAdBanner flurryAdBanner) {
 
-                }
 
-                @Override
-                public void onRendered(FlurryAdBanner flurryAdBanner) {
-
-                }
-
-                @Override
-                public void onShowFullscreen(FlurryAdBanner flurryAdBanner) {
-
-                }
-
-                @Override
-                public void onCloseFullscreen(FlurryAdBanner flurryAdBanner) {
-
-                }
-
-                @Override
-                public void onAppExit(FlurryAdBanner flurryAdBanner) {
-
-                }
-
-                @Override
-                public void onClicked(FlurryAdBanner flurryAdBanner) {
-
-                }
-
-                @Override
-                public void onVideoCompleted(FlurryAdBanner flurryAdBanner) {
-
-                }
-
-                @Override
-                public void onError(FlurryAdBanner flurryAdBanner, FlurryAdErrorType flurryAdErrorType, int i) {
-                    Log.e("FlurryAdBanner", "onError: " + flurryAdErrorType);
-                    mAdView.setVisibility(View.GONE);
-                    findViewById(R.id.donateView).setVisibility(View.VISIBLE);
-                }
-            });
-            mFlurryAdBanner.fetchAndDisplayAd();
             //mAdView.setInventoryHash(getString(R.string.mobfox_hash));
             //mAdView.load();
         } else {
@@ -468,7 +420,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             articleParams.put("Name", item.getTitle());
             articleParams.put("Type", item.getType() == ViewModel.Type.MOVIE ? "Movie" : "Series");
             articleParams.put("Id", item.getSlug());
-            FlurryAgent.logEvent("Content_View", articleParams);
             item = Parser.getInstance().loadDetail(item);
             return true;
         }
@@ -585,9 +536,9 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[spinnerSeasonItemPosition];
                 String e = s.episodes[spinnerEpisodeItemPosition];
-                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror(), s.id, e);
+                link = Parser.getInstance().getMirrorLink(this, item, host, s.id, e);
             } else {
-                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror());
+                link = Parser.getInstance().getMirrorLink(this, item, host);
             }
 
             host.setUrl(link);
@@ -659,7 +610,6 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
                             articleParams.put("Player", app.getComponent().toString());
                             startActivity(intent);
                         }
-                        FlurryAgent.logEvent("Played_Stream", articleParams);
                         dialog.dismiss();
                     }
                 });

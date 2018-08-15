@@ -128,13 +128,13 @@ public class Movie4kParser extends Parser{
     }
 
     @Override
-    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, int id, int mirror, int i, String url){
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, Host host){
         //TODO
         return null;
     }
 
     @Override
-    public String getMirrorLink(DetailActivity.QueryPlayTask queryPlayTask, ViewModel item, int hoster, int mirror){
+    public String getMirrorLink(DetailActivity.QueryPlayTask queryTask, ViewModel item, Host host, int season, String episode){
         //TODO
         return null;
     }
