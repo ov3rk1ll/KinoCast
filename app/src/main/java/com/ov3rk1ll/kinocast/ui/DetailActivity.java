@@ -585,9 +585,9 @@ public class DetailActivity extends AppCompatActivity implements ActionMenuView.
             if (item.getType() == ViewModel.Type.SERIES) {
                 Season s = item.getSeasons()[spinnerSeasonItemPosition];
                 String e = s.episodes[spinnerEpisodeItemPosition];
-                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror(), s.id, e);
+                link = Parser.getInstance().getMirrorLink(this, item, host, s.id, e);
             } else {
-                link = Parser.getInstance().getMirrorLink(this, item, host.getId(), host.getMirror());
+                link = Parser.getInstance().getMirrorLink(this, item, host);
             }
 
             host.setUrl(link);
